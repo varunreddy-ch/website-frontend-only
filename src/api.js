@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-	baseURL: `https://3.218.164.68/api`,
+	baseURL: `https://api.resumevar.com/api`,
 	// baseURL: `http://localhost:3000/api`,
 });
 
