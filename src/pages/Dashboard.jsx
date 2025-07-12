@@ -18,7 +18,20 @@ export default function Dashboard() {
 	const [questionMessage, setQuestionMessage] = useState("");
 	const [questionError, setQuestionError] = useState("");
 
+	const [companyName, setCompanyName] = useState("");
+	const [showCompanyModal, setShowCompanyModal] = useState(false);
+
 	const navigate = useNavigate();
+
+	const handleDownloadJobDesc = () => {
+		const element = document.createElement("a");
+		const file = new Blob([jobDesc], { type: "text/plain" });
+		element.href = URL.createObjectURL(file);
+		element.download = "job_description.txt";
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
+	};
 
 	const handleGenerate = async () => {
 		setResumeMessage("");
@@ -27,10 +40,21 @@ export default function Dashboard() {
 			setResumeError("Please enter a job description.");
 			return;
 		}
+
+		// Pop up to enter company name
+		setShowCompanyModal(true);
+	};
+
+	const confirmAndGenerate = async () => {
+		setShowCompanyModal(false);
+		setLoading(true);
+		setResumeError("");
+		setResumeMessage("");
 		setLoading(true);
 		try {
 			const res = await API.post("/generate-resume", {
 				job_description: jobDesc,
+				company_name: companyName,
 			});
 			const base64 = res.data.pdf;
 			const binary = atob(base64);
@@ -131,7 +155,7 @@ export default function Dashboard() {
 							}`}
 							onClick={handleGenerate}
 						>
-							{loading ? "Generating..." : "Generate Resume"}
+							{loading ? "Generating..." : "Proceed"}
 						</button>
 					</div>
 				</div>
@@ -142,15 +166,23 @@ export default function Dashboard() {
 						<h2 className="text-lg font-semibold text-center text-gray-700">
 							Resume Preview
 						</h2>
+
 						<PDFPreview pdfUrl={pdfBlob} />
-						<div className="text-center">
+
+						<div className="flex flex-col sm:flex-row justify-center gap-4">
 							<a
 								href={pdfBlob}
 								download="resume.pdf"
-								className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded inline-block"
+								className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded text-center"
 							>
 								Download PDF
 							</a>
+							<button
+								onClick={handleDownloadJobDesc}
+								className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded"
+							>
+								Download Job Description
+							</button>
 						</div>
 					</div>
 				) : (
@@ -217,6 +249,39 @@ export default function Dashboard() {
 					)}
 				</div>
 			</div>
+			{showCompanyModal && (
+				<div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+					<div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
+						<h3 className="text-lg font-semibold text-gray-800 text-center">
+							Enter Company Name
+						</h3>
+
+						<input
+							type="text"
+							placeholder="Company Name"
+							className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+							value={companyName}
+							onChange={(e) => setCompanyName(e.target.value)}
+						/>
+
+						<div className="flex justify-end gap-4 mt-4">
+							<button
+								onClick={() => setShowCompanyModal(false)}
+								className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
+							>
+								Cancel
+							</button>
+							<button
+								onClick={confirmAndGenerate}
+								className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+								disabled={!companyName.trim()}
+							>
+								Generate
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
