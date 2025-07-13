@@ -1,36 +1,35 @@
 import { useState, useEffect } from "react";
 import API from "../api";
 import Navbar from "../components/Navbar";
+import UserWithResumeForm from "../components/UserWithResumeForm";
 
 export default function Admin() {
 	const [users, setUsers] = useState([]);
-	const [form, setForm] = useState({
-		username: "",
-		password: "",
-		role: "user",
-	});
-	const [showPassword, setShowPassword] = useState(false);
 	const [filterRole, setFilterRole] = useState("all");
 	const [userToRemove, setUserToRemove] = useState(null);
 	const [message, setMessage] = useState("");
 	const [error, setError] = useState("");
 
 	const fetchUsers = async () => {
-		const res = await API.get("/users");
-		setUsers(res.data.users);
+		try {
+			const res = await API.get("/users");
+			setUsers(res.data.users);
+		} catch {
+			setError("❌ Failed to fetch users.");
+		}
 	};
 
-	const handleCreate = async () => {
-		if (!form.username || !form.password) {
-			setError("Please fill in all fields.");
+	const handleCreate = async (fullForm) => {
+		if (!fullForm.username || !fullForm.password) {
+			setError("❌ Username and password are required.");
 			setMessage("");
 			return;
 		}
+
 		try {
-			await API.post("/create-user", form);
-			setMessage(`✅ User "${form.username}" created successfully.`);
+			await API.post("/create-user", fullForm);
+			setMessage(`✅ User "${fullForm.username}" created successfully.`);
 			setError("");
-			setForm({ username: "", password: "", role: "user" });
 			fetchUsers();
 			setTimeout(() => setMessage(""), 3000);
 		} catch {
@@ -52,10 +51,6 @@ export default function Admin() {
 		}
 	};
 
-	useEffect(() => {
-		fetchUsers();
-	}, []);
-
 	const roleBadge = (role) => (
 		<span
 			className={`ml-2 px-2 py-0.5 rounded-full text-xs font-semibold ${
@@ -68,15 +63,34 @@ export default function Admin() {
 		</span>
 	);
 
+	useEffect(() => {
+		fetchUsers();
+	}, []);
+
 	return (
 		<div>
 			<Navbar />
+
+			{message && (
+				<div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+					<div className="bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg animate-fade-in">
+						{message}
+					</div>
+				</div>
+			)}
+			{error && (
+				<div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+					<div className="bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg animate-fade-in">
+						{error}
+					</div>
+				</div>
+			)}
+
 			<div className="max-w-4xl mx-auto p-6 space-y-6 bg-white shadow rounded-xl mt-6">
 				<h1 className="text-2xl font-bold text-gray-800">
 					Admin Panel
 				</h1>
 
-				{/* Feedback */}
 				{message && (
 					<div className="text-green-600 bg-green-50 border border-green-200 px-4 py-2 rounded text-sm text-center">
 						{message}
@@ -88,85 +102,17 @@ export default function Admin() {
 					</div>
 				)}
 
-				{/* User Form */}
-				<div className="bg-gray-50 border border-gray-200 rounded-lg p-6 space-y-4">
-					<h2 className="text-lg font-semibold text-gray-800 mb-2">
-						Create New User
-					</h2>
-
-					<div>
-						<label className="text-sm font-medium text-gray-700">
-							Username
-						</label>
-						<input
-							className="mt-1 border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-							placeholder="Username"
-							value={form.username}
-							onChange={(e) =>
-								setForm((f) => ({
-									...f,
-									username: e.target.value,
-								}))
-							}
-						/>
-					</div>
-					<div>
-						<label className="text-sm font-medium text-gray-700">
-							Password
-						</label>
-						<div className="relative mt-1">
-							<input
-								type={showPassword ? "text" : "password"}
-								className="border border-gray-300 rounded-md px-4 py-2 w-full pr-10 focus:outline-none focus:ring-2 focus:ring-blue-400"
-								placeholder="Password"
-								value={form.password}
-								onChange={(e) =>
-									setForm((f) => ({
-										...f,
-										password: e.target.value,
-									}))
-								}
-							/>
-							<span
-								className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 cursor-pointer text-sm select-none"
-								onClick={() => setShowPassword(!showPassword)}
-							>
-								{showPassword ? "🙈" : "👁️"}
-							</span>
-						</div>
-					</div>
-					<div>
-						<label className="text-sm font-medium text-gray-700">
-							Role
-						</label>
-						<select
-							className="mt-1 border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-							value={form.role}
-							onChange={(e) =>
-								setForm((f) => ({ ...f, role: e.target.value }))
-							}
-						>
-							<option value="user">User</option>
-							<option value="admin">Admin</option>
-						</select>
-					</div>
-					<button
-						className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md font-semibold transition"
-						onClick={handleCreate}
-					>
-						Create User
-					</button>
-				</div>
+				{/* ✅ Unified Form */}
+				<UserWithResumeForm onSubmit={handleCreate} />
 
 				{/* User List */}
-				<div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4">
+				<div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-6">
 					<div className="flex justify-between items-center mb-3">
 						<h2 className="font-semibold text-lg">All Users</h2>
 						<div className="flex items-center gap-2">
 							<label className="text-sm text-gray-600 mr-2">
 								Filter by Role:
 							</label>
-
 							<select
 								className="border border-gray-300 rounded-md px-3 py-1 text-sm"
 								value={filterRole}
@@ -178,6 +124,7 @@ export default function Admin() {
 							</select>
 						</div>
 					</div>
+
 					<ul className="divide-y text-sm">
 						{users
 							.filter(
@@ -208,7 +155,7 @@ export default function Admin() {
 				</div>
 			</div>
 
-			{/* Confirm Delete Modal */}
+			{/* Confirm Modal */}
 			{userToRemove && (
 				<div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 transition-opacity">
 					<div className="bg-white p-6 rounded-xl shadow-xl w-80 space-y-4 transition transform scale-100">

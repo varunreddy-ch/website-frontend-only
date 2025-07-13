@@ -1,9 +1,11 @@
 import { useState } from "react";
 import API from "../api";
 import PDFPreview from "../components/PDFPreview";
-import { logout } from "../auth";
+import { getUser, logout } from "../auth";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+
+// console.log(getUser());
 
 export default function Dashboard() {
 	const [jobDesc, setJobDesc] = useState("");
@@ -27,7 +29,7 @@ export default function Dashboard() {
 		const element = document.createElement("a");
 		const file = new Blob([jobDesc], { type: "text/plain" });
 		element.href = URL.createObjectURL(file);
-		element.download = "job_description.txt";
+		element.download = `${getUser().user}_${companyName || ""}_JD.txt`;
 		document.body.appendChild(element);
 		element.click();
 		document.body.removeChild(element);
@@ -163,7 +165,9 @@ export default function Dashboard() {
 						<div className="flex flex-col sm:flex-row justify-center gap-4">
 							<a
 								href={pdfBlob}
-								download="resume.pdf"
+								download={`${getUser().user}_${
+									companyName || "resume"
+								}.pdf`}
 								className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded text-center"
 							>
 								Download PDF
