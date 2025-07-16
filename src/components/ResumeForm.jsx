@@ -16,7 +16,7 @@ export default function ResumeForm({ onSubmit, formData = null }) {
 				end_date: "",
 				job_title: "",
 				environment: "",
-				responsibilities: [""],
+				responsibilities: "",
 			},
 		],
 	};
@@ -29,24 +29,6 @@ export default function ResumeForm({ onSubmit, formData = null }) {
 	const handleExperienceChange = (i, field, value) => {
 		const updated = [...form.experience];
 		updated[i][field] = value;
-		setForm((prev) => ({ ...prev, experience: updated }));
-	};
-
-	const handleResponsibilityChange = (i, j, value) => {
-		const updated = [...form.experience];
-		updated[i].responsibilities[j] = value;
-		setForm((prev) => ({ ...prev, experience: updated }));
-	};
-
-	const addResponsibility = (i) => {
-		const updated = [...form.experience];
-		updated[i].responsibilities.push("");
-		setForm((prev) => ({ ...prev, experience: updated }));
-	};
-
-	const removeResponsibility = (i, j) => {
-		const updated = [...form.experience];
-		updated[i].responsibilities.splice(j, 1);
 		setForm((prev) => ({ ...prev, experience: updated }));
 	};
 
@@ -117,17 +99,10 @@ export default function ResumeForm({ onSubmit, formData = null }) {
 				newErrors[`exp_${i}_end`] =
 					"End date must be after start date.";
 			}
-			const validResps = exp.responsibilities.filter((r) => r.trim());
-			if (validResps.length === 0) {
+			if (!exp.responsibilities.trim()) {
 				newErrors[`exp_${i}_responsibilities`] =
-					"At least one responsibility required.";
+					"Responsibilities field cannot be empty.";
 			}
-			exp.responsibilities.forEach((resp, j) => {
-				if (!resp.trim()) {
-					newErrors[`exp_${i}_resp_${j}`] =
-						"Responsibility cannot be empty.";
-				}
-			});
 		});
 
 		setErrors(newErrors);
@@ -142,9 +117,7 @@ export default function ResumeForm({ onSubmit, formData = null }) {
 				...form,
 				experience: form.experience.map((exp) => ({
 					...exp,
-					responsibilities: exp.responsibilities.filter((r) =>
-						r.trim()
-					),
+					responsibilities: exp.responsibilities.trim(),
 				})),
 			};
 			onSubmit(cleaned);
@@ -329,50 +302,28 @@ export default function ResumeForm({ onSubmit, formData = null }) {
 					</div>
 
 					{/* Responsibilities */}
-					<div className="space-y-2">
+					<div>
 						<label className="block text-sm font-semibold mb-1">
 							Responsibilities
 						</label>
-						{exp.responsibilities.map((resp, j) => (
-							<div key={j} className="flex gap-2">
-								<textarea
-									className="w-full border p-2.5 rounded-md"
-									value={resp}
-									placeholder={`Responsibility #${j + 1}`}
-									onChange={(e) =>
-										handleResponsibilityChange(
-											i,
-											j,
-											e.target.value
-										)
-									}
-								/>
-								{exp.responsibilities.length > 1 && (
-									<button
-										type="button"
-										onClick={() =>
-											removeResponsibility(i, j)
-										}
-										className="text-red-500 font-bold px-2"
-										title="Remove"
-									>
-										×
-									</button>
-								)}
-							</div>
-						))}
+						<textarea
+							className="w-full border p-2.5 rounded-md"
+							rows={4}
+							value={exp.responsibilities}
+							onChange={(e) =>
+								handleExperienceChange(
+									i,
+									"responsibilities",
+									e.target.value
+								)
+							}
+							placeholder="List responsibilities separated by semicolons or periods"
+						/>
 						{errors[`exp_${i}_responsibilities`] && (
 							<p className="text-sm text-red-600">
 								{errors[`exp_${i}_responsibilities`]}
 							</p>
 						)}
-						<button
-							type="button"
-							onClick={() => addResponsibility(i)}
-							className="text-sm text-blue-600 hover:underline"
-						>
-							+ Add Responsibility
-						</button>
 					</div>
 				</div>
 			))}

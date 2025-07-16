@@ -16,7 +16,7 @@ export default function UserWithResumeForm({ onSubmit }) {
 				end_date: "",
 				job_title: "",
 				environment: "",
-				responsibilities: [""],
+				responsibilities: "", // Changed from array to string
 			},
 		],
 	};
@@ -25,6 +25,7 @@ export default function UserWithResumeForm({ onSubmit }) {
 		username: "",
 		password: "",
 		role: "user",
+		template: "", // New field
 		resume: initialResume,
 	});
 
@@ -65,18 +66,6 @@ export default function UserWithResumeForm({ onSubmit }) {
 		}));
 	};
 
-	const handleResponsibilityChange = (i, j, value) => {
-		const updated = [...form.resume.experience];
-		updated[i].responsibilities[j] = value;
-		setForm((prev) => ({
-			...prev,
-			resume: {
-				...prev.resume,
-				experience: updated,
-			},
-		}));
-	};
-
 	const addExperience = () => {
 		setForm((prev) => ({
 			...prev,
@@ -91,21 +80,9 @@ export default function UserWithResumeForm({ onSubmit }) {
 						end_date: "",
 						job_title: "",
 						environment: "",
-						responsibilities: [""],
+						responsibilities: "",
 					},
 				],
-			},
-		}));
-	};
-
-	const addResponsibility = (i) => {
-		const updated = [...form.resume.experience];
-		updated[i].responsibilities.push("");
-		setForm((prev) => ({
-			...prev,
-			resume: {
-				...prev.resume,
-				experience: updated,
 			},
 		}));
 	};
@@ -113,18 +90,6 @@ export default function UserWithResumeForm({ onSubmit }) {
 	const removeExperience = (i) => {
 		const updated = [...form.resume.experience];
 		updated.splice(i, 1);
-		setForm((prev) => ({
-			...prev,
-			resume: {
-				...prev.resume,
-				experience: updated,
-			},
-		}));
-	};
-
-	const removeResponsibility = (i, j) => {
-		const updated = [...form.resume.experience];
-		updated[i].responsibilities.splice(j, 1);
 		setForm((prev) => ({
 			...prev,
 			resume: {
@@ -149,10 +114,11 @@ export default function UserWithResumeForm({ onSubmit }) {
 			</h2>
 
 			{/* User Account Fields */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 				{[
 					["Username", "username"],
 					["Password", "password"],
+					["Template", "template"],
 				].map(([label, key]) => (
 					<div key={key}>
 						<label className="block text-sm font-semibold mb-1">
@@ -323,46 +289,23 @@ export default function UserWithResumeForm({ onSubmit }) {
 					</div>
 
 					{/* Responsibilities */}
-					<div className="space-y-2">
+					<div>
 						<label className="block text-sm font-semibold mb-1">
 							Responsibilities
 						</label>
-						{exp.responsibilities.map((resp, j) => (
-							<div key={j} className="flex gap-2">
-								<textarea
-									className="w-full border p-2.5 rounded-md"
-									value={resp}
-									placeholder={`Responsibility #${j + 1}`}
-									onChange={(e) =>
-										handleResponsibilityChange(
-											i,
-											j,
-											e.target.value
-										)
-									}
-									required
-								/>
-								{exp.responsibilities.length > 1 && (
-									<button
-										type="button"
-										onClick={() =>
-											removeResponsibility(i, j)
-										}
-										className="text-red-500 font-bold px-2"
-										title="Remove"
-									>
-										×
-									</button>
-								)}
-							</div>
-						))}
-						<button
-							type="button"
-							onClick={() => addResponsibility(i)}
-							className="text-sm text-blue-600 hover:underline"
-						>
-							+ Add Responsibility
-						</button>
+						<textarea
+							className="w-full border p-2.5 rounded-md"
+							rows={3}
+							value={exp.responsibilities}
+							onChange={(e) =>
+								handleExperienceChange(
+									i,
+									"responsibilities",
+									e.target.value
+								)
+							}
+							required
+						/>
 					</div>
 				</div>
 			))}
