@@ -1,8 +1,13 @@
 import axios from "axios";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
+	? `${import.meta.env.VITE_BACKEND_URL}/api`
+	: "https://api.resumevar.com/api";
+
+console.log("Backend URL:", BACKEND_URL);
+
 const API = axios.create({
-	baseURL: `https://api.resumevar.com/api`,
-	// baseURL: `http://localhost:3000/api`,
+	baseURL: BACKEND_URL,
 });
 
 API.interceptors.request.use((config) => {

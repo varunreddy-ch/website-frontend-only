@@ -18,7 +18,8 @@ export default function Navbar() {
 
 			<div className="flex items-center space-x-4">
 				<span className="text-gray-600 text-sm">
-					Logged in as <strong>{user?.user}</strong> ({user?.role})
+					Logged in as <strong>{user?.firstname}</strong> (
+					{user?.role})
 				</span>
 				<button
 					onClick={() => {

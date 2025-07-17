@@ -4,7 +4,10 @@ import API from "../api";
 import { setToken, getUser } from "../auth";
 
 export default function SignIn() {
-	const [form, setForm] = useState({ username: "", password: "" });
+	const [form, setForm] = useState({
+		username: "",
+		password: "",
+	});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	const navigate = useNavigate();

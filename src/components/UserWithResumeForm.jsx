@@ -22,6 +22,8 @@ export default function UserWithResumeForm({ onSubmit }) {
 	};
 
 	const [form, setForm] = useState({
+		firstname: "",
+		lastname: "",
 		username: "",
 		password: "",
 		role: "user",
@@ -116,6 +118,8 @@ export default function UserWithResumeForm({ onSubmit }) {
 			{/* User Account Fields */}
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 				{[
+					["Firstname", "firstname"],
+					["Lastname", "lastname"],
 					["Username", "username"],
 					["Password", "password"],
 					["Template", "template"],

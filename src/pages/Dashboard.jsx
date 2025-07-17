@@ -4,8 +4,12 @@ import PDFPreview from "../components/PDFPreview";
 import { getUser, logout } from "../auth";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf";
 
-// console.log(getUser());
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+	"pdfjs-dist/legacy/build/pdf.worker.min.js",
+	import.meta.url
+).toString();
 
 export default function Dashboard() {
 	const [jobDesc, setJobDesc] = useState("");
@@ -27,11 +31,14 @@ export default function Dashboard() {
 
 	const navigate = useNavigate();
 
+	const nameParts = [getUser().firstname, getUser().lastname];
+	const fullName = nameParts.filter(Boolean).join("_");
+
 	const handleDownloadJobDesc = () => {
 		const element = document.createElement("a");
 		const file = new Blob([jobDesc], { type: "text/plain" });
 		element.href = URL.createObjectURL(file);
-		element.download = `${getUser().user}_${companyName || ""}_JD.txt`;
+		element.download = `${fullName}_${companyName || ""}_JD.txt`;
 		document.body.appendChild(element);
 		element.click();
 		document.body.removeChild(element);
@@ -40,9 +47,9 @@ export default function Dashboard() {
 	const handleGenerate = async () => {
 		setResumeMessage("");
 		setResumeError("");
-		setAnswer(""); // ❗️ Clear previous answer
-		setQuestion(""); // Optional: clear input field
-		setPdfBlob(null); // ❗️ Clear previous PDF preview
+		setAnswer("");
+		setQuestion("");
+		setPdfBlob(null);
 		if (!jobDesc.trim()) {
 			setResumeError("Please enter a job description.");
 			return;
@@ -55,7 +62,6 @@ export default function Dashboard() {
 		setLoading(true);
 		setResumeError("");
 		setResumeMessage("");
-		setLoading(true);
 		try {
 			const res = await API.post(
 				"/generate-resume",
@@ -69,10 +75,28 @@ export default function Dashboard() {
 			);
 
 			const blob = new Blob([res.data], { type: "application/pdf" });
-			setPdfBlob(URL.createObjectURL(blob));
-			setGeneratedResume("PDF resume generated");
+			const blobUrl = URL.createObjectURL(blob);
+			setPdfBlob(blobUrl);
+
+			const arrayBuffer = await blob.arrayBuffer();
+
+			const pdf = await pdfjsLib.getDocument({ data: arrayBuffer })
+				.promise;
+			let text = "";
+
+			for (let i = 1; i <= pdf.numPages; i++) {
+				const page = await pdf.getPage(i);
+				const content = await page.getTextContent();
+				const pageText = content.items
+					.map((item) => item.str)
+					.join(" ");
+				text += pageText + "\n\n";
+			}
+			console.log(text);
+			setGeneratedResume(text);
 			setResumeMessage("Resume generated successfully!");
-		} catch {
+		} catch (err) {
+			console.error("Error generating resume:", err);
 			setResumeError("Failed to generate resume.");
 		} finally {
 			setLoading(false);
@@ -101,7 +125,8 @@ export default function Dashboard() {
 			});
 			setAnswer(res.data.generated_answer);
 			setQuestionMessage("Answer received!");
-		} catch {
+		} catch (err) {
+			console.error("Error asking question:", err);
 			setQuestionError("Failed to get an answer.");
 		} finally {
 			setAsking(false);
@@ -118,14 +143,12 @@ export default function Dashboard() {
 			<Navbar />
 
 			<div className="max-w-4xl mx-auto p-4 space-y-4">
-				{/* Header */}
 				<div className="flex justify-between items-center">
 					<h1 className="text-2xl font-bold text-gray-800">
 						Dashboard
 					</h1>
 				</div>
 
-				{/* Job Description */}
 				<div className="bg-white rounded-lg shadow-lg p-4 space-y-4">
 					<h2 className="text-lg font-semibold text-center text-gray-700">
 						Job Description
@@ -162,7 +185,6 @@ export default function Dashboard() {
 					</div>
 				</div>
 
-				{/* Resume Preview */}
 				{pdfBlob ? (
 					<div className="bg-white rounded-lg shadow-lg p-4 space-y-4">
 						<h2 className="text-lg font-semibold text-center text-gray-700">
@@ -174,7 +196,7 @@ export default function Dashboard() {
 						<div className="flex flex-col sm:flex-row justify-center gap-4">
 							<a
 								href={pdfBlob}
-								download={`${getUser().user}_${
+								download={`${fullName}_${
 									companyName || "resume"
 								}.pdf`}
 								className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded text-center"
@@ -196,7 +218,6 @@ export default function Dashboard() {
 					</div>
 				)}
 
-				{/* Ask a Question */}
 				<div className="bg-white rounded-lg shadow-lg p-4 space-y-4">
 					<h2 className="text-lg font-semibold text-center text-gray-700">
 						Ask About the Resume
@@ -256,6 +277,7 @@ export default function Dashboard() {
 					)}
 				</div>
 			</div>
+
 			{showCompanyModal && (
 				<div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
 					<div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
