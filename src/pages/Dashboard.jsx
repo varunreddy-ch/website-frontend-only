@@ -54,19 +54,20 @@ export default function Dashboard() {
 		setResumeMessage("");
 		setLoading(true);
 		try {
-			const res = await API.post("/generate-resume", {
-				job_description: jobDesc,
-				company_name: companyName,
-			});
-			const base64 = res.data.pdf;
-			const binary = atob(base64);
-			const byteArray = new Uint8Array(binary.length);
-			for (let i = 0; i < binary.length; i++) {
-				byteArray[i] = binary.charCodeAt(i);
-			}
-			const blob = new Blob([byteArray], { type: "application/pdf" });
+			const res = await API.post(
+				"/generate-resume",
+				{
+					job_description: jobDesc,
+					company_name: companyName,
+				},
+				{
+					responseType: "blob",
+				}
+			);
+
+			const blob = new Blob([res.data], { type: "application/pdf" });
 			setPdfBlob(URL.createObjectURL(blob));
-			setGeneratedResume(res.data.generated_resume);
+			setGeneratedResume("PDF resume generated");
 			setResumeMessage("Resume generated successfully!");
 		} catch {
 			setResumeError("Failed to generate resume.");
