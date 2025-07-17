@@ -23,6 +23,8 @@ export default function Dashboard() {
 	const [companyName, setCompanyName] = useState("");
 	const [showCompanyModal, setShowCompanyModal] = useState(false);
 
+	const [asking, setAsking] = useState(false);
+
 	const navigate = useNavigate();
 
 	const handleDownloadJobDesc = () => {
@@ -38,12 +40,13 @@ export default function Dashboard() {
 	const handleGenerate = async () => {
 		setResumeMessage("");
 		setResumeError("");
+		setAnswer(""); // ❗️ Clear previous answer
+		setQuestion(""); // Optional: clear input field
+		setPdfBlob(null); // ❗️ Clear previous PDF preview
 		if (!jobDesc.trim()) {
 			setResumeError("Please enter a job description.");
 			return;
 		}
-
-		// Pop up to enter company name
 		setShowCompanyModal(true);
 	};
 
@@ -79,12 +82,15 @@ export default function Dashboard() {
 	const handleAsk = async () => {
 		setQuestionMessage("");
 		setQuestionError("");
+		setAsking(true);
 		if (!question.trim()) {
 			setQuestionError("Please enter a question.");
+			setAsking(false);
 			return;
 		}
 		if (!jobDesc || !generatedResume) {
 			setQuestionError("Please generate a resume first.");
+			setAsking(false);
 			return;
 		}
 		try {
@@ -97,6 +103,8 @@ export default function Dashboard() {
 			setQuestionMessage("Answer received!");
 		} catch {
 			setQuestionError("Failed to get an answer.");
+		} finally {
+			setAsking(false);
 		}
 	};
 
@@ -215,9 +223,12 @@ export default function Dashboard() {
 					<div className="text-center">
 						<button
 							onClick={handleAsk}
-							className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded transition"
+							disabled={asking}
+							className={`bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded transition ${
+								asking && "opacity-50 cursor-not-allowed"
+							}`}
 						>
-							Ask
+							{asking ? "Asking..." : "Ask"}
 						</button>
 					</div>
 
