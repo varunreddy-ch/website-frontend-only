@@ -36,9 +36,9 @@ export default function Dashboard() {
 	const nameParts = getUser().firstname.split(" ");
 	const fullName = nameParts.filter(Boolean).join("_");
 
-	console.log(getUser().firstname);
+	// console.log(getUser().firstname);
 
-	console.log(fullName);
+	// console.log(fullName);
 
 	const handleDownloadJobDesc = () => {
 		const element = document.createElement("a");
@@ -98,7 +98,7 @@ export default function Dashboard() {
 					.join(" ");
 				text += pageText + "\n\n";
 			}
-			console.log(text);
+			// console.log(text);
 			setGeneratedResume(text);
 			setResumeMessage("Resume generated successfully!");
 		} catch (err) {
