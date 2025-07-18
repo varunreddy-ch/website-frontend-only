@@ -32,8 +32,11 @@ export default function Dashboard() {
 	const navigate = useNavigate();
 
 	// const nameParts = [getUser().firstname, getUser().lastname];
-	const nameParts = [getUser().firstname];
+	// const nameParts = [getUser().firstname];
+	const nameParts = [getUser().firstname.split(" ")];
 	const fullName = nameParts.filter(Boolean).join("_");
+
+	console.log(getUser().firstname);
 
 	console.log(fullName);
 
