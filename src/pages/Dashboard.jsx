@@ -31,7 +31,8 @@ export default function Dashboard() {
 
 	const navigate = useNavigate();
 
-	const nameParts = [getUser().firstname, getUser().lastname];
+	// const nameParts = [getUser().firstname, getUser().lastname];
+	const nameParts = [getUser().firstname];
 	const fullName = nameParts.filter(Boolean).join("_");
 
 	const handleDownloadJobDesc = () => {
