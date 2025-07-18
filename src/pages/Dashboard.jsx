@@ -33,7 +33,7 @@ export default function Dashboard() {
 
 	// const nameParts = [getUser().firstname, getUser().lastname];
 	// const nameParts = [getUser().firstname];
-	const nameParts = [getUser().firstname.split(" ")];
+	const nameParts = getUser().firstname.split(" ");
 	const fullName = nameParts.filter(Boolean).join("_");
 
 	console.log(getUser().firstname);
