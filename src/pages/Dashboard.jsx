@@ -197,9 +197,10 @@ export default function Dashboard() {
 						<div className="flex flex-col sm:flex-row justify-center gap-4">
 							<a
 								href={pdfBlob}
-								download={`${fullName}_${
-									companyName || "resume"
-								}.pdf`}
+								// download={`${fullName}_${
+								// 	companyName || "resume"
+								// }.pdf`}
+								download={`${fullName}.pdf`}
 								className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded text-center"
 							>
 								Download PDF
