@@ -26,6 +26,7 @@ export default function UserWithResumeForm({ onSubmit }) {
 		lastname: "",
 		username: "",
 		password: "",
+		job_role: "",
 		role: "user",
 		template: "", // New field
 		resume: initialResume,
@@ -139,6 +140,28 @@ export default function UserWithResumeForm({ onSubmit }) {
 						/>
 					</div>
 				))}
+
+				<div>
+					<label className="block text-sm font-semibold mb-1">
+						Job Role
+					</label>
+					<select
+						className="w-full border p-2.5 rounded-md"
+						value={form.job_role}
+						onChange={(e) =>
+							handleChange("root", "job_role", e.target.value)
+						}
+						required
+					>
+						<option value="" disabled>
+							Select Job Role
+						</option>
+						<option value="SDE">Software Developer</option>
+						<option value="DATA ENGINEER">Data Engineer</option>
+						<option value=".NET">.NET</option>
+					</select>
+				</div>
+
 				<div>
 					<label className="block text-sm font-semibold mb-1">
 						Role
