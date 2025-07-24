@@ -28,7 +28,9 @@ export default function UserWithResumeForm({ onSubmit }) {
 		password: "",
 		job_role: "",
 		role: "user",
-		template: "", // New field
+		summary_points: 0,
+		experience_points: 0,
+		template: "",
 		resume: initialResume,
 	});
 
@@ -160,6 +162,45 @@ export default function UserWithResumeForm({ onSubmit }) {
 						<option value="DATA ENGINEER">Data Engineer</option>
 						<option value=".NET">.NET</option>
 					</select>
+				</div>
+
+				<div>
+					<label className="block text-sm font-semibold mb-1">
+						Summary Points
+					</label>
+					<input
+						type="number"
+						min={0}
+						className="w-full border p-2.5 rounded-md"
+						value={form.summary_points}
+						onChange={(e) =>
+							handleChange(
+								"root",
+								"summary_points",
+								parseInt(e.target.value) || 0
+							)
+						}
+						required
+					/>
+				</div>
+				<div>
+					<label className="block text-sm font-semibold mb-1">
+						Experience Points
+					</label>
+					<input
+						type="number"
+						min={0}
+						className="w-full border p-2.5 rounded-md"
+						value={form.experience_points}
+						onChange={(e) =>
+							handleChange(
+								"root",
+								"experience_points",
+								parseInt(e.target.value) || 0
+							)
+						}
+						required
+					/>
 				</div>
 
 				<div>
