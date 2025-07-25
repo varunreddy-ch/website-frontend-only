@@ -95,6 +95,17 @@ export default function SignIn() {
 						{loading ? "Signing In..." : "Sign In"}
 					</button>
 				</form>
+
+				<p className="text-sm text-center text-gray-500 mt-6">
+					Don't have an account? Send your resume to{" "}
+					<a
+						href="mailto:support@resumevar.com"
+						className="text-blue-600 underline"
+					>
+						support@resumevar.com
+					</a>{" "}
+					to get your credentials today.
+				</p>
 			</div>
 		</div>
 	);
