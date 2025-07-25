@@ -5,10 +5,10 @@ export default function GeneratedResumes({ userId, fullName }) {
 	const [userResumes, setUserResumes] = useState([]);
 	const [resumesLoading, setResumesLoading] = useState(false);
 	const [copiedIndex, setCopiedIndex] = useState(-1);
-	const [deletingId, setDeletingId] = useState("");
-	const [pendingDeleteResumeId, setPendingDeleteResumeId] = useState(""); // New for soft warning
-	const [deleteMessage, setDeleteMessage] = useState("");
-	const [deleteError, setDeleteError] = useState("");
+	const [pendingApplyResumeId, setPendingApplyResumeId] = useState("");
+	const [applyMessage, setApplyMessage] = useState("");
+	const [applyError, setApplyError] = useState("");
+	const [applyingId, setApplyingId] = useState("");
 
 	useEffect(() => {
 		async function fetchResumes() {
@@ -29,14 +29,14 @@ export default function GeneratedResumes({ userId, fullName }) {
 	}, [userId]);
 
 	useEffect(() => {
-		if (deleteMessage || deleteError) {
+		if (applyMessage || applyError) {
 			const timeout = setTimeout(() => {
-				setDeleteMessage("");
-				setDeleteError("");
+				setApplyMessage("");
+				setApplyError("");
 			}, 2500);
 			return () => clearTimeout(timeout);
 		}
-	}, [deleteMessage, deleteError]);
+	}, [applyMessage, applyError]);
 
 	const handleDownloadJD = (jd, companyName) => {
 		const a = document.createElement("a");
@@ -54,71 +54,70 @@ export default function GeneratedResumes({ userId, fullName }) {
 		setTimeout(() => setCopiedIndex(-1), 1200);
 	};
 
-	const requestDelete = (resumeId) => {
-		setPendingDeleteResumeId(resumeId); // Show custom warning
-	};
+	// Soft confirmation
+	const requestApply = (resumeId) => setPendingApplyResumeId(resumeId);
 
-	const confirmDelete = async () => {
-		const resumeId = pendingDeleteResumeId;
-		setDeletingId(resumeId);
-		setDeleteError("");
-		setDeleteMessage("");
-		setPendingDeleteResumeId(""); // Hide modal
+	const confirmApply = async () => {
+		const resumeId = pendingApplyResumeId;
+		setApplyingId(resumeId);
+		setApplyError("");
+		setApplyMessage("");
+		setPendingApplyResumeId("");
 		try {
-			await API.delete(`/delete_generated_resume/${resumeId}`);
+			await API.post(`/mark_applied/${resumeId}`);
 			setUserResumes((prev) => prev.filter((r) => r._id !== resumeId));
-			setDeleteMessage("Resume deleted successfully.");
+			setApplyMessage("Marked as applied!");
 		} catch (err) {
-			console.error("Failed to delete resume:", err);
-			setDeleteError("Failed to delete resume.");
+			console.error("Failed to mark as applied:", err);
+			setApplyError("Failed to mark as applied.");
 		} finally {
-			setDeletingId("");
+			setApplyingId("");
 		}
 	};
-
-	const cancelDelete = () => setPendingDeleteResumeId("");
+	const cancelApply = () => setPendingApplyResumeId("");
 
 	return (
 		<div className="bg-white rounded-lg shadow-lg p-4 mt-8">
 			<h2 className="text-lg font-semibold text-center text-gray-700 mb-4">
 				Your Generated Resumes
 			</h2>
-			{deleteError && (
+			{applyError && (
 				<div className="text-red-600 bg-red-50 border border-red-200 px-4 py-2 rounded text-sm text-center mb-2">
-					{deleteError}
+					{applyError}
 				</div>
 			)}
-			{deleteMessage && (
+			{applyMessage && (
 				<div className="text-blue-600 bg-blue-50 border border-blue-200 px-4 py-2 rounded text-sm text-center mb-2">
-					{deleteMessage}
+					{applyMessage}
 				</div>
 			)}
 
-			{/* SOFT CONFIRM DELETE MODAL */}
-			{pendingDeleteResumeId && (
+			{/* SOFT CONFIRM APPLIED MODAL */}
+			{pendingApplyResumeId && (
 				<div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
 					<div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs space-y-4">
 						<h3 className="text-lg font-semibold text-gray-800 text-center">
-							Delete Resume
+							Mark as Applied
 						</h3>
 						<p className="text-gray-700 text-center">
-							Are you sure you want to delete this resume?
+							Are you sure you want to mark this resume as
+							applied? It will be hidden from your dashboard.
 						</p>
 						<div className="flex justify-end gap-4">
 							<button
-								onClick={cancelDelete}
+								onClick={cancelApply}
 								className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
 							>
 								Cancel
 							</button>
 							<button
-								onClick={confirmDelete}
-								className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-								disabled={deletingId === pendingDeleteResumeId}
+								onClick={confirmApply}
+								className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+								disabled={applyingId === pendingApplyResumeId}
 							>
-								{deletingId === pendingDeleteResumeId
-									? "Deleting..."
-									: "Delete"}
+								{applyingId === pendingApplyResumeId
+									? "Applying..."
+									: "Mark as Applied"}
 							</button>
 						</div>
 					</div>
@@ -203,19 +202,17 @@ export default function GeneratedResumes({ userId, fullName }) {
 										</button>
 									)}
 									<button
-										onClick={() =>
-											requestDelete(resume._id)
-										}
-										className={`bg-red-100 hover:bg-red-200 text-red-700 px-4 py-1 rounded ${
-											deletingId === resume._id
+										onClick={() => requestApply(resume._id)}
+										className={`bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-1 rounded ${
+											applyingId === resume._id
 												? "opacity-60 cursor-not-allowed"
 												: ""
 										}`}
-										disabled={deletingId === resume._id}
+										disabled={applyingId === resume._id}
 									>
-										{deletingId === resume._id
-											? "Deleting..."
-											: "Delete"}
+										{applyingId === resume._id
+											? "Applying..."
+											: "Applied"}
 									</button>
 								</div>
 							</div>

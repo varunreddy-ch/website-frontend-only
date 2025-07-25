@@ -275,7 +275,7 @@ export default function Dashboard() {
 					</div>
 				</div>
 
-				{/* <GeneratedResumes userId={user.user} fullName={fullName} /> */}
+				<GeneratedResumes userId={user.user} fullName={fullName} />
 
 				{/* Company Name Modal */}
 				{showCompanyModal && (
