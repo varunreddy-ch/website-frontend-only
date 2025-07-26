@@ -53,7 +53,7 @@ export default function SignUp() {
 		username: "",
 		password: "",
 		email: "",
-		job_role: "",
+		job_role: "default",
 		role: "user",
 		template: "default",
 		resume: initialResume,
@@ -455,7 +455,7 @@ export default function SignUp() {
 									</div>
 								</div>
 
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+								{/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<div className="space-y-2">
 										<Label htmlFor="job_role">
 											Job Role
@@ -490,7 +490,7 @@ export default function SignUp() {
 											</p>
 										)}
 									</div>
-								</div>
+								</div> */}
 							</div>
 
 							{/* Resume Information Section */}
