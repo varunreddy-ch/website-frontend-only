@@ -43,7 +43,6 @@ export default function ApplierSubmissionForm() {
 		setMessage("");
 		setSubmitting(true);
 
-		// JS validation for required fields
 		if (
 			!applierData.company_name.trim() ||
 			!applierData.job_description.trim() ||
@@ -62,7 +61,7 @@ export default function ApplierSubmissionForm() {
 			job_link: applierData.job_link.trim(),
 			questions: applierData.questions
 				.map((q) => q.trim())
-				.filter((q) => q.length > 0), // remove empty questions
+				.filter((q) => q.length > 0),
 		};
 
 		try {
@@ -84,16 +83,25 @@ export default function ApplierSubmissionForm() {
 	return (
 		<form
 			onSubmit={handleSubmit}
-			className="bg-white rounded-lg shadow-lg p-4 space-y-4 mt-4"
+			data-lov-id="applier-form"
+			className="bg-white max-w-4xl mx-auto rounded-2xl shadow-xl p-8 space-y-6"
 		>
-			<h2 className="text-lg font-semibold text-blue-800 text-center">
+			<h2
+				className="text-2xl font-bold text-center text-blue-700"
+				data-lov-id="applier-form-heading"
+			>
 				Applier Submission
 			</h2>
+
 			{formError && (
-				<div className="text-center rounded py-2 text-sm bg-red-100 text-red-700">
+				<div
+					className="text-center rounded py-2 text-sm bg-red-100 text-red-700"
+					data-lov-id="form-error"
+				>
 					{formError}
 				</div>
 			)}
+
 			{message && (
 				<div
 					className={`text-center rounded py-2 text-sm ${
@@ -101,17 +109,20 @@ export default function ApplierSubmissionForm() {
 							? "bg-red-100 text-red-700"
 							: "bg-green-100 text-green-700"
 					}`}
+					data-lov-id="form-message"
 				>
 					{message}
 				</div>
 			)}
-			<div>
-				<label className="block text-sm font-semibold mb-1">
+
+			<div className="space-y-2">
+				<label className="block text-sm font-semibold text-gray-700">
 					Company Name
 				</label>
 				<input
 					type="text"
-					className="w-full border p-2.5 rounded-md"
+					data-lov-id="company-name"
+					className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
 					value={applierData.company_name}
 					onChange={(e) =>
 						handleChange("company_name", e.target.value)
@@ -119,13 +130,15 @@ export default function ApplierSubmissionForm() {
 					required
 				/>
 			</div>
-			<div>
-				<label className="block text-sm font-semibold mb-1">
+
+			<div className="space-y-2">
+				<label className="block text-sm font-semibold text-gray-700">
 					Job Description
 				</label>
 				<textarea
-					className="w-full border p-2.5 rounded-md"
-					rows={3}
+					data-lov-id="job-description"
+					className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+					rows={4}
 					value={applierData.job_description}
 					onChange={(e) =>
 						handleChange("job_description", e.target.value)
@@ -133,27 +146,32 @@ export default function ApplierSubmissionForm() {
 					required
 				/>
 			</div>
-			<div>
-				<label className="block text-sm font-semibold mb-1">
+
+			<div className="space-y-2">
+				<label className="block text-sm font-semibold text-gray-700">
 					Link to Apply
 				</label>
 				<input
 					type="url"
-					className="w-full border p-2.5 rounded-md"
+					data-lov-id="job-link"
+					className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
 					value={applierData.job_link}
 					onChange={(e) => handleChange("job_link", e.target.value)}
 					required
 				/>
 			</div>
-			<div>
-				<label className="block text-sm font-semibold mb-1">
-					Questions (optional)
+
+			<div className="space-y-2">
+				<label className="block text-sm font-semibold text-gray-700">
+					Questions <span className="text-gray-400">(optional)</span>
 				</label>
+
 				{applierData.questions.map((q, idx) => (
-					<div className="flex items-center mb-2" key={idx}>
+					<div className="w-full flex gap-2 mb-2" key={idx}>
 						<input
 							type="text"
-							className="w-full border p-2.5 rounded-md"
+							data-lov-id={`question-${idx}`}
+							className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
 							value={q}
 							onChange={(e) =>
 								handleQuestionChange(idx, e.target.value)
@@ -163,27 +181,34 @@ export default function ApplierSubmissionForm() {
 						{applierData.questions.length > 1 && (
 							<button
 								type="button"
+								data-lov-id={`remove-question-${idx}`}
 								onClick={() => removeQuestion(idx)}
-								className="ml-2 text-red-600 hover:underline"
+								className="text-red-500 hover:underline text-sm"
 							>
 								Remove
 							</button>
 						)}
 					</div>
 				))}
-				<button
-					type="button"
-					onClick={addQuestion}
-					className="text-blue-600 hover:text-blue-800 text-sm mt-2"
-				>
-					+ Add Question
-				</button>
+
+				<div className="flex justify-center">
+					<button
+						type="button"
+						onClick={addQuestion}
+						data-lov-id="add-question"
+						className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+					>
+						+ Add Question
+					</button>
+				</div>
 			</div>
-			<div className="flex justify-center pt-2">
+
+			<div className="pt-4">
 				<button
 					type="submit"
 					disabled={submitting}
-					className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-6 py-2 rounded shadow-md hover:shadow-lg transition-all duration-300"
+					data-lov-id="submit-applier"
+					className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
 				>
 					{submitting ? "Submitting..." : "Submit Applier Info"}
 				</button>
