@@ -22,7 +22,11 @@ import {
 import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import API from "../api";
+import { useRef } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
+
+// Inside your component:
+const recaptchaRef = useRef<ReCAPTCHA>(null);
 
 export default function SignUp() {
 	const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -301,6 +305,11 @@ export default function SignUp() {
 			setSuccess("Account created successfully. Please sign in.");
 		} catch (err) {
 			setError(err.response.data);
+			// Reset the reCAPTCHA so user can try again
+			if (recaptchaRef.current) {
+				recaptchaRef.current.reset();
+			}
+			setCaptchaToken(null);
 		} finally {
 			setLoading(false);
 		}
@@ -1144,6 +1153,7 @@ export default function SignUp() {
 							<div className="flex justify-center">
 								<div className="flex justify-center"></div>
 								<ReCAPTCHA
+									ref={recaptchaRef}
 									sitekey="6LeC3I8rAAAAADRVKawA3XVf4z3ijJge7ERVCk5K"
 									onChange={(token) => setCaptchaToken(token)}
 								/>
