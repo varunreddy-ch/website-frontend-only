@@ -62,6 +62,7 @@ export default function SignUp() {
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [success, setSuccess] = useState("");
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -283,11 +284,11 @@ export default function SignUp() {
 		const valid = validateAllFields();
 		if (!valid) return;
 
-		if (!captchaToken) {
-			setError("Please complete the CAPTCHA.");
-			setLoading(false);
-			return;
-		}
+		// if (!captchaToken) {
+		// 	setError("Please complete the CAPTCHA.");
+		// 	setLoading(false);
+		// 	return;
+		// }
 
 		setLoading(true);
 
@@ -296,9 +297,10 @@ export default function SignUp() {
 				...form,
 				recaptcha: captchaToken,
 			});
-			navigate("/signin");
+			setError(""); // Clear any previous error
+			setSuccess("Account created successfully. Please sign in.");
 		} catch (err) {
-			setError("Registration failed. Please try again.");
+			setError(err.response.data);
 		} finally {
 			setLoading(false);
 		}
@@ -1131,6 +1133,14 @@ export default function SignUp() {
 								</Alert>
 							)}
 
+							{success && (
+								<Alert variant="default">
+									<AlertDescription>
+										{success}
+									</AlertDescription>
+								</Alert>
+							)}
+
 							<div className="flex justify-center">
 								<div className="flex justify-center"></div>
 								<ReCAPTCHA
@@ -1146,6 +1156,7 @@ export default function SignUp() {
 									</p>
 								</div>
 							)}
+
 							<Button
 								type="submit"
 								className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
