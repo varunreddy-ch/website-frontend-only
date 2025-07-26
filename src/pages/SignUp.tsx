@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,11 +22,8 @@ import {
 import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import API from "../api";
-import { useRef } from "react";
-import ReCAPTCHA from "react-google-recaptcha";
 
-// Inside your component:
-const recaptchaRef = useRef<ReCAPTCHA>(null);
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function SignUp() {
 	const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -68,6 +65,8 @@ export default function SignUp() {
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
 	const navigate = useNavigate();
+
+	const recaptchaRef = useRef<ReCAPTCHA>(null);
 
 	useEffect(() => {
 		const token = localStorage.getItem("token");
