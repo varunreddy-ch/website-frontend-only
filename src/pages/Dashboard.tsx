@@ -306,7 +306,7 @@ export default function Dashboard() {
 					</div>
 				</div>
 
-				{user.role == "tier2" && (
+				{(user.role == "tier2" || user.role == "applier") && (
 					<GeneratedResumes userId={user.user} fullName={fullName} />
 				)}
 
