@@ -8,6 +8,7 @@ import ApplierSubmissionForm from "../components/ApplierSubmissionForm";
 import GeneratedResumes from "../components/GeneratedResumes";
 import Spinner, { spinnerCSS } from "../components/Spinner";
 import { Mail, Heart } from "lucide-react";
+import { getAPIErrorMessage } from "../utils/apiErrors";
 
 // Configure PDF.js worker
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf";
@@ -116,23 +117,9 @@ export default function Dashboard() {
 			setGeneratedResume(text);
 			setResumeMessage("Resume generated successfully!");
 		} catch (err) {
-			console.error("Error generating resume:", err);
-
-			// Handle errors based on the response
-			if (err.response) {
-				const msg =
-					err.response.data?.message ||
-					(err.response.status === 403
-						? "Resume generation limit exceeded. Please contact support."
-						: err.response.status === 404
-						? "User not found. Please sign in again."
-						: "Failed to generate resume. Please try again.");
-				setResumeError(msg);
-			} else if (err.request) {
-				setResumeError("No response from server. Please try again.");
-			} else {
-				setResumeError("Failed to generate resume.");
-			}
+			setResumeError(
+				getAPIErrorMessage(err, "Failed to generate resume.")
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -161,23 +148,9 @@ export default function Dashboard() {
 			setAnswer(res.data.generated_answer);
 			setQuestionMessage("Answer received!");
 		} catch (err) {
-			console.error("Error generating resume:", err);
-
-			// Handle errors based on the response
-			if (err.response) {
-				const msg =
-					err.response.data?.message ||
-					(err.response.status === 403
-						? "Resume generation limit exceeded. Please contact support."
-						: err.response.status === 404
-						? "User not found. Please sign in again."
-						: "Failed to generate resume. Please try again.");
-				setResumeError(msg);
-			} else if (err.request) {
-				setResumeError("No response from server. Please try again.");
-			} else {
-				setResumeError("Failed to generate resume.");
-			}
+			setResumeError(
+				getAPIErrorMessage(err, "Failed to generate resume.")
+			);
 		} finally {
 			setAsking(false);
 		}
