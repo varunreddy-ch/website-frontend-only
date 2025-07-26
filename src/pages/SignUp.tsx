@@ -22,8 +22,11 @@ import {
 import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import API from "../api";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function SignUp() {
+	const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
 	const initialResume = {
 		full_name: "",
 		job_title: "",
@@ -280,10 +283,19 @@ export default function SignUp() {
 		const valid = validateAllFields();
 		if (!valid) return;
 
+		if (!captchaToken) {
+			setError("Please complete the CAPTCHA.");
+			setLoading(false);
+			return;
+		}
+
 		setLoading(true);
 
 		try {
-			await API.post("/signup", form);
+			await API.post("/signup", {
+				...form,
+				recaptcha: captchaToken,
+			});
 			navigate("/signin");
 		} catch (err) {
 			setError("Registration failed. Please try again.");
@@ -1119,6 +1131,21 @@ export default function SignUp() {
 								</Alert>
 							)}
 
+							<div className="flex justify-center">
+								<div className="flex justify-center"></div>
+								<ReCAPTCHA
+									sitekey="6LeC3I8rAAAAADRVKawA3XVf4z3ijJge7ERVCk5K"
+									onChange={(token) => setCaptchaToken(token)}
+								/>
+							</div>
+
+							{!captchaToken && (
+								<div className="flex justify-center">
+									<p className="text-sm text-red-600">
+										Please verify you're not a robot.
+									</p>
+								</div>
+							)}
 							<Button
 								type="submit"
 								className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
