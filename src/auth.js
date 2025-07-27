@@ -31,5 +31,5 @@ export const getUser = () => {
 
 export const logout = () => {
 	removeToken();
-	window.location.href = "/";
+	window.location.href = "/signin";
 };

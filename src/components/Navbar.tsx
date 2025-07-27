@@ -1,4 +1,4 @@
-import { logout } from "@/auth";
+import { getUser, logout } from "@/auth";
 import { useState, useEffect } from "react";
 import { Menu, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ const Navbar = () => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const location = useLocation();
 	const navigate = useNavigate();
+	const user = getUser();
 
 	const isDashboard = location.pathname === "/dashboard";
 	const isAdmin = location.pathname === "/admin";
@@ -51,13 +52,20 @@ const Navbar = () => {
 
 					{/* Dashboard-only: Show Sign Out */}
 					{isDashboard || isAdmin ? (
-						<Button
-							variant="outline"
-							onClick={handleSignOut}
-							className="text-red-600 border-red-500 hover:bg-red-50"
-						>
-							Sign Out
-						</Button>
+						<div className="flex items-center space-x-4">
+							<span className="text-gray-600 text-sm">
+								Logged in as <strong>{user?.firstname}</strong>{" "}
+								({user?.role})
+							</span>
+
+							<Button
+								variant="outline"
+								onClick={handleSignOut}
+								className="text-red-600 border-red-500 hover:bg-red-50"
+							>
+								Sign Out
+							</Button>
+						</div>
 					) : (
 						<>
 							{/* Desktop Navigation */}
