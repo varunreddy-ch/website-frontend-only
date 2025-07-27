@@ -43,9 +43,9 @@ export default function Dashboard() {
 		}
 	}, [user, navigate]);
 
-	if (!user) {
-		return null;
-	}
+	// if (!user) {
+	// 	return null;
+	// }
 
 	const fullName = user.firstname
 		? user.firstname.split(" ").filter(Boolean).join("_")

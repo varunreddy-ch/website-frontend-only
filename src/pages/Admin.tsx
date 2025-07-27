@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import API from "../api";
 import Navbar from "../components/Navbar";
 import UserWithResumeForm from "../components/UserWithResumeForm";
-import { Mail, Heart } from "lucide-react";
+import { Mail, Heart, Edit, Trash2 } from "lucide-react";
+
+import { getUser } from "../auth";
+import { useNavigate } from "react-router-dom";
 
 export default function Admin() {
 	const [users, setUsers] = useState([]);
@@ -10,6 +13,17 @@ export default function Admin() {
 	const [userToRemove, setUserToRemove] = useState(null);
 	const [message, setMessage] = useState("");
 	const [error, setError] = useState("");
+
+	const user = getUser();
+	const navigate = useNavigate();
+
+	const [userToEdit, setUserToEdit] = useState(null);
+
+	useEffect(() => {
+		if (!user || user.role !== "admin") {
+			navigate("/signin");
+		}
+	}, [user, navigate]);
 
 	const fetchUsers = async () => {
 		try {
@@ -20,9 +34,61 @@ export default function Admin() {
 		}
 	};
 
+	const validateField = (key, value) => {
+		if (key === "username") {
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(value)) return "Invalid email address.";
+		} else if (key === "password") {
+			if (!value || value.length < 8)
+				return "Password must be at least 8 characters.";
+		} else {
+			if (!value || !value.trim()) return "This field is required.";
+		}
+		return "";
+	};
+
+	const validateFullForm = (form) => {
+		const requiredFields = [
+			"firstname",
+			"lastname",
+			"username",
+			"password",
+			"job_role",
+			"role",
+			"template",
+		];
+
+		for (const key of requiredFields) {
+			const error = validateField(key, form[key]);
+			if (error) {
+				return `❌ ${
+					key.charAt(0).toUpperCase() + key.slice(1)
+				}: ${error}`;
+			}
+		}
+
+		const resume = form.resume;
+		if (!resume) return "❌ Resume data is missing.";
+
+		// Flat resume fields
+		const flatResumeFields = [
+			"full_name",
+			"job_title",
+			"professional_summary",
+			"technical_skills",
+		];
+		for (const key of flatResumeFields) {
+			const error = validateField(key, resume[key]);
+			if (error) return `❌ ${key.replace(/_/g, " ")}: ${error}`;
+		}
+
+		return ""; // All good
+	};
+
 	const handleCreate = async (fullForm) => {
-		if (!fullForm.username || !fullForm.password) {
-			setError("❌ Username and password are required.");
+		const validationError = validateFullForm(fullForm);
+		if (validationError) {
+			setError(validationError);
 			setMessage("");
 			return;
 		}
@@ -33,8 +99,28 @@ export default function Admin() {
 			setError("");
 			fetchUsers();
 			setTimeout(() => setMessage(""), 3000);
-		} catch {
-			setError("❌ Failed to create user.");
+		} catch (err) {
+			const errorMsg = "❌ Failed to create user.";
+			setError(`❌ ${errorMsg}`);
+			setMessage("");
+		}
+	};
+
+	const handleUpdate = async (updatedUser) => {
+		try {
+			await API.post("/update-user", {
+				username: updatedUser.username,
+				updatedFields: updatedUser,
+			});
+			setMessage(`✏️ User "${updatedUser.username}" updated.`);
+			setError("");
+			setUserToEdit(null);
+			fetchUsers();
+			setTimeout(() => setMessage(""), 3000);
+		} catch (err) {
+			const errorMsg =
+				err?.response?.data || err.message || "Failed to update user";
+			setError(`❌ ${errorMsg}`);
 			setMessage("");
 		}
 	};
@@ -138,16 +224,46 @@ export default function Admin() {
 										{u.username}
 										{roleBadge(u.role)}
 									</span>
-									<button
-										onClick={() =>
-											setUserToRemove(u.username)
-										}
-										className="text-red-500 hover:underline text-sm"
-									>
-										Remove
-									</button>
+
+									<div className="flex gap-4 items-center text-sm">
+										<button
+											onClick={() => setUserToEdit(u)}
+											className="flex items-center text-blue-600 hover:underline"
+										>
+											<Edit className="w-4 h-4 mr-1" />
+											<span>Edit</span>
+										</button>
+										<button
+											onClick={() =>
+												setUserToRemove(u.username)
+											}
+											className="flex items-center text-red-500 hover:underline"
+										>
+											<Trash2 className="w-4 h-4 mr-1" />
+											<span>Remove</span>
+										</button>
+									</div>
 								</li>
 							))}
+						{userToEdit && (
+							<div className="border-t pt-6 mt-6">
+								<h3 className="text-xl font-semibold mb-2 text-indigo-800">
+									Update User: {userToEdit.username}
+								</h3>
+								<UserWithResumeForm
+									onSubmit={handleUpdate}
+									initialData={userToEdit}
+								/>
+								<div className="text-right">
+									<button
+										onClick={() => setUserToEdit(null)}
+										className="text-sm text-gray-600 underline"
+									>
+										Cancel Editing
+									</button>
+								</div>
+							</div>
+						)}
 					</ul>
 				</div>
 			</div>

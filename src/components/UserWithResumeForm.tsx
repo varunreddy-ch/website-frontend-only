@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function UserWithResumeForm({ onSubmit }) {
+export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 	const initialResume = {
 		full_name: "",
 		job_title: "",
@@ -30,9 +30,35 @@ export default function UserWithResumeForm({ onSubmit }) {
 		role: "user",
 		summary_points: 0,
 		experience_points: 0,
+		complete_change: false,
 		template: "",
 		resume: initialResume,
 	});
+
+	useEffect(() => {
+		if (initialData) {
+			setForm((prev) => ({
+				...prev,
+				...initialData,
+				resume: {
+					...initialResume,
+					...(initialData.resume || {}),
+					contact: {
+						...initialResume.contact,
+						...(initialData.resume?.contact || {}),
+					},
+					education: {
+						...initialResume.education,
+						...(initialData.resume?.education || {}),
+					},
+					experience:
+						initialData.resume?.experience?.length > 0
+							? initialData.resume.experience
+							: initialResume.experience,
+				},
+			}));
+		}
+	}, [initialData]);
 
 	const handleChange = (section, key, value) => {
 		if (section === "root") {
@@ -161,6 +187,7 @@ export default function UserWithResumeForm({ onSubmit }) {
 						<option value="SDE">Software Developer</option>
 						<option value="DATA ENGINEER">Data Engineer</option>
 						<option value=".NET">.NET</option>
+						<option value=".NET">default</option>
 					</select>
 				</div>
 
@@ -221,6 +248,28 @@ export default function UserWithResumeForm({ onSubmit }) {
 						<option value="applier">Applier</option>
 						<option value="admin">Admin</option>
 					</select>
+				</div>
+
+				<div className="flex items-center justify-center col-span-1 md:col-span-2">
+					<input
+						type="checkbox"
+						id="complete_change"
+						className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 accent-blue-600"
+						checked={form.complete_change}
+						onChange={(e) =>
+							handleChange(
+								"root",
+								"complete_change",
+								e.target.checked
+							)
+						}
+					/>
+					<label
+						htmlFor="complete_change"
+						className="ml-2 text-sm font-semibold text-gray-900"
+					>
+						Enable Complete Change
+					</label>
 				</div>
 			</div>
 
