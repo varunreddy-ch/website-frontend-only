@@ -80,7 +80,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 	return (
 		<div className="bg-white rounded-xl shadow-md p-6 mt-8">
 			<h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
-				Your Generated Resumes
+				💼 TOP JOB PICKS FOR YOU 💼
 			</h2>
 
 			{applyError && (
