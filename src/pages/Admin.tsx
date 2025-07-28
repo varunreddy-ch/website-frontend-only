@@ -204,6 +204,9 @@ export default function Admin() {
 								<option value="all">All Roles</option>
 								<option value="admin">Admin</option>
 								<option value="user">User</option>
+								<option value="tier1">Tier1</option>
+								<option value="tier2">Tier2</option>
+								<option value="applier">Applier</option>
 							</select>
 						</div>
 					</div>
