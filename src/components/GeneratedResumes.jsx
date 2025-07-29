@@ -142,7 +142,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 							className="bg-gray-50 border border-gray-200 rounded-lg p-4"
 						>
 							<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-								<div>
+								<div className="min-w-0 flex-1">
 									<p className="text-lg font-semibold text-gray-800">
 										{resume.company_name ||
 											"Untitled Company"}
@@ -156,22 +156,23 @@ export default function GeneratedResumes({ userId, fullName }) {
 											: "Unknown"}
 									</p>
 									{resume.company_link && (
-										<div className="mt-1 flex items-center gap-2 text-sm text-blue-600">
+										<div className="mt-1 flex items-center gap-2 text-sm text-blue-600 sm:max-w-sm md:max-w-md lg:max-w-lg overflow-hidden">
 											<a
 												href={resume.company_link}
 												target="_blank"
 												rel="noopener noreferrer"
-												className="hover:underline"
+												className="hover:underline truncate"
+												style={{ maxWidth: "16rem" }}
 											>
 												{resume.company_link}
 											</a>
 											<button
+												className="text-xs px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 whitespace-nowrap"
 												onClick={() =>
 													navigator.clipboard.writeText(
 														resume.company_link
 													)
 												}
-												className="text-xs px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
 											>
 												Copy
 											</button>
