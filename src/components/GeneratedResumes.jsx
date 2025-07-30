@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import API from "../api";
 import { getUser } from "../auth";
+import { extractTextFromPdfBase64 } from "../utils/pdfUtils";
 
 export default function GeneratedResumes({ userId, fullName }) {
 	const [userResumes, setUserResumes] = useState([]);
@@ -125,6 +126,37 @@ export default function GeneratedResumes({ userId, fullName }) {
 	};
 
 	const cancelDelete = () => setPendingDeleteJobId("");
+
+	const handleCopyJDAndResume = async (jd, resumeBase64, companyName) => {
+		if (!jd && !resumeBase64) {
+			alert("Nothing to copy.");
+			return;
+		}
+
+		let resumeText = "";
+		if (resumeBase64) {
+			resumeText = await extractTextFromPdfBase64(resumeBase64);
+		}
+
+		let contentToCopy = `Job Description for ${
+			companyName || "Company"
+		}:\n\n${jd || "N/A"}\n\n`;
+
+		contentToCopy += `You are simulating a job application assistant. For each question, generate a response written in the first person, as if the candidate is filling out a job application form. Each answer should be concise, approximately 100 words, and must be based only on the candidate’s resume and the job description
+				Here is the resume text:\n\n`;
+
+		if (resumeText) {
+			contentToCopy += `\n\n--- Resume ---\n${resumeText}`;
+		}
+
+		try {
+			await navigator.clipboard.writeText(contentToCopy);
+			setApplyMessage("JD and resume copied to clipboard!");
+		} catch (err) {
+			console.error("Copy failed:", err);
+			setApplyError("Failed to copy to clipboard.");
+		}
+	};
 
 	return (
 		<div className="bg-white rounded-xl shadow-md p-6 mt-8">
@@ -265,6 +297,18 @@ export default function GeneratedResumes({ userId, fullName }) {
 											</button>
 										</div>
 									)}
+									<button
+										onClick={() =>
+											handleCopyJDAndResume(
+												resume.JD,
+												resume.resume,
+												resume.company_name
+											)
+										}
+										className="inline-flex items-center justify-center min-w-[140px] h-9 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 rounded-md shadow-sm transition-all"
+									>
+										Copy JD + Resume
+									</button>
 								</div>
 
 								<div className="flex flex-wrap justify-end gap-2 mt-2 sm:mt-0">
