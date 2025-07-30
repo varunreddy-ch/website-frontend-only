@@ -10,6 +10,11 @@ export default function GeneratedResumes({ userId, fullName }) {
 	const [applyError, setApplyError] = useState("");
 	const [applyingId, setApplyingId] = useState("");
 
+	const [pendingDeleteJobId, setPendingDeleteJobId] = useState("");
+	const [deletingId, setDeletingId] = useState("");
+	const [deleteError, setDeleteError] = useState("");
+	const [deleteMessage, setDeleteMessage] = useState("");
+
 	useEffect(() => {
 		async function fetchResumes() {
 			setResumesLoading(true);
@@ -48,6 +53,17 @@ export default function GeneratedResumes({ userId, fullName }) {
 		document.body.removeChild(a);
 	};
 
+	// Clear messages after a short time
+	useEffect(() => {
+		if (deleteMessage || deleteError) {
+			const t = setTimeout(() => {
+				setDeleteMessage("");
+				setDeleteError("");
+			}, 2500);
+			return () => clearTimeout(t);
+		}
+	}, [deleteMessage, deleteError]);
+
 	const handleCopyAnswer = (answer, idx) => {
 		navigator.clipboard.writeText(answer);
 		setCopiedIndex(idx);
@@ -77,6 +93,34 @@ export default function GeneratedResumes({ userId, fullName }) {
 
 	const cancelApply = () => setPendingApplyResumeId("");
 
+	// Trigger the confirmation modal
+	const requestDeleteJob = (jobId) => {
+		setPendingDeleteJobId(jobId);
+	};
+
+	// On confirm, call backend and prune list
+	const confirmDeleteJob = async () => {
+		setDeletingId(pendingDeleteJobId);
+		setDeleteError("");
+		setDeleteMessage("");
+		try {
+			await API.delete(`/jobs/${pendingDeleteJobId}`);
+			// Remove all resumes for this job
+			setUserResumes((prev) =>
+				prev.filter((r) => r.jobId !== pendingDeleteJobId)
+			);
+			setDeleteMessage("Job and its resumes deleted.");
+		} catch (err) {
+			console.error("Failed to delete job:", err);
+			setDeleteError("Could not delete job. Try again.");
+		} finally {
+			setDeletingId("");
+			setPendingDeleteJobId("");
+		}
+	};
+
+	const cancelDelete = () => setPendingDeleteJobId("");
+
 	return (
 		<div className="bg-white rounded-xl shadow-md p-6 mt-8">
 			<h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
@@ -92,6 +136,13 @@ export default function GeneratedResumes({ userId, fullName }) {
 				<p className="text-center text-sm text-blue-600 bg-blue-100 py-2 rounded mb-4">
 					{applyMessage}
 				</p>
+			)}
+
+			{deleteError && (
+				<p className="text-red-600 text-center">{deleteError}</p>
+			)}
+			{deleteMessage && (
+				<p className="text-blue-600 text-center">{deleteMessage}</p>
 			)}
 
 			{/* Soft Confirmation Modal */}
@@ -120,6 +171,37 @@ export default function GeneratedResumes({ userId, fullName }) {
 								{applyingId === pendingApplyResumeId
 									? "Applying..."
 									: "Confirm"}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{pendingDeleteJobId && (
+				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+					<div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
+						<h3 className="text-lg font-bold text-center">
+							Confirm Delete
+						</h3>
+						<p className="text-center">
+							This will delete the job and <strong>all</strong>{" "}
+							associated resumes. Are you sure?
+						</p>
+						<div className="flex justify-end gap-4">
+							<button
+								onClick={cancelDelete}
+								className="px-4 py-2 rounded border"
+							>
+								Cancel
+							</button>
+							<button
+								onClick={confirmDeleteJob}
+								disabled={deletingId === pendingDeleteJobId}
+								className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+							>
+								{deletingId === pendingDeleteJobId
+									? "Deleting..."
+									: "Delete"}
 							</button>
 						</div>
 					</div>
@@ -209,6 +291,17 @@ export default function GeneratedResumes({ userId, fullName }) {
 										</button>
 									)}
 
+									{resume.jobId && resume.JD.trim() && (
+										<button
+											onClick={() =>
+												requestDeleteJob(resume.jobId)
+											}
+											className="inline-flex items-center justify-center min-w-[140px] h-9 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 rounded-md shadow-sm"
+										>
+											Delete JOB
+										</button>
+									)}
+
 									<button
 										onClick={() => requestApply(resume._id)}
 										disabled={applyingId === resume._id}
@@ -224,7 +317,6 @@ export default function GeneratedResumes({ userId, fullName }) {
 									</button>
 								</div>
 							</div>
-
 							{resume.JD && (
 								<details className="mt-3">
 									<summary className="cursor-pointer text-sm font-medium text-gray-700">

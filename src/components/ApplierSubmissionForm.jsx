@@ -74,7 +74,8 @@ export default function ApplierSubmissionForm() {
 				questions: [""],
 			});
 		} catch (err) {
-			setMessage("Submission failed");
+			const msg = err.response?.data || err.message || "Unknown error";
+			setMessage("Submission failed: " + msg);
 		} finally {
 			setSubmitting(false);
 		}
