@@ -146,7 +146,7 @@ export default function Admin() {
 					: "bg-gray-100 text-gray-700"
 			}`}
 		>
-			{role === "admin" ? "👑 Admin" : "🙋 User"}
+			{role === "admin" ? "👑 Admin" : `🙋 ${role}`}
 		</span>
 	);
 
