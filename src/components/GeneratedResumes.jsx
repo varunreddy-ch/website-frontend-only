@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import API from "../api";
+import { getUser } from "../auth";
 
 export default function GeneratedResumes({ userId, fullName }) {
 	const [userResumes, setUserResumes] = useState([]);
@@ -14,6 +15,10 @@ export default function GeneratedResumes({ userId, fullName }) {
 	const [deletingId, setDeletingId] = useState("");
 	const [deleteError, setDeleteError] = useState("");
 	const [deleteMessage, setDeleteMessage] = useState("");
+
+	const user = getUser();
+
+	const isApplier = user.role === "applier";
 
 	useEffect(() => {
 		async function fetchResumes() {
@@ -291,16 +296,20 @@ export default function GeneratedResumes({ userId, fullName }) {
 										</button>
 									)}
 
-									{resume.jobId && resume.JD.trim() && (
-										<button
-											onClick={() =>
-												requestDeleteJob(resume.jobId)
-											}
-											className="inline-flex items-center justify-center min-w-[140px] h-9 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 rounded-md shadow-sm"
-										>
-											Delete JOB
-										</button>
-									)}
+									{isApplier &&
+										resume.jobId &&
+										resume.JD.trim() && (
+											<button
+												onClick={() =>
+													requestDeleteJob(
+														resume.jobId
+													)
+												}
+												className="inline-flex items-center justify-center min-w-[140px] h-9 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 rounded-md shadow-sm"
+											>
+												Delete JOB
+											</button>
+										)}
 
 									<button
 										onClick={() => requestApply(resume._id)}
