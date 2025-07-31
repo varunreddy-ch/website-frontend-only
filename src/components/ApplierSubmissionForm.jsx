@@ -6,7 +6,7 @@ export default function ApplierSubmissionForm() {
 		company_name: "",
 		job_description: "",
 		job_link: "",
-		job_title: "",
+		job_title: "Unknown Title",
 		questions: [""],
 	});
 	const [submitting, setSubmitting] = useState(false);
@@ -75,7 +75,7 @@ export default function ApplierSubmissionForm() {
 				company_name: "",
 				job_description: "",
 				job_link: "",
-				job_title: "",
+				job_title: "Unknown Title",
 				questions: [""],
 			});
 		} catch (err) {
@@ -137,7 +137,7 @@ export default function ApplierSubmissionForm() {
 				/>
 			</div>
 
-			<div className="space-y-2">
+			{/* <div className="space-y-2">
 				<label className="block text-sm font-semibold text-gray-700">
 					Job Title
 				</label>
@@ -149,7 +149,7 @@ export default function ApplierSubmissionForm() {
 					onChange={(e) => handleChange("job_title", e.target.value)}
 					required
 				/>
-			</div>
+			</div> */}
 
 			<div className="space-y-2">
 				<label className="block text-sm font-semibold text-gray-700">
