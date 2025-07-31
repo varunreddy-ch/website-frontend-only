@@ -6,6 +6,7 @@ export default function ApplierSubmissionForm() {
 		company_name: "",
 		job_description: "",
 		job_link: "",
+		job_title: "",
 		questions: [""],
 	});
 	const [submitting, setSubmitting] = useState(false);
@@ -46,10 +47,12 @@ export default function ApplierSubmissionForm() {
 		if (
 			!applierData.company_name.trim() ||
 			!applierData.job_description.trim() ||
-			!applierData.job_link.trim()
+			!applierData.job_link.trim() ||
+			!applierData.job_title.trim()
 		) {
+			console.warn(applierData);
 			setFormError(
-				"Company name, Job description, and Link to apply are required."
+				"Company name, Job description, Job title and Link to apply are required."
 			);
 			setSubmitting(false);
 			return;
@@ -59,6 +62,7 @@ export default function ApplierSubmissionForm() {
 			company_name: applierData.company_name.trim(),
 			job_description: applierData.job_description.trim(),
 			job_link: applierData.job_link.trim(),
+			job_title: applierData.job_title.trim(),
 			questions: applierData.questions
 				.map((q) => q.trim())
 				.filter((q) => q.length > 0),
@@ -71,6 +75,7 @@ export default function ApplierSubmissionForm() {
 				company_name: "",
 				job_description: "",
 				job_link: "",
+				job_title: "",
 				questions: [""],
 			});
 		} catch (err) {
@@ -128,6 +133,20 @@ export default function ApplierSubmissionForm() {
 					onChange={(e) =>
 						handleChange("company_name", e.target.value)
 					}
+					required
+				/>
+			</div>
+
+			<div className="space-y-2">
+				<label className="block text-sm font-semibold text-gray-700">
+					Job Title
+				</label>
+				<input
+					type="text"
+					data-lov-id="job-title"
+					className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+					value={applierData.job_title}
+					onChange={(e) => handleChange("job_title", e.target.value)}
 					required
 				/>
 			</div>

@@ -263,8 +263,9 @@ export default function GeneratedResumes({ userId, fullName }) {
 							<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
 								<div className="min-w-0 flex-1">
 									<p className="text-lg font-semibold text-gray-800">
-										{resume.company_name ||
-											"Untitled Company"}
+										{resume.job_title == "Unknown Title"
+											? resume.company_name
+											: `${resume.job_title} at ${resume.company_name}`}
 									</p>
 									<p className="text-sm text-gray-500">
 										Generated:{" "}
