@@ -182,7 +182,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 				<p className="text-blue-600 text-center">{deleteMessage}</p>
 			)}
 
-			<div className="max-h-[600px] overflow-y-auto px-4">
+			<div className="max-h-[400px] overflow-y-auto px-4">
 				{/* Soft Confirmation Modal */}
 				{pendingApplyResumeId && (
 					<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
