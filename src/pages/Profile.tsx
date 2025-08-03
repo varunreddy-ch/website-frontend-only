@@ -5,18 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import { User, FileText } from "lucide-react";
 import API from "@/api";
+import { DateTime } from "luxon";
 
 function getESTStartDates() {
-	const now = new Date();
-	const estOffset = -4 * 60; // EDT
-	const estNow = new Date(now.getTime() + estOffset * 60000);
-	const startOfToday = new Date(estNow);
-	startOfToday.setHours(0, 0, 0, 0);
-	const startOfWeek = new Date(startOfToday);
-	startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
-	const startOfMonth = new Date(startOfToday);
-	startOfMonth.setDate(1);
-	return { startOfToday, startOfWeek, startOfMonth };
+	const estNow = DateTime.now().setZone("America/New_York");
+	return {
+		startOfToday: estNow.startOf("day"),
+		startOfWeek: estNow.startOf("week"),
+		startOfMonth: estNow.startOf("month"),
+	};
 }
 
 export default function Profile() {
@@ -30,37 +27,47 @@ export default function Profile() {
 	const { id } = useParams();
 	const [generatedResumes, setGeneratedResumes] = useState([]);
 	const [stats, setStats] = useState({ today: 0, thisWeek: 0, thisMonth: 0 });
-
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		async function fetchResumes() {
 			try {
-				setLoading(true); // start loading
+				setLoading(true);
 				const { data } = await API.get(`/profile/${id}`);
-				setUserInfo(data.user || {});
+				setUserInfo(data.user || []);
+
+				const resumes = data.resumes || [];
+
+				// Parse resume.updatedAt with EST zone
+				const parsedResumes = resumes.map((r) => ({
+					...r,
+					updatedAtEST: DateTime.fromISO(r.updatedAt).setZone(
+						"America/New_York"
+					),
+				}));
+
 				setGeneratedResumes(
-					(data.resumes || []).sort(
+					parsedResumes.sort(
 						(a, b) =>
-							new Date(b.createdAt).getTime() -
-							new Date(a.createdAt).getTime()
+							b.updatedAtEST.toMillis() -
+							a.updatedAtEST.toMillis()
 					)
 				);
 
 				const { startOfToday, startOfWeek, startOfMonth } =
 					getESTStartDates();
-				const todayCount =
-					data.resumes?.filter(
-						(r) => new Date(r.createdAt) >= startOfToday
-					).length || 0;
-				const weekCount =
-					data.resumes?.filter(
-						(r) => new Date(r.createdAt) >= startOfWeek
-					).length || 0;
-				const monthCount =
-					data.resumes?.filter(
-						(r) => new Date(r.createdAt) >= startOfMonth
-					).length || 0;
+
+				const todayCount = parsedResumes.filter(
+					(r) => r.updatedAtEST >= startOfToday
+				).length;
+
+				const weekCount = parsedResumes.filter(
+					(r) => r.updatedAtEST >= startOfWeek
+				).length;
+
+				const monthCount = parsedResumes.filter(
+					(r) => r.updatedAtEST >= startOfMonth
+				).length;
 
 				setStats({
 					today: todayCount,
@@ -70,7 +77,7 @@ export default function Profile() {
 			} catch (err) {
 				console.error("Failed to load profile:", err);
 			} finally {
-				setLoading(false); // stop loading
+				setLoading(false);
 			}
 		}
 		fetchResumes();
@@ -108,7 +115,6 @@ export default function Profile() {
 	return (
 		<div className="min-h-screen bg-[#f8f9fc]">
 			<Navbar />
-
 			{loading ? (
 				<div className="flex items-center justify-center h-[80vh]">
 					<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
@@ -116,7 +122,7 @@ export default function Profile() {
 			) : (
 				<div className="max-w-6xl mx-auto p-6 mt-16 space-y-8">
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-						{/* Profile */}
+						{/* Profile Card */}
 						<Card className="col-span-1 shadow-md">
 							<CardContent className="p-6 text-center space-y-4">
 								<div className="mx-auto w-20 h-20 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full flex items-center justify-center">
@@ -196,9 +202,9 @@ export default function Profile() {
 															: `${resume.job_title} at ${resume.company_name}`}
 													</h3>
 													<p className="text-sm text-gray-500">
-														{new Date(
-															resume.createdAt
-														).toLocaleDateString()}
+														{resume.updatedAtEST.toFormat(
+															"MMM d, yyyy"
+														)}
 													</p>
 												</div>
 											</div>

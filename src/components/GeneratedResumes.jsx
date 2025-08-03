@@ -21,21 +21,22 @@ export default function GeneratedResumes({ userId, fullName }) {
 
 	const isApplier = user.role === "applier";
 
-	useEffect(() => {
-		async function fetchResumes() {
-			setResumesLoading(true);
-			try {
-				const res = await API.get(
-					`/get_generated_resumes?user_id=${userId}`
-				);
-				setUserResumes(res.data || []);
-			} catch (err) {
-				console.error("Failed to fetch resumes:", err);
-				setUserResumes([]);
-			} finally {
-				setResumesLoading(false);
-			}
+	const fetchResumes = async () => {
+		setResumesLoading(true);
+		try {
+			const res = await API.get(
+				`/get_generated_resumes?user_id=${userId}`
+			);
+			setUserResumes(res.data || []);
+		} catch (err) {
+			console.error("Failed to fetch resumes:", err);
+			setUserResumes([]);
+		} finally {
+			setResumesLoading(false);
 		}
+	};
+
+	useEffect(() => {
 		if (userId) fetchResumes();
 	}, [userId]);
 
@@ -163,6 +164,16 @@ export default function GeneratedResumes({ userId, fullName }) {
 			<h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
 				💼 TOP JOB PICKS FOR YOU 💼
 			</h2>
+
+			<div className="flex justify-end mb-6 px-4">
+				<button
+					onClick={fetchResumes}
+					disabled={resumesLoading}
+					className="text-sm px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded shadow disabled:opacity-50 ml-4"
+				>
+					{resumesLoading ? "Refreshing..." : "Refresh"}
+				</button>
+			</div>
 
 			{applyError && (
 				<p className="text-center text-sm text-red-600 bg-red-100 py-2 rounded mb-4">
