@@ -11,7 +11,9 @@ const Navbar = () => {
 	const user = getUser();
 
 	const isDashboard = location.pathname === "/dashboard";
-	const isAdmin = location.pathname === "/admin";
+	const isAdmin =
+		location.pathname === "/admin" ||
+		location.pathname === "/admin/dashboard";
 
 	const handleSignOut = () => {
 		logout();
