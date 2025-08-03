@@ -52,19 +52,14 @@ export default function AdminDashboard() {
 				</div>
 			) : (
 				<div className="max-w-6xl mx-auto p-6 mt-16 space-y-8">
-					<Card>
-						<CardHeader>
-							<CardTitle>Manage Users</CardTitle>
-						</CardHeader>
-						<CardContent className="text-center">
-							<button
-								onClick={() => navigate("/admin")}
-								className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-							>
-								Go to User Management
-							</button>
-						</CardContent>
-					</Card>
+					<div className="text-left mb-4 flex justify-end px-4">
+						<button
+							onClick={() => navigate("/admin")}
+							className="px-4 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+						>
+							Go to User Management →
+						</button>
+					</div>
 
 					<Card>
 						<CardHeader>
