@@ -17,6 +17,11 @@ export default function GeneratedResumes({ userId, fullName }) {
 	const [deleteError, setDeleteError] = useState("");
 	const [deleteMessage, setDeleteMessage] = useState("");
 
+	const [pendingExpireJobId, setPendingExpireJobId] = useState("");
+	const [expiringId, setExpiringId] = useState("");
+	const [expireError, setExpireError] = useState("");
+	const [expireMessage, setExpireMessage] = useState("");
+
 	const user = getUser();
 
 	const isApplier = user.role === "applier";
@@ -39,6 +44,16 @@ export default function GeneratedResumes({ userId, fullName }) {
 	useEffect(() => {
 		if (userId) fetchResumes();
 	}, [userId]);
+
+	useEffect(() => {
+		if (expireMessage || expireError) {
+			const timeout = setTimeout(() => {
+				setExpireMessage("");
+				setExpireError("");
+			}, 2500);
+			return () => clearTimeout(timeout);
+		}
+	}, [expireMessage, expireError]);
 
 	useEffect(() => {
 		if (applyMessage || applyError) {
@@ -159,6 +174,32 @@ export default function GeneratedResumes({ userId, fullName }) {
 		}
 	};
 
+	const requestExpireJob = (jobId) => {
+		setPendingExpireJobId(jobId);
+	};
+
+	const cancelExpire = () => setPendingExpireJobId("");
+
+	const confirmExpireJob = async () => {
+		setExpiringId(pendingExpireJobId);
+		setExpireMessage("");
+		setExpireError("");
+
+		try {
+			await API.delete(`/jobs/expire/${pendingExpireJobId}`);
+			setUserResumes((prev) =>
+				prev.filter((r) => r.jobId !== pendingExpireJobId)
+			);
+			setExpireMessage("Job marked as expired.");
+		} catch (err) {
+			console.error("Failed to mark job as expired:", err);
+			setExpireError("Could not mark job as expired. Try again.");
+		} finally {
+			setExpiringId("");
+			setPendingExpireJobId("");
+		}
+	};
+
 	return (
 		<div className="bg-white rounded-xl shadow-md p-6 mt-8">
 			<h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
@@ -184,6 +225,13 @@ export default function GeneratedResumes({ userId, fullName }) {
 				<p className="text-center text-sm text-blue-600 bg-blue-100 py-2 rounded mb-4">
 					{applyMessage}
 				</p>
+			)}
+
+			{expireError && (
+				<p className="text-red-600 text-center">{expireError}</p>
+			)}
+			{expireMessage && (
+				<p className="text-yellow-700 text-center">{expireMessage}</p>
 			)}
 
 			{deleteError && (
@@ -250,6 +298,37 @@ export default function GeneratedResumes({ userId, fullName }) {
 								{deletingId === pendingDeleteJobId
 									? "Deleting..."
 									: "Delete"}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{pendingExpireJobId && (
+				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+					<div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
+						<h3 className="text-lg font-bold text-center">
+							Mark Job as Expired
+						</h3>
+						<p className="text-center">
+							This will mark the job as expired and remove
+							associated resumes. Are you sure?
+						</p>
+						<div className="flex justify-end gap-4">
+							<button
+								onClick={cancelExpire}
+								className="px-4 py-2 rounded border"
+							>
+								Cancel
+							</button>
+							<button
+								onClick={confirmExpireJob}
+								disabled={expiringId === pendingExpireJobId}
+								className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+							>
+								{expiringId === pendingExpireJobId
+									? "Processing..."
+									: "Confirm"}
 							</button>
 						</div>
 					</div>
@@ -351,6 +430,21 @@ export default function GeneratedResumes({ userId, fullName }) {
 											Download JD
 										</button>
 									)}
+
+									{isApplier &&
+										resume.jobId &&
+										resume.JD.trim() && (
+											<button
+												onClick={() =>
+													requestExpireJob(
+														resume.jobId
+													)
+												}
+												className="inline-flex items-center justify-center min-w-[140px] h-9 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 rounded-md shadow-sm"
+											>
+												Mark as Expired
+											</button>
+										)}
 
 									{isApplier &&
 										resume.jobId &&
