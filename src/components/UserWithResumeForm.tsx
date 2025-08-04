@@ -187,7 +187,9 @@ export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 						<option value="SDE">Software Developer</option>
 						<option value="DATA ENGINEER">Data Engineer</option>
 						<option value=".NET">.NET</option>
-						<option value=".NET">default</option>
+						<option value="DevOps">DevOps</option>
+						<option value="DataAnalyst">Data Analyst</option>
+						<option value="default">default</option>
 					</select>
 				</div>
 
