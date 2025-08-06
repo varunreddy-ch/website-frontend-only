@@ -197,7 +197,6 @@ export default function ApplierSubmissionForm() {
 						className="w-full h-[48px] border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
 						value={applierData.salary}
 						onChange={(e) => handleChange("salary", e.target.value)}
-						required
 					/>
 				</div>
 			</div>
