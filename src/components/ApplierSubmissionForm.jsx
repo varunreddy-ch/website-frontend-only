@@ -7,6 +7,7 @@ export default function ApplierSubmissionForm() {
 		job_description: "",
 		job_link: "",
 		job_title: "Unknown Title",
+		salary: "",
 		questions: [""],
 	});
 	const [submitting, setSubmitting] = useState(false);
@@ -63,6 +64,7 @@ export default function ApplierSubmissionForm() {
 			job_description: applierData.job_description.trim(),
 			job_link: applierData.job_link.trim(),
 			job_title: applierData.job_title.trim(),
+			salary: applierData.salary.trim(),
 			questions: applierData.questions
 				.map((q) => q.trim())
 				.filter((q) => q.length > 0),
@@ -76,6 +78,7 @@ export default function ApplierSubmissionForm() {
 				job_description: "",
 				job_link: "",
 				job_title: "Unknown Title",
+				salary: "",
 				questions: [""],
 			});
 		} catch (err) {
@@ -167,18 +170,36 @@ export default function ApplierSubmissionForm() {
 				/>
 			</div>
 
-			<div className="space-y-2">
-				<label className="block text-sm font-semibold text-gray-700">
-					Link to Apply
-				</label>
-				<input
-					type="url"
-					data-lov-id="job-link"
-					className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-					value={applierData.job_link}
-					onChange={(e) => handleChange("job_link", e.target.value)}
-					required
-				/>
+			<div className="flex flex-col md:flex-row md:gap-4 space-y-4 md:space-y-0">
+				<div className="w-full md:w-1/2">
+					<label className="block text-sm font-semibold text-gray-700 mb-1">
+						Link to Apply
+					</label>
+					<input
+						type="url"
+						data-lov-id="job-link"
+						className="w-full h-[48px] border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+						value={applierData.job_link}
+						onChange={(e) =>
+							handleChange("job_link", e.target.value)
+						}
+						required
+					/>
+				</div>
+
+				<div className="w-full md:w-1/2">
+					<label className="block text-sm font-semibold text-gray-700 mb-1">
+						Salary
+					</label>
+					<input
+						type="text"
+						data-lov-id="salary"
+						className="w-full h-[48px] border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+						value={applierData.salary}
+						onChange={(e) => handleChange("salary", e.target.value)}
+						required
+					/>
+				</div>
 			</div>
 
 			<div className="space-y-2">

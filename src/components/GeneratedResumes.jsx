@@ -388,6 +388,14 @@ export default function GeneratedResumes({ userId, fullName }) {
 											</button>
 										</div>
 									)}
+									{resume.salary != "" && (
+										<div className="text-lg font-semibold text-gray-800">
+											<p className="text-lg font-semibold text-gray-800">
+												{`Salary: ${resume.salary}`}
+											</p>
+										</div>
+									)}
+
 									<button
 										onClick={() =>
 											handleCopyJDAndResume(
