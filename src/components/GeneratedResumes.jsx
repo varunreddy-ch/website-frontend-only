@@ -7,6 +7,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 	const [userResumes, setUserResumes] = useState([]);
 	const [resumesLoading, setResumesLoading] = useState(false);
 	const [copiedIndex, setCopiedIndex] = useState(-1);
+
 	const [pendingApplyResumeId, setPendingApplyResumeId] = useState("");
 	const [applyMessage, setApplyMessage] = useState("");
 	const [applyError, setApplyError] = useState("");
@@ -22,8 +23,15 @@ export default function GeneratedResumes({ userId, fullName }) {
 	const [expireError, setExpireError] = useState("");
 	const [expireMessage, setExpireMessage] = useState("");
 
-	const user = getUser();
+	// NEW: reporting state
+	const [pendingReportJobId, setPendingReportJobId] = useState("");
+	const [reportingId, setReportingId] = useState("");
+	const [reportMessage, setReportMessage] = useState("");
+	const [reportError, setReportError] = useState("");
+	const [reportReason, setReportReason] = useState("");
+	const REPORT_MAX = 500;
 
+	const user = getUser();
 	const isApplier = user.role === "applier";
 
 	const fetchResumes = async () => {
@@ -65,6 +73,17 @@ export default function GeneratedResumes({ userId, fullName }) {
 		}
 	}, [applyMessage, applyError]);
 
+	// NEW: auto-clear report messages
+	useEffect(() => {
+		if (reportMessage || reportError) {
+			const t = setTimeout(() => {
+				setReportMessage("");
+				setReportError("");
+			}, 2500);
+			return () => clearTimeout(t);
+		}
+	}, [reportMessage, reportError]);
+
 	const handleDownloadJD = (jd, companyName) => {
 		const a = document.createElement("a");
 		const file = new Blob([jd], { type: "text/plain" });
@@ -75,7 +94,6 @@ export default function GeneratedResumes({ userId, fullName }) {
 		document.body.removeChild(a);
 	};
 
-	// Clear messages after a short time
 	useEffect(() => {
 		if (deleteMessage || deleteError) {
 			const t = setTimeout(() => {
@@ -115,19 +133,14 @@ export default function GeneratedResumes({ userId, fullName }) {
 
 	const cancelApply = () => setPendingApplyResumeId("");
 
-	// Trigger the confirmation modal
-	const requestDeleteJob = (jobId) => {
-		setPendingDeleteJobId(jobId);
-	};
+	const requestDeleteJob = (jobId) => setPendingDeleteJobId(jobId);
 
-	// On confirm, call backend and prune list
 	const confirmDeleteJob = async () => {
 		setDeletingId(pendingDeleteJobId);
 		setDeleteError("");
 		setDeleteMessage("");
 		try {
 			await API.delete(`/jobs/${pendingDeleteJobId}`);
-			// Remove all resumes for this job
 			setUserResumes((prev) =>
 				prev.filter((r) => r.jobId !== pendingDeleteJobId)
 			);
@@ -174,10 +187,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 		}
 	};
 
-	const requestExpireJob = (jobId) => {
-		setPendingExpireJobId(jobId);
-	};
-
+	const requestExpire = (jobId) => setPendingExpireJobId(jobId);
 	const cancelExpire = () => setPendingExpireJobId("");
 
 	const confirmExpireJob = async () => {
@@ -200,6 +210,53 @@ export default function GeneratedResumes({ userId, fullName }) {
 		}
 	};
 
+	// ====== REPORT JOB ======
+	const requestReport = (jobId) => {
+		setPendingReportJobId(jobId);
+		setReportReason(""); // clear previous input
+	};
+	const cancelReport = () => {
+		setPendingReportJobId("");
+		setReportReason("");
+	};
+
+	const confirmReportJob = async () => {
+		if (!reportReason.trim()) {
+			setReportError("Please provide a brief reason for reporting.");
+			return;
+		}
+		if (reportReason.length > REPORT_MAX) {
+			setReportError(`Report is too long (max ${REPORT_MAX} chars).`);
+			return;
+		}
+
+		setReportingId(pendingReportJobId);
+		setReportMessage("");
+		setReportError("");
+
+		try {
+			// Adjust endpoint if your server differs (e.g. /admin/jobs/:id/report)
+			await API.patch(
+				`/jobs/report/${pendingReportJobId}`,
+				{ reason: reportReason.trim() },
+				{ headers: { "Content-Type": "application/json" } }
+			);
+
+			// Optimistic: remove the job’s resumes from this list
+			setUserResumes((prev) =>
+				prev.filter((r) => r.jobId !== pendingReportJobId)
+			);
+			setReportMessage("Thanks! Job has been reported for review.");
+		} catch (err) {
+			console.error("Failed to report job:", err);
+			setReportError("Could not report job. Please try again.");
+		} finally {
+			setReportingId("");
+			setPendingReportJobId("");
+			setReportReason("");
+		}
+	};
+
 	return (
 		<div className="bg-white rounded-xl shadow-md p-6 mt-8">
 			<h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
@@ -216,6 +273,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 				</button>
 			</div>
 
+			{/* Messages */}
 			{applyError && (
 				<p className="text-center text-sm text-red-600 bg-red-100 py-2 rounded mb-4">
 					{applyError}
@@ -226,22 +284,27 @@ export default function GeneratedResumes({ userId, fullName }) {
 					{applyMessage}
 				</p>
 			)}
-
 			{expireError && (
 				<p className="text-red-600 text-center">{expireError}</p>
 			)}
 			{expireMessage && (
 				<p className="text-yellow-700 text-center">{expireMessage}</p>
 			)}
-
 			{deleteError && (
 				<p className="text-red-600 text-center">{deleteError}</p>
 			)}
 			{deleteMessage && (
 				<p className="text-blue-600 text-center">{deleteMessage}</p>
 			)}
+			{/* NEW report messages */}
+			{reportError && (
+				<p className="text-red-600 text-center">{reportError}</p>
+			)}
+			{reportMessage && (
+				<p className="text-green-700 text-center">{reportMessage}</p>
+			)}
 
-			{/* Soft Confirmation Modal */}
+			{/* Apply modal */}
 			{pendingApplyResumeId && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 					<div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
@@ -254,7 +317,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 						</p>
 						<div className="flex justify-end gap-4">
 							<button
-								onClick={cancelApply}
+								onClick={() => setPendingApplyResumeId("")}
 								className="px-4 py-2 rounded border text-gray-700 hover:bg-gray-100"
 							>
 								Cancel
@@ -273,6 +336,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 				</div>
 			)}
 
+			{/* Delete modal */}
 			{pendingDeleteJobId && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 					<div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
@@ -285,7 +349,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 						</p>
 						<div className="flex justify-end gap-4">
 							<button
-								onClick={cancelDelete}
+								onClick={() => setPendingDeleteJobId("")}
 								className="px-4 py-2 rounded border"
 							>
 								Cancel
@@ -304,6 +368,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 				</div>
 			)}
 
+			{/* Expire modal */}
 			{pendingExpireJobId && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 					<div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
@@ -329,6 +394,63 @@ export default function GeneratedResumes({ userId, fullName }) {
 								{expiringId === pendingExpireJobId
 									? "Processing..."
 									: "Confirm"}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Report modal */}
+			{pendingReportJobId && (
+				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+					<div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
+						<h3 className="text-lg font-bold text-center">
+							Report this Job
+						</h3>
+						<p className="text-center text-gray-600">
+							Tell us what’s wrong so the admins can review it
+							quickly.
+						</p>
+
+						<div>
+							<label
+								htmlFor="report-reason"
+								className="block text-sm font-medium text-gray-700 mb-1"
+							>
+								Reason (required)
+							</label>
+							<textarea
+								id="report-reason"
+								value={reportReason}
+								onChange={(e) =>
+									setReportReason(
+										e.target.value.slice(0, REPORT_MAX)
+									)
+								}
+								rows={4}
+								placeholder="e.g. Broken link, duplicate posting, misleading description, scam, etc."
+								className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+							/>
+							<div className="mt-1 text-xs text-gray-500 text-right">
+								{reportReason.length}/{REPORT_MAX}
+							</div>
+						</div>
+
+						<div className="flex justify-end gap-3">
+							<button
+								onClick={cancelReport}
+								className="px-4 py-2 rounded border"
+							>
+								Cancel
+							</button>
+							<button
+								onClick={confirmReportJob}
+								disabled={reportingId === pendingReportJobId}
+								className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+							>
+								{reportingId === pendingReportJobId
+									? "Reporting..."
+									: "Submit Report"}
 							</button>
 						</div>
 					</div>
@@ -390,9 +512,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 									)}
 									{resume.salary != "" && (
 										<div className="text-lg font-semibold text-gray-800">
-											<p className="text-lg font-semibold text-gray-800">
-												{`Salary: ${resume.salary}`}
-											</p>
+											<p className="text-lg font-semibold text-gray-800">{`Salary: ${resume.salary}`}</p>
 										</div>
 									)}
 
@@ -439,14 +559,30 @@ export default function GeneratedResumes({ userId, fullName }) {
 										</button>
 									)}
 
+									{/* Report Job — available to all users */}
+									{resume.jobId && (
+										<button
+											onClick={() =>
+												requestReport(resume.jobId)
+											}
+											disabled={
+												reportingId === resume.jobId
+											}
+											className="inline-flex items-center justify-center min-w-[140px] h-9 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 rounded-md shadow-sm disabled:opacity-50"
+										>
+											{reportingId === resume.jobId
+												? "Reporting..."
+												: "Report Job"}
+										</button>
+									)}
+
+									{/* Applier tools */}
 									{isApplier &&
 										resume.jobId &&
 										resume.JD.trim() && (
 											<button
 												onClick={() =>
-													requestExpireJob(
-														resume.jobId
-													)
+													requestExpire(resume.jobId)
 												}
 												className="inline-flex items-center justify-center min-w-[140px] h-9 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 rounded-md shadow-sm"
 											>
@@ -484,6 +620,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 									</button>
 								</div>
 							</div>
+
 							{resume.JD && (
 								<details className="mt-3">
 									<summary className="cursor-pointer text-sm font-medium text-gray-700">

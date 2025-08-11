@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Navbar from "@/components/Navbar";
+import AdminNavbar from "@/components/AdminNavbar.tsx";
 import API from "@/api";
 import { useNavigate } from "react-router-dom";
 
@@ -44,7 +44,7 @@ export default function AdminDashboard() {
 
 	return (
 		<div className="min-h-screen bg-[#f8f9fc]">
-			<Navbar />
+			<AdminNavbar />
 
 			{loading ? (
 				<div className="flex items-center justify-center h-[80vh]">
