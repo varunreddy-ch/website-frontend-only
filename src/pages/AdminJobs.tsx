@@ -67,16 +67,23 @@ const AdminJobs = () => {
 		setActionId(id);
 		const prev = jobs;
 		setJobs((j) => j.filter((x) => x._id !== id)); // optimistic
+
 		try {
-			// If your admin endpoints are under /admin, switch to `/admin/jobs/${id}/${action}`
-			await API.patch(
-				`/jobs/${id}/${action}`,
-				{},
-				{
+			if (action === "expire") {
+				await API.delete(`/jobs/expire/${id}`, {
 					headers: { Accept: "application/json" },
 					withCredentials: true,
-				}
-			);
+				});
+			} else {
+				await API.patch(
+					`/jobs/verify/${id}`,
+					{},
+					{
+						headers: { Accept: "application/json" },
+						withCredentials: true,
+					}
+				);
+			}
 		} catch (e: any) {
 			const msg =
 				e?.response?.data?.message ||
