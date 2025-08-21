@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 import Spinner, { spinnerCSS } from "../components/Spinner";
-import { Mail, Heart } from "lucide-react";
+import { Mail, Heart, Copy } from "lucide-react";
 import { getAPIErrorMessage } from "../utils/apiErrors";
 
 // Configure PDF.js worker
@@ -26,6 +26,8 @@ export default function Dashboard() {
 
 	const [companyName, setCompanyName] = useState("");
 	const [showCompanyModal, setShowCompanyModal] = useState(false);
+
+	const [copyMessage, setCopyMessage] = useState("");
 
 	const user = getUser();
 	const navigate = useNavigate();
@@ -48,6 +50,33 @@ export default function Dashboard() {
 		document.body.appendChild(element);
 		element.click();
 		document.body.removeChild(element);
+	};
+
+	const handleCopyJDAndResume = async () => {
+		if (!jobDesc.trim() && !generatedResume.trim()) {
+			setCopyMessage("Nothing to copy.");
+			return;
+		}
+
+		let contentToCopy = `Job Description for ${
+			companyName || "Company"
+		}:\n\n${jobDesc || "N/A"}\n\n`;
+
+		if (generatedResume.trim()) {
+			contentToCopy += `--- Resume ---\n${generatedResume}`;
+		}
+
+		try {
+			await navigator.clipboard.writeText(contentToCopy);
+			setCopyMessage("JD and resume copied to clipboard!");
+			// Clear the message after 2.5 seconds
+			setTimeout(() => setCopyMessage(""), 2500);
+		} catch (err) {
+			console.error("Copy failed:", err);
+			setCopyMessage("Failed to copy to clipboard.");
+			// Clear the error message after 2.5 seconds
+			setTimeout(() => setCopyMessage(""), 2500);
+		}
 	};
 
 	const handleGenerate = async () => {
@@ -179,6 +208,19 @@ export default function Dashboard() {
 
 							<PDFPreview pdfUrl={pdfBlob} />
 
+							{/* Copy Message */}
+							{copyMessage && (
+								<div
+									className={`text-center px-4 py-2 rounded text-sm ${
+										copyMessage.includes("Failed")
+											? "text-red-600 bg-red-50 border border-red-200"
+											: "text-blue-600 bg-blue-50 border border-blue-200"
+									}`}
+								>
+									{copyMessage}
+								</div>
+							)}
+
 							<div className="flex flex-col sm:flex-row justify-center gap-4">
 								<a
 									href={pdfBlob}
@@ -195,6 +237,13 @@ export default function Dashboard() {
 									className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-md"
 								>
 									📋 Download Job Description
+								</button>
+								<button
+									onClick={handleCopyJDAndResume}
+									className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-md flex items-center justify-center gap-2"
+								>
+									<Copy className="h-4 w-4" />
+									Copy JD+Resume
 								</button>
 							</div>
 						</div>
