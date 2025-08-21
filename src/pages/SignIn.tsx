@@ -40,8 +40,18 @@ export default function SignIn() {
 		try {
 			const res = await API.post("/login", form);
 			setToken(res.data.token);
-			const role = getUser()?.role;
-			navigate(role === "admin" ? "/admin" : "/dashboard");
+			const user = getUser();
+			const role = user?.role;
+
+			// Redirect based on user tier
+			if (role === "admin") {
+				navigate("/admin");
+			} else if (role === "tier2") {
+				navigate("/jobs");
+			} else {
+				// tier1 and user roles go to dashboard (generate page)
+				navigate("/dashboard");
+			}
 		} catch (err) {
 			setError("Invalid username or password.");
 		} finally {

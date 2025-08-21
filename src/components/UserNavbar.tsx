@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Menu, X, FileText, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 const UserNavbar = () => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -57,22 +58,36 @@ const UserNavbar = () => {
 								Generate
 							</Button>
 						</Link>
-						<Link to="/jobs">
+						{user?.role === "tier2" && (
+							<Link to="/jobs">
+								<Button
+									variant={
+										location.pathname === "/jobs"
+											? "default"
+											: "ghost"
+									}
+									className={`transition-colors duration-200 font-medium text-sm ${
+										location.pathname === "/jobs"
+											? "bg-blue-600 text-white hover:bg-blue-700"
+											: "text-gray-700 hover:text-blue-600"
+									}`}
+								>
+									Jobs
+								</Button>
+							</Link>
+						)}
+						{(user?.role === "tier1" || user?.role === "user") && (
 							<Button
-								variant={
-									location.pathname === "/jobs"
-										? "default"
-										: "ghost"
-								}
-								className={`transition-colors duration-200 font-medium text-sm ${
-									location.pathname === "/jobs"
-										? "bg-blue-600 text-white hover:bg-blue-700"
-										: "text-gray-700 hover:text-blue-600"
-								}`}
+								variant="ghost"
+								className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm relative group"
+								onClick={() => navigate("/jobs")}
 							>
 								Jobs
+								<Badge className="ml-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs px-2 py-0.5">
+									Premium
+								</Badge>
 							</Button>
-						</Link>
+						)}
 						{user?.role === "applier" && (
 							<Link to="/applier-form">
 								<Button
@@ -91,22 +106,36 @@ const UserNavbar = () => {
 								</Button>
 							</Link>
 						)}
-						<Link to={getProfileLink()}>
+						{user?.role === "tier2" && (
+							<Link to={getProfileLink()}>
+								<Button
+									variant={
+										location.pathname.startsWith("/profile")
+											? "default"
+											: "ghost"
+									}
+									className={`transition-colors duration-200 font-medium text-sm ${
+										location.pathname.startsWith("/profile")
+											? "bg-blue-600 text-white hover:bg-blue-700"
+											: "text-gray-700 hover:text-blue-600"
+									}`}
+								>
+									Profile
+								</Button>
+							</Link>
+						)}
+						{(user?.role === "tier1" || user?.role === "user") && (
 							<Button
-								variant={
-									location.pathname.startsWith("/profile")
-										? "default"
-										: "ghost"
-								}
-								className={`transition-colors duration-200 font-medium text-sm ${
-									location.pathname.startsWith("/profile")
-										? "bg-blue-600 text-white hover:bg-blue-700"
-										: "text-gray-700 hover:text-blue-600"
-								}`}
+								variant="ghost"
+								className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm relative group"
+								onClick={() => navigate(getProfileLink())}
 							>
 								Profile
+								<Badge className="ml-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs px-2 py-0.5">
+									Premium
+								</Badge>
 							</Button>
-						</Link>
+						)}
 					</div>
 
 					{/* Desktop User Section */}
@@ -162,23 +191,41 @@ const UserNavbar = () => {
 									Generate
 								</Button>
 							</Link>
-							<Link to="/jobs">
+							{user?.role === "tier2" && (
+								<Link to="/jobs">
+									<Button
+										variant={
+											location.pathname === "/jobs"
+												? "default"
+												: "ghost"
+										}
+										className={`transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
+											location.pathname === "/jobs"
+												? "bg-blue-600 text-white hover:bg-blue-700"
+												: "text-gray-700 hover:text-blue-600"
+										}`}
+										onClick={() => setIsMenuOpen(false)}
+									>
+										Jobs
+									</Button>
+								</Link>
+							)}
+							{(user?.role === "tier1" ||
+								user?.role === "user") && (
 								<Button
-									variant={
-										location.pathname === "/jobs"
-											? "default"
-											: "ghost"
-									}
-									className={`transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
-										location.pathname === "/jobs"
-											? "bg-blue-600 text-white hover:bg-blue-700"
-											: "text-gray-700 hover:text-blue-600"
-									}`}
-									onClick={() => setIsMenuOpen(false)}
+									variant="ghost"
+									className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm relative group"
+									onClick={() => {
+										navigate("/jobs");
+										setIsMenuOpen(false);
+									}}
 								>
 									Jobs
+									<Badge className="ml-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs px-2 py-0.5">
+										Premium
+									</Badge>
 								</Button>
-							</Link>
+							)}
 							{user?.role === "applier" && (
 								<Link to="/applier-form">
 									<Button
@@ -200,23 +247,45 @@ const UserNavbar = () => {
 									</Button>
 								</Link>
 							)}
-							<Link to={getProfileLink()}>
+							{user?.role === "tier2" && (
+								<Link to={getProfileLink()}>
+									<Button
+										variant={
+											location.pathname.startsWith(
+												"/profile"
+											)
+												? "default"
+												: "ghost"
+										}
+										className={`transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
+											location.pathname.startsWith(
+												"/profile"
+											)
+												? "bg-blue-600 text-white hover:bg-blue-700"
+												: "text-gray-700 hover:text-blue-600"
+										}`}
+										onClick={() => setIsMenuOpen(false)}
+									>
+										Profile
+									</Button>
+								</Link>
+							)}
+							{(user?.role === "tier1" ||
+								user?.role === "user") && (
 								<Button
-									variant={
-										location.pathname.startsWith("/profile")
-											? "default"
-											: "ghost"
-									}
-									className={`transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
-										location.pathname.startsWith("/profile")
-											? "bg-blue-600 text-white hover:bg-blue-700"
-											: "text-gray-700 hover:text-blue-600"
-									}`}
-									onClick={() => setIsMenuOpen(false)}
+									variant="ghost"
+									className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm relative group"
+									onClick={() => {
+										navigate(getProfileLink());
+										setIsMenuOpen(false);
+									}}
 								>
 									Profile
+									<Badge className="ml-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs px-2 py-0.5">
+										Premium
+									</Badge>
 								</Button>
-							</Link>
+							)}
 
 							<div className="pt-4 border-t border-gray-100 space-y-3">
 								<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">

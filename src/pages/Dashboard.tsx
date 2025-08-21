@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 import Spinner, { spinnerCSS } from "../components/Spinner";
-import { Mail, Heart, Copy } from "lucide-react";
+import { Mail, Heart, Copy, Star } from "lucide-react";
 import { getAPIErrorMessage } from "../utils/apiErrors";
 
 // Configure PDF.js worker
@@ -35,7 +35,11 @@ export default function Dashboard() {
 	useEffect(() => {
 		if (!user) {
 			navigate("/signin");
+			return;
 		}
+
+		// All users (tier1, tier2, user) can access dashboard for resume generation
+		// No additional checks needed here
 	}, [user, navigate]);
 
 	const fullName = user.firstname
@@ -160,6 +164,21 @@ export default function Dashboard() {
 							Paste a job description and get a tailored resume in
 							seconds
 						</p>
+
+						{/* Premium features note for tier1 users */}
+						{(user?.role === "tier1" || user?.role === "user") && (
+							<div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg max-w-md mx-auto">
+								<div className="flex items-center gap-2 text-yellow-800">
+									<Star className="w-5 h-5 text-yellow-600" />
+									<span className="font-medium">
+										Premium Features Available
+									</span>
+								</div>
+								<p className="text-sm text-yellow-700 mt-1">
+									Upgrade to access Jobs and Profile Analytics
+								</p>
+							</div>
+						)}
 					</div>
 
 					{/* Job Description Section */}

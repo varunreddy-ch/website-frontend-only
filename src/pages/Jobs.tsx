@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import GeneratedResumes from "@/components/GeneratedResumes";
+import PremiumUpgrade from "@/components/PremiumUpgrade";
 import { getUser } from "@/auth";
 import { Briefcase, CheckCircle, RefreshCw } from "lucide-react";
 import API from "@/api";
@@ -28,7 +29,11 @@ export default function Jobs() {
 			return;
 		}
 		setUser(currentUser);
-		fetchJobStats();
+
+		// Only fetch job stats for tier2 users
+		if (currentUser.role === "tier2") {
+			fetchJobStats();
+		}
 	}, []);
 
 	const fetchJobStats = async () => {
@@ -109,6 +114,21 @@ export default function Jobs() {
 
 	if (!currentUser) {
 		return null;
+	}
+
+	// If user is tier1 or regular user, show premium upgrade
+	if (
+		currentUser &&
+		(currentUser.role === "tier1" || currentUser.role === "user")
+	) {
+		return (
+			<div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+				<Navbar />
+				<div className="pt-16">
+					<PremiumUpgrade feature="jobs" />
+				</div>
+			</div>
+		);
 	}
 
 	return (

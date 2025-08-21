@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import API from "../api";
 import { getUser } from "../auth";
 import { extractTextFromPdfBase64 } from "../utils/pdfUtils";
@@ -49,6 +49,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 	const [reportError, setReportError] = useState("");
 	const [reportReason, setReportReason] = useState("");
 	const REPORT_MAX = 500;
+	const reportTextareaRef = useRef(null);
 
 	const user = getUser();
 	const isApplier = user.role === "applier";
@@ -106,7 +107,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 			const t = setTimeout(() => {
 				setReportMessage("");
 				setReportError("");
-			}, 2500);
+			}, 5000); // Increased timeout to reduce re-renders
 			return () => clearTimeout(t);
 		}
 	}, [reportMessage, reportError]);
@@ -245,6 +246,12 @@ export default function GeneratedResumes({ userId, fullName }) {
 	const requestReport = (jobId) => {
 		setPendingReportJobId(jobId);
 		setReportReason(""); // clear previous input
+		// Focus the textarea after the modal opens
+		setTimeout(() => {
+			if (reportTextareaRef.current) {
+				reportTextareaRef.current.focus();
+			}
+		}, 100);
 	};
 	const cancelReport = () => {
 		setPendingReportJobId("");
@@ -513,57 +520,69 @@ export default function GeneratedResumes({ userId, fullName }) {
 				</Modal>
 
 				{/* Report Modal */}
-				<Modal
-					isOpen={!!pendingReportJobId}
-					onClose={cancelReport}
-					title="Report this Job"
-					icon={AlertTriangle}
-					iconColor="text-red-500"
-				>
-					<p className="text-gray-600 text-center mb-6">
-						Tell us what's wrong so the admins can review it
-						quickly.
-					</p>
-					<div className="space-y-4">
-						<div>
-							<label
-								htmlFor="report-reason"
-								className="block text-sm font-medium text-gray-700 mb-2"
-							>
-								Reason (required)
-							</label>
-							<textarea
-								id="report-reason"
-								value={reportReason}
-								onChange={(e) =>
-									setReportReason(
-										e.target.value.slice(0, REPORT_MAX)
-									)
-								}
-								rows={4}
-								placeholder="e.g. Broken link, duplicate posting, misleading description, scam, etc."
-								className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-							/>
-							<div className="mt-2 text-xs text-gray-500 text-right">
-								{reportReason.length}/{REPORT_MAX}
+				{!!pendingReportJobId && (
+					<div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+						<div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
+							<div className="p-8 space-y-6">
+								<div className="text-center">
+									<AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+									<h3 className="text-2xl font-bold text-gray-900 mb-2">
+										Report this Job
+									</h3>
+								</div>
+								<p className="text-gray-600 text-center mb-6">
+									Tell us what's wrong so the admins can
+									review it quickly.
+								</p>
+								<div className="space-y-4">
+									<div>
+										<label
+											htmlFor="report-reason"
+											className="block text-sm font-medium text-gray-700 mb-2"
+										>
+											Reason (required)
+										</label>
+										<textarea
+											ref={reportTextareaRef}
+											id="report-reason"
+											value={reportReason}
+											onChange={(e) =>
+												setReportReason(e.target.value)
+											}
+											maxLength={REPORT_MAX}
+											rows={4}
+											placeholder="e.g. Broken link, duplicate posting, misleading description, scam, etc."
+											className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+										/>
+										<div className="mt-2 text-xs text-gray-500 text-right">
+											{reportReason.length}/{REPORT_MAX}
+										</div>
+									</div>
+									<div className="flex justify-end gap-3">
+										<Button
+											variant="secondary"
+											onClick={cancelReport}
+										>
+											Cancel
+										</Button>
+										<Button
+											variant="danger"
+											onClick={confirmReportJob}
+											disabled={
+												reportingId ===
+												pendingReportJobId
+											}
+										>
+											{reportingId === pendingReportJobId
+												? "Reporting..."
+												: "Submit Report"}
+										</Button>
+									</div>
+								</div>
 							</div>
 						</div>
-						<div className="flex justify-end gap-3">
-							<Button variant="secondary" onClick={cancelReport}>
-								Cancel
-							</Button>
-							<Button
-								variant="danger"
-								onClick={confirmReportJob}
-								disabled={reportingId === pendingReportJobId}
-							>
-								{reportingId === pendingReportJobId
-									? "Reporting..."
-									: "Submit Report"}
-							</Button>
-						</div>
 					</div>
-				</Modal>
+				)}
 
 				{/* Content */}
 				{resumesLoading ? (
