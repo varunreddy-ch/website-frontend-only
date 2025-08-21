@@ -9,7 +9,7 @@ import {
 	MessageSquare,
 } from "lucide-react";
 import API from "@/api";
-import AdminNavbar from "@/components/AdminNavbar";
+import Navbar from "@/components/Navbar";
 
 type ReportNote = {
 	reason: string;
@@ -99,7 +99,7 @@ const AdminJobs = () => {
 
 	return (
 		<div className="min-h-screen bg-[#f8f9fc]">
-			<AdminNavbar />
+			<Navbar />
 			<div className="p-6 mt-16">
 				<div className="mb-6 flex items-center justify-between">
 					<h2 className="text-xl font-semibold">Reported Jobs</h2>

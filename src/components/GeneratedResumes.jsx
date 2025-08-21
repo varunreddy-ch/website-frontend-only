@@ -2,8 +2,27 @@ import { useState, useEffect } from "react";
 import API from "../api";
 import { getUser } from "../auth";
 import { extractTextFromPdfBase64 } from "../utils/pdfUtils";
+import {
+	Download,
+	Copy,
+	FileText,
+	Building,
+	Calendar,
+	ExternalLink,
+	AlertTriangle,
+	CheckCircle,
+	Clock,
+	Briefcase,
+	MapPin,
+	DollarSign,
+	Eye,
+	EyeOff,
+} from "lucide-react";
 
 export default function GeneratedResumes({ userId, fullName }) {
+	// Use fullName if available, otherwise use empty string for company-only naming
+	const safeFullName = fullName || "";
+
 	const [userResumes, setUserResumes] = useState([]);
 	const [resumesLoading, setResumesLoading] = useState(false);
 	const [copiedIndex, setCopiedIndex] = useState(-1);
@@ -34,12 +53,20 @@ export default function GeneratedResumes({ userId, fullName }) {
 	const user = getUser();
 	const isApplier = user.role === "applier";
 
+	// Use userId prop if provided, otherwise use authenticated user
+	const effectiveUserId = userId || user?.user;
+
 	const fetchResumes = async () => {
 		setResumesLoading(true);
 		try {
-			const res = await API.get(
-				`/get_generated_resumes?user_id=${userId}`
-			);
+			// If userId is provided, use the old endpoint, otherwise use the new private endpoint
+			let res;
+			if (userId) {
+				res = await API.get(`/get_generated_resumes?user_id=${userId}`);
+			} else {
+				// Use the new endpoint for authenticated users that returns full resume data
+				res = await API.get("/user-generated-resumes");
+			}
 			setUserResumes(res.data || []);
 		} catch (err) {
 			console.error("Failed to fetch resumes:", err);
@@ -50,8 +77,8 @@ export default function GeneratedResumes({ userId, fullName }) {
 	};
 
 	useEffect(() => {
-		if (userId) fetchResumes();
-	}, [userId]);
+		if (effectiveUserId) fetchResumes();
+	}, [effectiveUserId]);
 
 	useEffect(() => {
 		if (expireMessage || expireError) {
@@ -88,7 +115,11 @@ export default function GeneratedResumes({ userId, fullName }) {
 		const a = document.createElement("a");
 		const file = new Blob([jd], { type: "text/plain" });
 		a.href = URL.createObjectURL(file);
-		a.download = `${fullName}_${companyName || "JobDesc"}_JD.txt`;
+		// If fullName is available, use it; otherwise just use company name
+		const fileName = safeFullName
+			? `${safeFullName}_${companyName || "JobDesc"}_JD.txt`
+			: `${companyName || "JobDesc"}_JD.txt`;
+		a.download = fileName;
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
@@ -171,7 +202,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 			companyName || "Company"
 		}:\n\n${jd || "N/A"}\n\n`;
 
-		contentToCopy += `You are simulating a job application assistant. For each question, generate a response written in the first person, as if the candidate is filling out a job application form. Each answer should be concise, approximately 100 words, and must be based only on the candidate’s resume and the job description
+		contentToCopy += `You are simulating a job application assistant. For each question, generate a response written in the first person, as if the candidate is filling out a job application form. Each answer should be concise, approximately 100 words, and must be based only on the candidate's resume and the job description
 				Here is the resume text:\n\n`;
 
 		if (resumeText) {
@@ -242,7 +273,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 				{ headers: { "Content-Type": "application/json" } }
 			);
 
-			// Optimistic: remove the job’s resumes from this list
+			// Optimistic: remove the job's resumes from this list
 			setUserResumes((prev) =>
 				prev.filter((r) => r.jobId !== pendingReportJobId)
 			);
@@ -257,165 +288,247 @@ export default function GeneratedResumes({ userId, fullName }) {
 		}
 	};
 
-	return (
-		<div className="bg-white rounded-xl shadow-md p-6 mt-8">
-			<h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
-				💼 TOP JOB PICKS FOR YOU 💼
-			</h2>
+	// Message component for consistent styling
+	const MessageBanner = ({ type, message, onClose }) => {
+		const styles = {
+			success: "bg-emerald-50 border-emerald-200 text-emerald-800",
+			error: "bg-red-50 border-red-200 text-red-800",
+			warning: "bg-amber-50 border-amber-200 text-amber-800",
+			info: "bg-blue-50 border-blue-200 text-blue-800",
+		};
 
-			<div className="flex justify-end mb-6 px-4">
-				<button
-					onClick={fetchResumes}
-					disabled={resumesLoading}
-					className="text-sm px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded shadow disabled:opacity-50 ml-4"
-				>
-					{resumesLoading ? "Refreshing..." : "Refresh"}
-				</button>
+		return (
+			<div
+				className={`mb-6 p-4 border rounded-xl flex items-center justify-between ${styles[type]}`}
+			>
+				<p className="text-sm font-medium">{message}</p>
+				{onClose && (
+					<button
+						onClick={onClose}
+						className="ml-4 text-current hover:opacity-70 transition-opacity"
+					>
+						×
+					</button>
+				)}
 			</div>
+		);
+	};
 
-			{/* Messages */}
-			{applyError && (
-				<p className="text-center text-sm text-red-600 bg-red-100 py-2 rounded mb-4">
-					{applyError}
-				</p>
-			)}
-			{applyMessage && (
-				<p className="text-center text-sm text-blue-600 bg-blue-100 py-2 rounded mb-4">
-					{applyMessage}
-				</p>
-			)}
-			{expireError && (
-				<p className="text-red-600 text-center">{expireError}</p>
-			)}
-			{expireMessage && (
-				<p className="text-yellow-700 text-center">{expireMessage}</p>
-			)}
-			{deleteError && (
-				<p className="text-red-600 text-center">{deleteError}</p>
-			)}
-			{deleteMessage && (
-				<p className="text-blue-600 text-center">{deleteMessage}</p>
-			)}
-			{/* NEW report messages */}
-			{reportError && (
-				<p className="text-red-600 text-center">{reportError}</p>
-			)}
-			{reportMessage && (
-				<p className="text-green-700 text-center">{reportMessage}</p>
-			)}
+	// Modal component for consistent styling
+	const Modal = ({
+		isOpen,
+		onClose,
+		children,
+		title,
+		icon: Icon,
+		iconColor = "text-blue-500",
+	}) => {
+		if (!isOpen) return null;
 
-			{/* Apply modal */}
-			{pendingApplyResumeId && (
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-					<div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
-						<h3 className="text-lg font-bold text-center text-gray-800">
-							Confirm Apply
-						</h3>
-						<p className="text-center text-gray-600">
-							Are you sure you want to mark this resume as
-							applied? It will no longer appear on your dashboard.
-						</p>
-						<div className="flex justify-end gap-4">
-							<button
-								onClick={() => setPendingApplyResumeId("")}
-								className="px-4 py-2 rounded border text-gray-700 hover:bg-gray-100"
-							>
-								Cancel
-							</button>
-							<button
-								onClick={confirmApply}
-								disabled={applyingId === pendingApplyResumeId}
-								className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-							>
-								{applyingId === pendingApplyResumeId
-									? "Applying..."
-									: "Confirm"}
-							</button>
+		return (
+			<div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+				<div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
+					<div className="p-8 space-y-6">
+						<div className="text-center">
+							{Icon && (
+								<Icon
+									className={`h-16 w-16 ${iconColor} mx-auto mb-4`}
+								/>
+							)}
+							<h3 className="text-2xl font-bold text-gray-900 mb-2">
+								{title}
+							</h3>
 						</div>
+						{children}
 					</div>
 				</div>
-			)}
+			</div>
+		);
+	};
 
-			{/* Delete modal */}
-			{pendingDeleteJobId && (
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-					<div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
-						<h3 className="text-lg font-bold text-center">
-							Confirm Delete
-						</h3>
-						<p className="text-center">
-							This will delete the job and <strong>all</strong>{" "}
-							associated resumes. Are you sure?
-						</p>
-						<div className="flex justify-end gap-4">
-							<button
-								onClick={() => setPendingDeleteJobId("")}
-								className="px-4 py-2 rounded border"
-							>
-								Cancel
-							</button>
-							<button
-								onClick={confirmDeleteJob}
-								disabled={deletingId === pendingDeleteJobId}
-								className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
-							>
-								{deletingId === pendingDeleteJobId
-									? "Deleting..."
-									: "Delete"}
-							</button>
-						</div>
-					</div>
+	// Button component for consistent styling
+	const Button = ({
+		children,
+		variant = "primary",
+		size = "md",
+		onClick,
+		disabled,
+		className = "",
+		...props
+	}) => {
+		const baseStyles =
+			"inline-flex items-center gap-2 font-medium rounded-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none";
+
+		const variants = {
+			primary:
+				"bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl",
+			secondary:
+				"bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-300 hover:border-gray-400 shadow-sm",
+			success:
+				"bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl",
+			danger: "bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl",
+			warning:
+				"bg-amber-500 hover:bg-amber-600 text-white shadow-lg hover:shadow-xl",
+		};
+
+		const sizes = {
+			sm: "px-3 py-2 text-sm",
+			md: "px-4 py-2.5 text-sm",
+			lg: "px-6 py-3 text-base",
+		};
+
+		return (
+			<button
+				className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+				onClick={onClick}
+				disabled={disabled}
+				{...props}
+			>
+				{children}
+			</button>
+		);
+	};
+
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+				{/* Header Section */}
+				<div className="mb-8 text-center">
+					<h1 className="text-3xl font-bold text-gray-900 mb-2">
+						Your Generated Resumes
+					</h1>
+					<p className="text-gray-600 text-lg">
+						Track and manage all your job applications in one place
+					</p>
 				</div>
-			)}
 
-			{/* Expire modal */}
-			{pendingExpireJobId && (
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-					<div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
-						<h3 className="text-lg font-bold text-center">
-							Mark Job as Expired
-						</h3>
-						<p className="text-center">
-							This will mark the job as expired and remove
-							associated resumes. Are you sure?
-						</p>
-						<div className="flex justify-end gap-4">
-							<button
-								onClick={cancelExpire}
-								className="px-4 py-2 rounded border"
-							>
-								Cancel
-							</button>
-							<button
-								onClick={confirmExpireJob}
-								disabled={expiringId === pendingExpireJobId}
-								className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
-							>
-								{expiringId === pendingExpireJobId
-									? "Processing..."
-									: "Confirm"}
-							</button>
-						</div>
+				{/* Messages */}
+				{applyError && (
+					<MessageBanner type="error" message={applyError} />
+				)}
+				{applyMessage && (
+					<MessageBanner type="success" message={applyMessage} />
+				)}
+				{expireError && (
+					<MessageBanner type="error" message={expireError} />
+				)}
+				{expireMessage && (
+					<MessageBanner type="warning" message={expireMessage} />
+				)}
+				{deleteError && (
+					<MessageBanner type="error" message={deleteError} />
+				)}
+				{deleteMessage && (
+					<MessageBanner type="success" message={deleteMessage} />
+				)}
+				{reportError && (
+					<MessageBanner type="error" message={reportError} />
+				)}
+				{reportMessage && (
+					<MessageBanner type="success" message={reportMessage} />
+				)}
+
+				{/* Apply Modal */}
+				<Modal
+					isOpen={!!pendingApplyResumeId}
+					onClose={cancelApply}
+					title="Confirm Application"
+					icon={CheckCircle}
+					iconColor="text-emerald-500"
+				>
+					<p className="text-gray-600 text-center mb-6">
+						Are you sure you want to mark this resume as applied? It
+						will no longer appear on your dashboard.
+					</p>
+					<div className="flex justify-end gap-3">
+						<Button variant="secondary" onClick={cancelApply}>
+							Cancel
+						</Button>
+						<Button
+							variant="primary"
+							onClick={confirmApply}
+							disabled={applyingId === pendingApplyResumeId}
+						>
+							{applyingId === pendingApplyResumeId
+								? "Applying..."
+								: "Confirm"}
+						</Button>
 					</div>
-				</div>
-			)}
+				</Modal>
 
-			{/* Report modal */}
-			{pendingReportJobId && (
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-					<div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
-						<h3 className="text-lg font-bold text-center">
-							Report this Job
-						</h3>
-						<p className="text-center text-gray-600">
-							Tell us what’s wrong so the admins can review it
-							quickly.
-						</p>
+				{/* Delete Modal */}
+				<Modal
+					isOpen={!!pendingDeleteJobId}
+					onClose={cancelDelete}
+					title="Confirm Delete"
+					icon={AlertTriangle}
+					iconColor="text-red-500"
+				>
+					<p className="text-gray-600 text-center mb-6">
+						This will delete the job and <strong>all</strong>{" "}
+						associated resumes. Are you sure?
+					</p>
+					<div className="flex justify-end gap-3">
+						<Button variant="secondary" onClick={cancelDelete}>
+							Cancel
+						</Button>
+						<Button
+							variant="danger"
+							onClick={confirmDeleteJob}
+							disabled={deletingId === pendingDeleteJobId}
+						>
+							{deletingId === pendingDeleteJobId
+								? "Deleting..."
+								: "Delete"}
+						</Button>
+					</div>
+				</Modal>
 
+				{/* Expire Modal */}
+				<Modal
+					isOpen={!!pendingExpireJobId}
+					onClose={cancelExpire}
+					title="Mark Job as Expired"
+					icon={Clock}
+					iconColor="text-amber-500"
+				>
+					<p className="text-gray-600 text-center mb-6">
+						This will mark the job as expired and remove associated
+						resumes. Are you sure?
+					</p>
+					<div className="flex justify-end gap-3">
+						<Button variant="secondary" onClick={cancelExpire}>
+							Cancel
+						</Button>
+						<Button
+							variant="warning"
+							onClick={confirmExpireJob}
+							disabled={expiringId === pendingExpireJobId}
+						>
+							{expiringId === pendingExpireJobId
+								? "Processing..."
+								: "Confirm"}
+						</Button>
+					</div>
+				</Modal>
+
+				{/* Report Modal */}
+				<Modal
+					isOpen={!!pendingReportJobId}
+					onClose={cancelReport}
+					title="Report this Job"
+					icon={AlertTriangle}
+					iconColor="text-red-500"
+				>
+					<p className="text-gray-600 text-center mb-6">
+						Tell us what's wrong so the admins can review it
+						quickly.
+					</p>
+					<div className="space-y-4">
 						<div>
 							<label
 								htmlFor="report-reason"
-								className="block text-sm font-medium text-gray-700 mb-1"
+								className="block text-sm font-medium text-gray-700 mb-2"
 							>
 								Reason (required)
 							</label>
@@ -429,259 +542,372 @@ export default function GeneratedResumes({ userId, fullName }) {
 								}
 								rows={4}
 								placeholder="e.g. Broken link, duplicate posting, misleading description, scam, etc."
-								className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+								className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
 							/>
-							<div className="mt-1 text-xs text-gray-500 text-right">
+							<div className="mt-2 text-xs text-gray-500 text-right">
 								{reportReason.length}/{REPORT_MAX}
 							</div>
 						</div>
-
 						<div className="flex justify-end gap-3">
-							<button
-								onClick={cancelReport}
-								className="px-4 py-2 rounded border"
-							>
+							<Button variant="secondary" onClick={cancelReport}>
 								Cancel
-							</button>
-							<button
+							</Button>
+							<Button
+								variant="danger"
 								onClick={confirmReportJob}
 								disabled={reportingId === pendingReportJobId}
-								className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
 							>
 								{reportingId === pendingReportJobId
 									? "Reporting..."
 									: "Submit Report"}
-							</button>
+							</Button>
 						</div>
 					</div>
-				</div>
-			)}
+				</Modal>
 
-			{resumesLoading ? (
-				<div className="text-center text-gray-400">
-					Loading resumes...
-				</div>
-			) : userResumes.length === 0 ? (
-				<div className="text-center text-gray-400 italic">
-					No resumes generated yet.
-				</div>
-			) : (
-				<div className="space-y-6">
-					{userResumes.map((resume, idx) => (
-						<div
-							key={resume._id || idx}
-							className="bg-gray-50 border border-gray-200 rounded-lg p-4"
-						>
-							<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-								<div className="min-w-0 flex-1">
-									<p className="text-lg font-semibold text-gray-800">
-										{resume.job_title == "Unknown Title"
-											? resume.company_name
-											: `${resume.job_title} at ${resume.company_name}`}
-									</p>
-									<p className="text-sm text-gray-500">
-										Generated:{" "}
-										{resume.created_at
-											? new Date(
-													resume.created_at
-											  ).toLocaleString()
-											: "Unknown"}
-									</p>
-									{resume.company_link && (
-										<div className="mt-1 flex items-center gap-2 text-sm text-blue-600 sm:max-w-sm md:max-w-md lg:max-w-lg overflow-hidden">
-											<a
-												href={resume.company_link}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="hover:underline truncate"
-												style={{ maxWidth: "16rem" }}
-											>
-												{resume.company_link}
-											</a>
-											<button
-												className="text-xs px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 whitespace-nowrap"
-												onClick={() =>
-													navigator.clipboard.writeText(
-														resume.company_link
-													)
-												}
-											>
-												Copy
-											</button>
-										</div>
-									)}
-									{resume.salary != "" && (
-										<div className="text-lg font-semibold text-gray-800">
-											<p className="text-lg font-semibold text-gray-800">{`Salary: ${resume.salary}`}</p>
-										</div>
-									)}
+				{/* Content */}
+				{resumesLoading ? (
+					<div className="text-center py-16">
+						<div className="inline-flex items-center justify-center w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-6"></div>
+						<p className="text-gray-600 text-lg font-medium">
+							Loading your job applications...
+						</p>
+						<p className="text-gray-400 text-sm mt-2">
+							This may take a few moments
+						</p>
+					</div>
+				) : userResumes.length === 0 ? (
+					<div className="text-center py-16">
+						<div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-6">
+							<FileText className="h-10 w-10 text-gray-400" />
+						</div>
+						<h3 className="text-xl font-semibold text-gray-900 mb-2">
+							No resumes generated yet
+						</h3>
+						<p className="text-gray-500 mb-6">
+							Start by generating your first resume from the
+							Generate page
+						</p>
+						<Button variant="primary" size="lg">
+							<Briefcase className="h-5 w-5" />
+							Generate Resume
+						</Button>
+					</div>
+				) : (
+					<div className="grid gap-6">
+						{userResumes.map((resume, idx) => (
+							<div
+								key={resume._id || idx}
+								className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 overflow-hidden"
+							>
+								{/* Header Section */}
+								<div className="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+									<div className="flex flex-col lg:flex-row justify-between items-start gap-4">
+										<div className="flex-1 min-w-0">
+											<div className="flex items-start gap-3 mb-3">
+												<div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+													<Briefcase className="h-6 w-6 text-blue-600" />
+												</div>
+												<div className="min-w-0 flex-1">
+													<h3 className="text-xl font-bold text-gray-900 mb-1 line-clamp-2">
+														{resume.job_title ===
+														"Unknown Title"
+															? resume.company_name
+															: resume.job_title}
+													</h3>
+													<div className="flex items-center gap-4 text-sm text-gray-600">
+														<div className="flex items-center gap-1.5">
+															<Building className="h-4 w-4 text-gray-500" />
+															<span className="font-medium">
+																{resume.company_name ||
+																	"Company"}
+															</span>
+														</div>
+														<div className="flex items-center gap-1.5">
+															<Calendar className="h-4 w-4 text-gray-500" />
+															<span>
+																{resume.created_at
+																	? new Date(
+																			resume.created_at
+																	  ).toLocaleDateString()
+																	: "Unknown"}
+															</span>
+														</div>
+													</div>
+												</div>
+											</div>
 
-									<button
-										onClick={() =>
-											handleCopyJDAndResume(
-												resume.JD,
-												resume.resume,
-												resume.company_name
-											)
-										}
-										className="inline-flex items-center justify-center min-w-[140px] h-9 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 rounded-md shadow-sm transition-all"
-									>
-										Copy JD + Resume
-									</button>
+											{/* Company Link */}
+											{resume.company_link && (
+												<div className="flex items-center gap-2 text-sm">
+													<ExternalLink className="h-4 w-4 text-blue-600" />
+													<a
+														href={
+															resume.company_link
+														}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="text-blue-600 hover:text-blue-800 hover:underline truncate max-w-xs font-medium"
+													>
+														{resume.company_link}
+													</a>
+													<button
+														className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors border border-blue-200 font-medium"
+														onClick={() =>
+															navigator.clipboard.writeText(
+																resume.company_link
+															)
+														}
+														title="Copy link"
+													>
+														Copy
+													</button>
+												</div>
+											)}
+										</div>
+
+										{/* Salary Badge */}
+										{resume.salary &&
+											resume.salary !== "" && (
+												<div className="flex-shrink-0">
+													<div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-800 rounded-xl border border-emerald-200">
+														<DollarSign className="h-4 w-4" />
+														<span className="font-semibold text-sm">
+															{resume.salary}
+														</span>
+													</div>
+												</div>
+											)}
+									</div>
 								</div>
 
-								<div className="flex flex-wrap justify-end gap-2 mt-2 sm:mt-0">
-									{resume.resume && (
-										<a
-											href={`data:application/pdf;base64,${resume.resume}`}
-											download={`${fullName}_${
-												resume.company_name || "Resume"
-											}.pdf`}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="inline-flex items-center justify-center min-w-[140px] h-9 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 rounded-md shadow-sm"
-										>
-											Download PDF
-										</a>
-									)}
-
-									{resume.JD && resume.JD.trim() && (
-										<button
+								{/* Content Section */}
+								<div className="p-6">
+									{/* Action Buttons */}
+									<div className="flex flex-wrap gap-3 mb-6">
+										<Button
 											onClick={() =>
-												handleDownloadJD(
+												handleCopyJDAndResume(
 													resume.JD,
+													resume.resume,
 													resume.company_name
 												)
 											}
-											className="inline-flex items-center justify-center min-w-[140px] h-9 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 rounded-md shadow-sm"
+											variant="primary"
+											size="sm"
 										>
-											Download JD
-										</button>
-									)}
-
-									{/* Report Job — available to all users */}
-									{resume.jobId && (
-										<button
-											onClick={() =>
-												requestReport(resume.jobId)
-											}
-											disabled={
-												reportingId === resume.jobId
-											}
-											className="inline-flex items-center justify-center min-w-[140px] h-9 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 rounded-md shadow-sm disabled:opacity-50"
-										>
-											{reportingId === resume.jobId
-												? "Reporting..."
-												: "Report Job"}
-										</button>
-									)}
-
-									{/* Applier tools */}
-									{isApplier &&
-										resume.jobId &&
-										resume.JD.trim() && (
-											<button
-												onClick={() =>
-													requestExpire(resume.jobId)
-												}
-												className="inline-flex items-center justify-center min-w-[140px] h-9 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 rounded-md shadow-sm"
+											<Copy className="h-4 w-4" />
+											Copy JD + Resume
+										</Button>
+										{/* Download PDF color should be same as Download JD */}
+										{resume.resume && (
+											<a
+												href={`data:application/pdf;base64,${resume.resume}`}
+												download={`${
+													safeFullName
+														? `${safeFullName}_${
+																resume.company_name ||
+																"Resume"
+														  }`
+														: `${
+																resume.company_name ||
+																"Resume"
+														  }`
+												}.pdf`}
+												target="_blank"
+												rel="noopener noreferrer"
 											>
-												Mark as Expired
-											</button>
+												<Button
+													variant="primary"
+													size="sm"
+												>
+													<Download className="h-4 w-4" />
+													Download PDF
+												</Button>
+											</a>
 										)}
 
-									{isApplier &&
-										resume.jobId &&
-										resume.JD.trim() && (
-											<button
+										{resume.JD && resume.JD.trim() && (
+											<Button
 												onClick={() =>
-													requestDeleteJob(
-														resume.jobId
+													handleDownloadJD(
+														resume.JD,
+														resume.company_name
 													)
 												}
-												className="inline-flex items-center justify-center min-w-[140px] h-9 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 rounded-md shadow-sm"
+												variant="primary"
+												size="sm"
 											>
-												Delete JOB
-											</button>
+												<FileText className="h-4 w-4" />
+												Download JD
+											</Button>
 										)}
 
-									<button
-										onClick={() => requestApply(resume._id)}
-										disabled={applyingId === resume._id}
-										className={`inline-flex items-center justify-center min-w-[140px] h-9 text-sm font-medium px-4 rounded-md shadow-sm ${
-											applyingId === resume._id
-												? "bg-blue-100 text-blue-800 opacity-50 cursor-not-allowed"
-												: "bg-blue-100 hover:bg-blue-200 text-blue-800"
-										}`}
-									>
-										{applyingId === resume._id
-											? "Applying..."
-											: "Mark as Applied"}
-									</button>
+										{/* Report Job — available to all users */}
+										{resume.jobId && (
+											<Button
+												onClick={() =>
+													requestReport(resume.jobId)
+												}
+												disabled={
+													reportingId === resume.jobId
+												}
+												variant="danger"
+												size="sm"
+											>
+												<AlertTriangle className="h-4 w-4" />
+												{reportingId === resume.jobId
+													? "Reporting..."
+													: "Report Job"}
+											</Button>
+										)}
+
+										{/* Applier tools */}
+										{isApplier &&
+											resume.jobId &&
+											resume.JD.trim() && (
+												<Button
+													onClick={() =>
+														requestExpire(
+															resume.jobId
+														)
+													}
+													variant="secondary"
+													size="sm"
+													className="bg-orange-100 hover:bg-orange-200 text-orange-800 border-orange-300"
+												>
+													<Clock className="h-4 w-4" />
+													Mark as Expired
+												</Button>
+											)}
+
+										{isApplier &&
+											resume.jobId &&
+											resume.JD.trim() && (
+												<Button
+													onClick={() =>
+														requestDeleteJob(
+															resume.jobId
+														)
+													}
+													variant="danger"
+													size="sm"
+												>
+													<AlertTriangle className="h-4 w-4" />
+													Delete Job
+												</Button>
+											)}
+
+										<Button
+											onClick={() =>
+												requestApply(resume._id)
+											}
+											disabled={applyingId === resume._id}
+											variant="primary"
+											size="sm"
+										>
+											<CheckCircle className="h-4 w-4" />
+											{applyingId === resume._id
+												? "Applying..."
+												: "Mark as Applied"}
+										</Button>
+									</div>
+
+									{/* Job Description */}
+									{resume.JD && (
+										<div className="mb-6">
+											<details className="group">
+												<summary className="cursor-pointer flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors mb-3">
+													<FileText className="h-4 w-4" />
+													Job Description
+													<Eye className="h-4 w-4 group-open:hidden" />
+													<EyeOff className="h-4 w-4 hidden group-open:block" />
+												</summary>
+												<div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto">
+													{resume.JD}
+												</div>
+											</details>
+										</div>
+									)}
+
+									{/* Job Q&A */}
+									{Array.isArray(resume.answers) &&
+										resume.answers.length > 0 && (
+											<div>
+												<details className="group">
+													<summary className="cursor-pointer flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors mb-3">
+														<FileText className="h-4 w-4" />
+														Job Q & A (
+														{resume.answers.length})
+														<Eye className="h-4 w-4 group-open:hidden" />
+														<EyeOff className="h-4 w-4 hidden group-open:block" />
+													</summary>
+													<div className="mt-3 space-y-3">
+														{resume.answers.map(
+															(qa, i) => (
+																<div
+																	key={i}
+																	className="bg-gray-50 rounded-xl p-4 text-sm space-y-3 border border-gray-200"
+																>
+																	{qa.question && (
+																		<div className="flex items-start gap-2">
+																			<div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+																				<span className="text-blue-600 text-xs font-bold">
+																					Q
+																				</span>
+																			</div>
+																			<p className="text-blue-900 font-medium flex-1">
+																				{
+																					qa.question
+																				}
+																			</p>
+																		</div>
+																	)}
+																	{qa.answer && (
+																		<div className="flex items-start gap-2">
+																			<div className="flex-shrink-0 w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center mt-0.5">
+																				<span className="text-emerald-600 text-xs font-bold">
+																					A
+																				</span>
+																			</div>
+																			<div className="flex-1">
+																				<p className="text-gray-800 whitespace-pre-wrap mb-2">
+																					{
+																						qa.answer
+																					}
+																				</p>
+																				<Button
+																					onClick={() =>
+																						handleCopyAnswer(
+																							qa.answer,
+																							i
+																						)
+																					}
+																					variant="secondary"
+																					size="sm"
+																				>
+																					<Copy className="h-3 w-3" />
+																					{copiedIndex ===
+																					i
+																						? "Copied!"
+																						: "Copy Answer"}
+																				</Button>
+																			</div>
+																		</div>
+																	)}
+																</div>
+															)
+														)}
+													</div>
+												</details>
+											</div>
+										)}
 								</div>
 							</div>
-
-							{resume.JD && (
-								<details className="mt-3">
-									<summary className="cursor-pointer text-sm font-medium text-gray-700">
-										Show Job Description
-									</summary>
-									<div className="mt-2 bg-white border rounded p-3 text-sm text-gray-700 whitespace-pre-wrap max-h-40 overflow-y-auto">
-										{resume.JD}
-									</div>
-								</details>
-							)}
-
-							{Array.isArray(resume.answers) &&
-								resume.answers.length > 0 && (
-									<details className="mt-4">
-										<summary className="cursor-pointer font-semibold text-gray-700">
-											Job Q &amp; A
-										</summary>
-										<div className="mt-3 space-y-3">
-											{resume.answers.map((qa, i) => (
-												<div
-													key={i}
-													className="bg-gray-100 rounded p-3 text-sm space-y-1"
-												>
-													{qa.question && (
-														<p className="text-blue-900 font-medium">
-															Q: {qa.question}
-														</p>
-													)}
-													{qa.answer && (
-														<div className="flex justify-between items-start">
-															<p className="text-gray-800 whitespace-pre-wrap">
-																<strong>
-																	A:
-																</strong>{" "}
-																{qa.answer}
-															</p>
-															<button
-																onClick={() =>
-																	handleCopyAnswer(
-																		qa.answer,
-																		i
-																	)
-																}
-																className="ml-4 bg-green-200 hover:bg-green-300 text-green-800 text-xs px-3 py-1 rounded"
-															>
-																{copiedIndex ===
-																i
-																	? "Copied!"
-																	: "Copy"}
-															</button>
-														</div>
-													)}
-												</div>
-											))}
-										</div>
-									</details>
-								)}
-						</div>
-					))}
-				</div>
-			)}
+						))}
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }

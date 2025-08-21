@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import API from "../api";
-import AdminNavbar from "../components/AdminNavbar.tsx";
+import Navbar from "../components/Navbar";
 import UserWithResumeForm from "../components/UserWithResumeForm";
 import { Mail, Heart, Edit, Trash2 } from "lucide-react";
 
@@ -156,7 +156,7 @@ export default function Admin() {
 
 	return (
 		<div>
-			<AdminNavbar />
+			<Navbar />
 
 			{message && (
 				<div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">

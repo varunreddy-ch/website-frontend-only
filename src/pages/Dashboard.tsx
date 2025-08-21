@@ -4,8 +4,7 @@ import PDFPreview from "../components/PDFPreview";
 import { getUser, logout } from "../auth";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import ApplierSubmissionForm from "../components/ApplierSubmissionForm";
-import GeneratedResumes from "../components/GeneratedResumes";
+
 import Spinner, { spinnerCSS } from "../components/Spinner";
 import { Mail, Heart } from "lucide-react";
 import { getAPIErrorMessage } from "../utils/apiErrors";
@@ -21,18 +20,12 @@ export default function Dashboard() {
 	const [generatedResume, setGeneratedResume] = useState("");
 	const [pdfBlob, setPdfBlob] = useState(null);
 	const [loading, setLoading] = useState(false);
-	const [question, setQuestion] = useState("");
-	const [answer, setAnswer] = useState("");
 
 	const [resumeMessage, setResumeMessage] = useState("");
 	const [resumeError, setResumeError] = useState("");
-	const [questionMessage, setQuestionMessage] = useState("");
-	const [questionError, setQuestionError] = useState("");
 
 	const [companyName, setCompanyName] = useState("");
 	const [showCompanyModal, setShowCompanyModal] = useState(false);
-
-	const [asking, setAsking] = useState(false);
 
 	const user = getUser();
 	const navigate = useNavigate();
@@ -43,17 +36,9 @@ export default function Dashboard() {
 		}
 	}, [user, navigate]);
 
-	// if (!user) {
-	// 	return null;
-	// }
-
 	const fullName = user.firstname
 		? user.firstname.split(" ").filter(Boolean).join("_")
 		: "user";
-
-	const isApplier = user.role === "applier";
-	const isTier2 = user.role === "tier2";
-	const isAdmin = user.role === "admin";
 
 	const handleDownloadJobDesc = () => {
 		const element = document.createElement("a");
@@ -68,8 +53,6 @@ export default function Dashboard() {
 	const handleGenerate = async () => {
 		setResumeMessage("");
 		setResumeError("");
-		setAnswer("");
-		setQuestion("");
 		setPdfBlob(null);
 		if (!jobDesc.trim()) {
 			setResumeError("Please enter a job description.");
@@ -113,7 +96,6 @@ export default function Dashboard() {
 					.join(" ");
 				text += pageText + "\n\n";
 			}
-			// console.log(text);
 			setGeneratedResume(text);
 			setResumeMessage("Resume generated successfully!");
 		} catch (err) {
@@ -125,49 +107,13 @@ export default function Dashboard() {
 		}
 	};
 
-	const handleAsk = async () => {
-		setQuestionMessage("");
-		setQuestionError("");
-		setAsking(true);
-		if (!question.trim()) {
-			setQuestionError("Please enter a question.");
-			setAsking(false);
-			return;
-		}
-		if (!jobDesc || !generatedResume) {
-			setQuestionError("Please generate a resume first.");
-			setAsking(false);
-			return;
-		}
-		try {
-			const res = await API.post("/casual-question", {
-				job_description: jobDesc,
-				generated_resume: generatedResume,
-				question: question,
-			});
-			setAnswer(res.data.generated_answer);
-			setQuestionMessage("Answer received!");
-		} catch (err) {
-			setResumeError(
-				getAPIErrorMessage(err, "Failed to generate resume.")
-			);
-		} finally {
-			setAsking(false);
-		}
-	};
-
-	const handleCopy = () => {
-		navigator.clipboard.writeText(answer);
-		setQuestionMessage("Answer copied to clipboard!");
-	};
-
 	return (
 		<>
 			{/* Spinner CSS */}
 			<style>{spinnerCSS}</style>
 
 			{/* Fullscreen overlay during resume generation */}
-			{(loading || asking) && (
+			{loading && (
 				<div className="spinner-overlay">
 					<Spinner />
 				</div>
@@ -176,9 +122,21 @@ export default function Dashboard() {
 				<Navbar />
 
 				<div className="max-w-4xl mx-auto p-4 space-y-4">
-					<div className="bg-white rounded-lg shadow-lg p-4 space-y-4 mt-20">
-						<h2 className="text-lg font-semibold text-center text-gray-700">
-							Job Description
+					{/* Header Section */}
+					<div className="text-center mt-20 mb-8">
+						<h1 className="text-3xl font-bold text-gray-800 mb-2">
+							Generate Your Resume
+						</h1>
+						<p className="text-gray-600">
+							Paste a job description and get a tailored resume in
+							seconds
+						</p>
+					</div>
+
+					{/* Job Description Section */}
+					<div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
+						<h2 className="text-xl font-semibold text-gray-700 mb-4">
+							📋 Job Description
 						</h2>
 
 						{resumeError && (
@@ -193,29 +151,30 @@ export default function Dashboard() {
 						)}
 
 						<textarea
-							className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-							rows={5}
-							placeholder="Paste or write a job description here..."
+							className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 resize-none"
+							rows={6}
+							placeholder="Paste or write a job description here... Make sure to include key requirements, responsibilities, and company details for the best results."
 							value={jobDesc}
 							onChange={(e) => setJobDesc(e.target.value)}
 						/>
 						<div className="text-center">
 							<button
 								disabled={loading}
-								className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded transition ${
+								className={`bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-lg font-medium text-lg transition-all duration-200 transform hover:scale-105 ${
 									loading && "opacity-50 cursor-not-allowed"
 								}`}
 								onClick={handleGenerate}
 							>
-								{loading ? "Generating..." : "Proceed"}
+								{loading ? "Generating..." : "Generate Resume"}
 							</button>
 						</div>
 					</div>
 
+					{/* Resume Preview Section */}
 					{pdfBlob ? (
-						<div className="bg-white rounded-lg shadow-lg p-4 space-y-4">
-							<h2 className="text-lg font-semibold text-center text-gray-700">
-								Resume Preview
+						<div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
+							<h2 className="text-xl font-semibold text-center text-gray-700 mb-4">
+								📄 Resume Preview
 							</h2>
 
 							<PDFPreview pdfUrl={pdfBlob} />
@@ -227,97 +186,38 @@ export default function Dashboard() {
 										.split(" ")
 										.filter(Boolean)
 										.join("_")}.pdf`}
-									className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded text-center"
+									className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-md"
 								>
-									Download PDF
+									📥 Download PDF
 								</a>
 								<button
 									onClick={handleDownloadJobDesc}
-									className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded"
+									className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-md"
 								>
-									Download Job Description
+									📋 Download Job Description
 								</button>
 							</div>
 						</div>
 					) : (
-						<div className="bg-white rounded-lg shadow-lg p-4 text-center text-gray-400 italic border border-dashed border-gray-300">
-							Your generated resume will appear here after
-							clicking "Generate Resume"
+						<div className="bg-white rounded-lg shadow-lg p-8 text-center text-gray-400 border border-dashed border-gray-300">
+							<div className="text-6xl mb-4">📄</div>
+							<p className="text-lg font-medium mb-2">
+								Ready to Generate
+							</p>
+							<p className="text-sm">
+								Your generated resume will appear here after
+								clicking "Generate Resume"
+							</p>
 						</div>
 					)}
-
-					{/* Applier Form */}
-					{isApplier && <ApplierSubmissionForm />}
-
-					<div className="bg-white rounded-lg shadow-lg p-4 space-y-4">
-						<h2 className="text-lg font-semibold text-center text-gray-700">
-							Ask About the Resume
-						</h2>
-
-						{questionError && (
-							<div className="text-red-600 bg-red-50 border border-red-200 px-4 py-2 rounded text-sm text-center">
-								{questionError}
-							</div>
-						)}
-						{questionMessage && (
-							<div className="text-blue-600 bg-blue-50 border border-blue-200 px-4 py-2 rounded text-sm text-center">
-								{questionMessage}
-							</div>
-						)}
-
-						<input
-							type="text"
-							value={question}
-							onChange={(e) => setQuestion(e.target.value)}
-							className="border border-gray-300 px-4 py-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-							placeholder="e.g., What are the candidate's strengths?"
-						/>
-						<div className="text-center">
-							<button
-								onClick={handleAsk}
-								disabled={asking}
-								className={`bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded transition ${
-									asking && "opacity-50 cursor-not-allowed"
-								}`}
-							>
-								{asking ? "Asking..." : "Ask"}
-							</button>
-						</div>
-
-						{answer ? (
-							<div className="border border-gray-200 rounded p-4 bg-gray-50 space-y-2 shadow-sm">
-								<div className="flex justify-between items-center">
-									<strong className="text-gray-800">
-										Answer:
-									</strong>
-									<button
-										onClick={handleCopy}
-										className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1 rounded-md transition"
-									>
-										Copy Answer
-									</button>
-								</div>
-								<p className="text-gray-700 whitespace-pre-line">
-									{answer}
-								</p>
-							</div>
-						) : (
-							<div className="text-center text-gray-400 italic">
-								Answer to your question will appear here.
-							</div>
-						)}
-					</div>
 				</div>
 
-				{(user.role == "tier2" || user.role == "applier") && (
-					<GeneratedResumes userId={user.user} fullName={fullName} />
-				)}
-
+				{/* Company Modal */}
 				{showCompanyModal && (
 					<div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
 						<div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
 							<h3 className="text-lg font-semibold text-gray-800 text-center">
-								Enter Company Name
+								🏢 Enter Company Name
 							</h3>
 
 							<input
@@ -346,6 +246,8 @@ export default function Dashboard() {
 						</div>
 					</div>
 				)}
+
+				{/* Footer */}
 				<footer className="bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 text-white py-6 px-4 mt-10">
 					<div className="max-w-4xl mx-auto flex flex-col items-center justify-between gap-4 text-center text-sm sm:flex-row sm:text-left">
 						{/* Left - Contact */}

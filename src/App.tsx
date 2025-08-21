@@ -10,10 +10,12 @@ import SignUp from "./pages/SignUp";
 import Profile from "./pages/Profile";
 import Analytics from "./pages/Analytics";
 import Dashboard from "./pages/Dashboard";
+import Jobs from "./pages/Jobs";
 import Admin from "./pages/Admin";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import AdminJobs from "./pages/AdminJobs";
+import ApplierForm from "./pages/ApplierForm";
 
 const queryClient = new QueryClient();
 
@@ -31,14 +33,16 @@ const App = () => (
 					<Route path="/profile/:id" element={<Profile />} />
 					<Route path="/analytics" element={<Analytics />} />
 					<Route path="/dashboard" element={<Dashboard />} />
+					<Route path="/jobs" element={<Jobs />} />
 					<Route path="/admin" element={<Admin />} />
 					<Route path="/admin/jobs" element={<AdminJobs />} />
 					<Route
 						path="/admin/dashboard"
 						element={<AdminDashboard />}
 					/>
+					<Route path="/applier-form" element={<ApplierForm />} />
 					{/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-					{/* <Route path="*" element={<NotFound />} /> */}
+					<Route path="*" element={<NotFound />} />
 				</Routes>
 			</BrowserRouter>
 		</TooltipProvider>
