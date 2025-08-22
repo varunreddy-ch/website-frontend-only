@@ -128,20 +128,80 @@ export default function AdminDashboard() {
 							subtitle="Generated resumes"
 						/>
 						<StatCard
-							label="Applied Resumes"
-							value={stats.resumesApplied}
-							icon={CheckCircle}
+							label="Weekly Applications"
+							value={stats.weeklyStats?.totalApplications || 0}
+							icon={TrendingUp}
 							color="bg-gradient-to-r from-purple-500 to-purple-600"
-							subtitle="Successfully applied"
+							subtitle={`${
+								stats.weeklyStats?.usersWithApplications || 0
+							} users applied this week`}
 						/>
 						<StatCard
-							label="Pending Resumes"
-							value={stats.resumesPending}
-							icon={Clock}
+							label="Application Rate"
+							value={`${
+								stats.weeklyStats?.applicationRate || 0
+							}%`}
+							icon={BarChart3}
 							color="bg-gradient-to-r from-orange-500 to-orange-600"
-							subtitle="Awaiting application"
+							subtitle={`${
+								stats.weeklyStats?.averageApplicationsPerUser ||
+								0
+							} avg per active user`}
 						/>
 					</div>
+
+					{/* Weekly Application Statistics */}
+					<Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2 text-2xl">
+								<TrendingUp className="w-6 h-6 text-purple-600" />
+								Weekly Application Statistics
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+								<StatCard
+									label="Total Applications"
+									value={
+										stats.weeklyStats?.totalApplications ||
+										0
+									}
+									icon={CheckCircle}
+									color="bg-gradient-to-r from-green-500 to-green-600"
+									subtitle="This week"
+								/>
+								<StatCard
+									label="Active Users"
+									value={
+										stats.weeklyStats
+											?.usersWithApplications || 0
+									}
+									icon={Users}
+									color="bg-gradient-to-r from-blue-500 to-blue-600"
+									subtitle="Applied this week"
+								/>
+								<StatCard
+									label="Application Rate"
+									value={`${
+										stats.weeklyStats?.applicationRate || 0
+									}%`}
+									icon={BarChart3}
+									color="bg-gradient-to-r from-purple-500 to-purple-600"
+									subtitle="Of total users"
+								/>
+								<StatCard
+									label="Avg Per User"
+									value={
+										stats.weeklyStats
+											?.averageApplicationsPerUser || 0
+									}
+									icon={TrendingUp}
+									color="bg-gradient-to-r from-orange-500 to-orange-600"
+									subtitle="Applications per active user"
+								/>
+							</div>
+						</CardContent>
+					</Card>
 
 					{/* Job Statistics */}
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -236,12 +296,13 @@ export default function AdminDashboard() {
 								Per User Statistics
 							</CardTitle>
 							<p className="text-sm text-gray-600 mt-2">
-								Showing {stats.userStats.length} active users •
-								Sorted by total activity
+								Showing {stats.userStats.length} total users •
+								Sorted by activity level
 							</p>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<div className="flex justify-between items-center">
+							{/* Sort Controls */}
+							<div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg border">
 								<div className="text-sm text-gray-600">
 									<span className="font-medium">
 										Sort by:
@@ -267,149 +328,173 @@ export default function AdminDashboard() {
 								</select>
 							</div>
 
-							<div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+							{/* User Cards Grid */}
+							<div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
 								{sortedUsers.map((u, index) => (
 									<div
 										key={u.id || u.username}
-										className="group border border-gray-200 p-6 rounded-xl bg-white hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] hover:border-blue-200"
+										className={`group bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-blue-300 ${
+											index % 2 === 0
+												? "hover:from-blue-50 hover:to-blue-100"
+												: "hover:from-purple-50 hover:to-purple-100"
+										}`}
 										style={{
 											animationDelay: `${index * 50}ms`,
 											animation:
-												"fadeInUp 0.5s ease-out forwards",
+												"fadeInUp 0.6s ease-out forwards",
 											opacity: 0,
 											transform: "translateY(20px)",
 										}}
 									>
-										<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-											{/* User Info */}
-											<div className="flex-1">
-												<div className="flex items-center gap-3 mb-2">
-													<div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-														{u.firstname?.charAt(
-															0
-														) ||
-															u.username?.charAt(
-																0
-															) ||
-															"U"}
-													</div>
-													<div>
-														<h3 className="font-semibold text-gray-800 text-lg">
-															{u.firstname &&
-															u.lastname
-																? `${u.firstname} ${u.lastname}`
-																: u.username ||
-																  "Unknown User"}
-														</h3>
-														{u.username && (
-															<p className="text-sm text-gray-500 font-mono">
-																@{u.username}
-															</p>
-														)}
-													</div>
+										{/* User Header */}
+										<div className="flex items-center gap-4 mb-6">
+											<div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">
+												{u.firstname?.charAt(0) ||
+													u.username?.charAt(0) ||
+													"U"}
+											</div>
+											<div className="flex-1 min-w-0">
+												<h3 className="font-bold text-gray-800 text-lg truncate">
+													{u.firstname && u.lastname
+														? `${u.firstname} ${u.lastname}`
+														: u.username ||
+														  "Unknown User"}
+												</h3>
+												{u.username && (
+													<p className="text-sm text-gray-500 font-mono truncate">
+														@{u.username}
+													</p>
+												)}
+												{u.userCreatedAt && (
+													<p className="text-xs text-gray-400 mt-1">
+														Joined:{" "}
+														{new Date(
+															u.userCreatedAt
+														).toLocaleDateString()}
+													</p>
+												)}
+											</div>
+										</div>
+
+										{/* Stats Grid */}
+										<div className="grid grid-cols-2 gap-4 mb-6">
+											{/* Today Applied */}
+											<div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4 text-center group-hover:from-green-100 group-hover:to-green-200 transition-all duration-200">
+												<div className="text-2xl font-bold text-green-800 mb-1">
+													{u.appliedToday || 0}
+												</div>
+												<div className="text-xs text-green-700 font-medium">
+													Today Applied
 												</div>
 											</div>
 
-											{/* Stats Grid */}
-											<div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-												<div className="text-center p-3 bg-green-50 rounded-lg border border-green-200 group-hover:bg-green-100 transition-colors duration-200">
-													<p className="text-xs text-green-600 font-medium mb-1">
-														Applied Today
-													</p>
-													<p className="text-lg font-bold text-green-800">
-														{u.appliedToday || 0}
-													</p>
+											{/* Today Generated */}
+											<div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 text-center group-hover:from-blue-100 group-hover:to-blue-200 transition-all duration-200">
+												<div className="text-2xl font-bold text-blue-800 mb-1">
+													{u.generatedToday || 0}
 												</div>
-												<div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200 group-hover:bg-blue-100 transition-colors duration-200">
-													<p className="text-xs text-blue-600 font-medium mb-1">
-														Generated Today
-													</p>
-													<p className="text-lg font-bold text-blue-800">
-														{u.generatedToday || 0}
-													</p>
+												<div className="text-xs text-blue-700 font-medium">
+													Today Generated
 												</div>
-												<div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200 group-hover:bg-purple-100 transition-colors duration-200">
-													<p className="text-xs text-purple-600 font-medium mb-1">
-														Total Applied
-													</p>
-													<p className="text-lg font-bold text-purple-800">
-														{u.resumesApplied || 0}
-													</p>
+											</div>
+
+											{/* Weekly Apps */}
+											<div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4 text-center group-hover:from-purple-100 group-hover:to-purple-200 transition-all duration-200">
+												<div className="text-2xl font-bold text-purple-800 mb-1">
+													{u.appliedThisWeek || 0}
 												</div>
-												<div className="text-center p-3 bg-indigo-50 rounded-lg border border-indigo-200 group-hover:bg-indigo-100 transition-colors duration-200">
-													<p className="text-xs text-indigo-600 font-medium mb-1">
-														Available Jobs
-													</p>
-													<p className="text-lg font-bold text-indigo-800">
-														{u.availableJobs || 0}
-													</p>
+												<div className="text-xs text-purple-700 font-medium">
+													Weekly Apps
+												</div>
+											</div>
+
+											{/* Total Applied */}
+											<div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4 text-center group-hover:from-orange-100 group-hover:to-orange-200 transition-all duration-200">
+												<div className="text-2xl font-bold text-orange-800 mb-1">
+													{u.resumesApplied || 0}
+												</div>
+												<div className="text-xs text-orange-700 font-medium">
+													Total Applied
+												</div>
+											</div>
+										</div>
+
+										{/* Additional Stats Row */}
+										<div className="grid grid-cols-2 gap-4 mb-6">
+											{/* Available Jobs */}
+											<div className="bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 rounded-lg p-3 text-center group-hover:from-indigo-100 group-hover:to-indigo-200 transition-all duration-200">
+												<div className="text-lg font-bold text-indigo-800 mb-1">
+													{u.availableJobs || 0}
+												</div>
+												<div className="text-xs text-indigo-700 font-medium">
+													Available Jobs
 												</div>
 											</div>
 
 											{/* Total Generated */}
-											<div className="text-center p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-												<p className="text-xs text-gray-600 font-medium mb-1">
-													Total Generated
-												</p>
-												<p className="text-2xl font-bold text-gray-800">
+											<div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-3 text-center group-hover:from-gray-100 group-hover:to-gray-200 transition-all duration-200">
+												<div className="text-lg font-bold text-gray-800 mb-1">
 													{u.resumesGenerated || 0}
-												</p>
+												</div>
+												<div className="text-xs text-gray-700 font-medium">
+													Total Generated
+												</div>
 											</div>
 										</div>
 
-										{/* Progress Bar */}
-										<div className="mt-4">
-											<div className="flex justify-between text-xs text-gray-600 mb-1">
-												<span>Activity Level</span>
-												<span>
-													{(() => {
-														const maxActivity =
-															Math.max(
-																...sortedUsers.map(
-																	(u) =>
-																		u.resumesGenerated +
-																		u.resumesApplied
-																)
-															);
-														return maxActivity > 0
-															? `${Math.round(
-																	((u.resumesGenerated +
-																		u.resumesApplied) /
-																		maxActivity) *
-																		100
-															  )}%`
-															: "0%";
-													})()}
-												</span>
+										{/* Activity Level & Status */}
+										<div className="space-y-3">
+											{/* Activity Level */}
+											<div className="text-center">
+												<Badge
+													className={`px-3 py-2 text-sm font-medium w-full justify-center ${
+														u.activityLevel ===
+														"New User"
+															? "bg-yellow-100 text-yellow-800 border-yellow-200"
+															: u.activityLevel ===
+																	"Low Activity" ||
+															  u.activityLevel ===
+																	"Low-Medium Activity"
+															? "bg-blue-100 text-blue-800 border-blue-200"
+															: u.activityLevel ===
+															  "Medium Activity"
+															? "bg-purple-100 text-purple-800 border-purple-200"
+															: "bg-green-100 text-green-800 border-green-200"
+													}`}
+												>
+													{u.activityLevel ||
+														"New User"}
+												</Badge>
 											</div>
-											<div className="w-full bg-gray-200 rounded-full h-2">
-												<div
-													className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500"
-													style={{
-														width: (() => {
-															const maxActivity =
-																Math.max(
-																	...sortedUsers.map(
-																		(u) =>
-																			u.resumesGenerated +
-																			u.resumesApplied
-																	)
-																);
-															return maxActivity >
-																0
-																? `${Math.max(
-																		5,
-																		Math.round(
-																			((u.resumesGenerated +
-																				u.resumesApplied) /
-																				maxActivity) *
-																				100
-																		)
-																  )}%`
-																: "5%";
-														})(),
-													}}
-												></div>
+
+											{/* Status & Score */}
+											<div className="bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 rounded-lg p-3 text-center">
+												<Badge
+													variant={
+														u.totalActivity === 0
+															? "secondary"
+															: "default"
+													}
+													className={`text-xs px-2 py-1 mb-2 ${
+														u.totalActivity === 0
+															? "bg-yellow-100 text-yellow-800 border-yellow-200"
+															: "bg-green-100 text-green-800 border-green-200"
+													}`}
+												>
+													{u.totalActivity === 0
+														? "New User"
+														: "Active User"}
+												</Badge>
+												<div className="text-xs text-gray-600">
+													Score:{" "}
+													<span className="font-semibold">
+														{u.activityScore || 0}%
+													</span>
+												</div>
+												<div className="text-xs text-gray-500 mt-1">
+													{u.totalActivity || 0}{" "}
+													activities
+												</div>
 											</div>
 										</div>
 									</div>
@@ -418,26 +503,82 @@ export default function AdminDashboard() {
 
 							{/* Summary Stats */}
 							{stats.userStats.length > 0 && (
-								<div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-									<div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-										<div>
-											<p className="text-sm text-gray-600">
-												Most Active User
+								<div className="mt-6 p-6 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-200">
+									<h4 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+										User Activity Distribution
+									</h4>
+									<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 md:gap-6 text-center">
+										<div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+											<p className="text-sm text-gray-600 mb-1">
+												Total Users
 											</p>
-											<p className="font-semibold text-gray-800">
-												{stats.userStats[0]
-													?.firstname &&
-												stats.userStats[0]?.lastname
-													? `${stats.userStats[0].firstname} ${stats.userStats[0].lastname}`
-													: stats.userStats[0]
-															?.username || "N/A"}
+											<p className="text-2xl font-bold text-gray-800">
+												{stats.userStats.length}
 											</p>
 										</div>
-										<div>
-											<p className="text-sm text-gray-600">
+										<div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200 shadow-sm">
+											<p className="text-sm text-yellow-600 mb-1">
+												New Users
+											</p>
+											<p className="text-2xl font-bold text-yellow-700">
+												{
+													stats.userStats.filter(
+														(u) =>
+															u.totalActivity ===
+															0
+													).length
+												}
+											</p>
+										</div>
+										<div className="bg-blue-50 p-4 rounded-lg border border-blue-200 shadow-sm">
+											<p className="text-sm text-blue-600 mb-1">
+												Low Activity
+											</p>
+											<p className="text-2xl font-bold text-blue-700">
+												{
+													stats.userStats.filter(
+														(u) =>
+															u.totalActivity >
+																0 &&
+															u.totalActivity <= 5
+													).length
+												}
+											</p>
+										</div>
+										<div className="bg-purple-50 p-4 rounded-lg border border-purple-200 shadow-sm">
+											<p className="text-sm text-purple-600 mb-1">
+												Medium Activity
+											</p>
+											<p className="text-2xl font-bold text-purple-700">
+												{
+													stats.userStats.filter(
+														(u) =>
+															u.totalActivity >
+																5 &&
+															u.totalActivity <=
+																15
+													).length
+												}
+											</p>
+										</div>
+										<div className="bg-green-50 p-4 rounded-lg border border-green-200 shadow-sm">
+											<p className="text-sm text-green-600 mb-1">
+												High Activity
+											</p>
+											<p className="text-2xl font-bold text-green-700">
+												{
+													stats.userStats.filter(
+														(u) =>
+															u.totalActivity > 15
+													).length
+												}
+											</p>
+										</div>
+										<div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200 shadow-sm">
+											<p className="text-sm text-indigo-600 mb-1">
 												Total Activity
 											</p>
-											<p className="font-semibold text-gray-800">
+											<p className="text-2xl font-bold text-indigo-700">
 												{stats.userStats.reduce(
 													(sum, user) =>
 														sum +
@@ -445,30 +586,6 @@ export default function AdminDashboard() {
 														user.resumesApplied,
 													0
 												)}
-											</p>
-										</div>
-										<div>
-											<p className="text-sm text-gray-600">
-												Avg Available Jobs
-											</p>
-											<p className="font-semibold text-gray-800">
-												{Math.round(
-													stats.userStats.reduce(
-														(sum, user) =>
-															sum +
-															(user.availableJobs ||
-																0),
-														0
-													) / stats.userStats.length
-												)}
-											</p>
-										</div>
-										<div>
-											<p className="text-sm text-gray-600">
-												Active Users
-											</p>
-											<p className="font-semibold text-gray-800">
-												{stats.userStats.length}
 											</p>
 										</div>
 									</div>
