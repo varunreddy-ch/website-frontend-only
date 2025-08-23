@@ -45,6 +45,7 @@ const HomepageNavbar = () => {
 						{[
 							{ name: "Home", href: "#home" },
 							{ name: "Features", href: "#features" },
+							{ name: "Contact", href: "#contact" },
 							{ name: "FAQs", href: "#faqs" },
 						].map((link) => (
 							<button
@@ -98,6 +99,7 @@ const HomepageNavbar = () => {
 							{[
 								{ name: "Home", href: "#home" },
 								{ name: "Features", href: "#features" },
+								{ name: "Contact", href: "#contact" },
 								{ name: "FAQs", href: "#faqs" },
 							].map((link) => (
 								<button
