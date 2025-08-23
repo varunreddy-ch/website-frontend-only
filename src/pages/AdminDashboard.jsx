@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
+import PageFooter from "@/components/PageFooter";
 import API from "@/api";
 import { useNavigate } from "react-router-dom";
 import {
@@ -529,6 +530,8 @@ export default function AdminDashboard() {
 					background-color: rgb(224 231 255);
 				}
 			`}</style>
+
+			<PageFooter />
 		</div>
 	);
 }

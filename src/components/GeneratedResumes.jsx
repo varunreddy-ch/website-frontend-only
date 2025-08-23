@@ -349,6 +349,24 @@ export default function GeneratedResumes({ userId, fullName }) {
 						{children}
 					</div>
 				</div>
+
+				{/* Custom Scrollbar Styles */}
+				<style>{`
+				.custom-scrollbar::-webkit-scrollbar {
+					width: 6px;
+				}
+				.custom-scrollbar::-webkit-scrollbar-track {
+					background: #f1f5f9;
+					border-radius: 3px;
+				}
+				.custom-scrollbar::-webkit-scrollbar-thumb {
+					background: #cbd5e1;
+					border-radius: 3px;
+				}
+				.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+					background: #94a3b8;
+				}
+			`}</style>
 			</div>
 		);
 	};
@@ -629,17 +647,17 @@ export default function GeneratedResumes({ userId, fullName }) {
 												</div>
 												<div className="min-w-0 flex-1">
 													<h3 className="text-xl font-bold text-gray-900 mb-1 line-clamp-2">
-														{resume.job_title ===
-														"Unknown Title"
-															? resume.company_name
-															: resume.job_title}
+														{resume.company_name ||
+															"Company"}
 													</h3>
 													<div className="flex items-center gap-4 text-sm text-gray-600">
 														<div className="flex items-center gap-1.5">
-															<Building className="h-4 w-4 text-gray-500" />
+															<Briefcase className="h-4 w-4 text-gray-500" />
 															<span className="font-medium">
-																{resume.company_name ||
-																	"Company"}
+																{resume.job_title ===
+																"Unknown Title"
+																	? "Unknown Title"
+																	: resume.job_title}
 															</span>
 														</div>
 														<div className="flex items-center gap-1.5">
@@ -653,6 +671,18 @@ export default function GeneratedResumes({ userId, fullName }) {
 															</span>
 														</div>
 													</div>
+
+													{/* Location */}
+													{resume.location && (
+														<div className="flex items-center gap-1.5 text-sm text-gray-500 mt-2">
+															<MapPin className="h-4 w-4 text-gray-400" />
+															<span>
+																{
+																	resume.location
+																}
+															</span>
+														</div>
+													)}
 												</div>
 											</div>
 
@@ -842,8 +872,12 @@ export default function GeneratedResumes({ userId, fullName }) {
 													<Eye className="h-4 w-4 group-open:hidden" />
 													<EyeOff className="h-4 w-4 hidden group-open:block" />
 												</summary>
-												<div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto">
-													{resume.JD}
+												<div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700">
+													<div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+														<p className="whitespace-pre-wrap leading-relaxed">
+															{resume.JD}
+														</p>
+													</div>
 												</div>
 											</details>
 										</div>
@@ -927,6 +961,24 @@ export default function GeneratedResumes({ userId, fullName }) {
 					</div>
 				)}
 			</div>
+
+			{/* Custom Scrollbar Styles */}
+			<style>{`
+				.custom-scrollbar::-webkit-scrollbar {
+					width: 6px;
+				}
+				.custom-scrollbar::-webkit-scrollbar-track {
+					background: #f1f5f9;
+					border-radius: 3px;
+				}
+				.custom-scrollbar::-webkit-scrollbar-thumb {
+					background: #cbd5e1;
+					border-radius: 3px;
+				}
+				.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+					background: #94a3b8;
+				}
+			`}</style>
 		</div>
 	);
 }

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import TierRouteGuard from "@/components/TierRouteGuard";
+import PageFooter from "@/components/PageFooter";
 import {
 	User,
 	FileText,
@@ -746,7 +747,7 @@ export default function Profile() {
 																				{resume.job_title ===
 																				"Unknown Title"
 																					? resume.company_name
-																					: `${resume.job_title} at ${resume.company_name}`}
+																					: `${resume.company_name} - ${resume.job_title}`}
 																			</h4>
 																		</div>
 																		<p className="text-xs text-gray-500">
@@ -825,7 +826,7 @@ export default function Profile() {
 																				{resume.job_title ===
 																				"Unknown Title"
 																					? resume.company_name
-																					: `${resume.job_title} at ${resume.company_name}`}
+																					: `${resume.company_name} - ${resume.job_title}`}
 																			</h4>
 																		</div>
 																		<p className="text-xs text-gray-500">
@@ -892,6 +893,8 @@ export default function Profile() {
 					</div>
 				)}
 			</div>
+
+			<PageFooter />
 		</TierRouteGuard>
 	);
 }

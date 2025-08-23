@@ -13,6 +13,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import PageFooter from "@/components/PageFooter";
 import API from "../api";
 import { setToken, getUser } from "../auth";
 
@@ -146,6 +147,8 @@ export default function SignIn() {
 					</CardContent>
 				</Card>
 			</div>
+
+			<PageFooter />
 		</div>
 	);
 }

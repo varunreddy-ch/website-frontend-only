@@ -6,7 +6,8 @@ export default function ApplierSubmissionForm() {
 		company_name: "",
 		job_description: "",
 		job_link: "",
-		job_title: "Unknown Title",
+		job_title: "",
+		location: "",
 		salary: "",
 		questions: [""],
 	});
@@ -48,8 +49,7 @@ export default function ApplierSubmissionForm() {
 		if (
 			!applierData.company_name.trim() ||
 			!applierData.job_description.trim() ||
-			!applierData.job_link.trim() ||
-			!applierData.job_title.trim()
+			!applierData.job_link.trim()
 		) {
 			console.warn(applierData);
 			setFormError(
@@ -63,12 +63,17 @@ export default function ApplierSubmissionForm() {
 			company_name: applierData.company_name.trim(),
 			job_description: applierData.job_description.trim(),
 			job_link: applierData.job_link.trim(),
-			job_title: applierData.job_title.trim(),
 			salary: applierData.salary.trim(),
 			questions: applierData.questions
 				.map((q) => q.trim())
 				.filter((q) => q.length > 0),
 		};
+
+		// Only include optional fields if they have content
+		if (applierData.job_title?.trim())
+			payload.job_title = applierData.job_title.trim();
+		if (applierData.location?.trim())
+			payload.location = applierData.location.trim();
 
 		try {
 			await API.post("/add-job", payload);
@@ -77,7 +82,8 @@ export default function ApplierSubmissionForm() {
 				company_name: "",
 				job_description: "",
 				job_link: "",
-				job_title: "Unknown Title",
+				job_title: "",
+				location: "",
 				salary: "",
 				questions: [""],
 			});
@@ -140,19 +146,41 @@ export default function ApplierSubmissionForm() {
 				/>
 			</div>
 
-			{/* <div className="space-y-2">
-				<label className="block text-sm font-semibold text-gray-700">
-					Job Title
-				</label>
-				<input
-					type="text"
-					data-lov-id="job-title"
-					className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-					value={applierData.job_title}
-					onChange={(e) => handleChange("job_title", e.target.value)}
-					required
-				/>
-			</div> */}
+			<div className="flex flex-col md:flex-row md:gap-4 space-y-4 md:space-y-0">
+				<div className="w-full md:w-1/2">
+					<label className="block text-sm font-semibold text-gray-700 mb-1">
+						Job Title{" "}
+						<span className="text-gray-400">(optional)</span>
+					</label>
+					<input
+						type="text"
+						data-lov-id="job-title"
+						className="w-full h-[48px] border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+						value={applierData.job_title}
+						onChange={(e) =>
+							handleChange("job_title", e.target.value)
+						}
+						placeholder="e.g., Senior Software Engineer"
+					/>
+				</div>
+
+				<div className="w-full md:w-1/2">
+					<label className="block text-sm font-semibold text-gray-700 mb-1">
+						Location{" "}
+						<span className="text-gray-400">(optional)</span>
+					</label>
+					<input
+						type="text"
+						data-lov-id="location"
+						className="w-full h-[48px] border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+						value={applierData.location}
+						onChange={(e) =>
+							handleChange("location", e.target.value)
+						}
+						placeholder="e.g., New York, NY or Remote"
+					/>
+				</div>
+			</div>
 
 			<div className="space-y-2">
 				<label className="block text-sm font-semibold text-gray-700">

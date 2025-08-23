@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import GeneratedResumes from "@/components/GeneratedResumes";
 import PremiumUpgrade from "@/components/PremiumUpgrade";
+import PageFooter from "@/components/PageFooter";
 import { getUser } from "@/auth";
 import { Briefcase, CheckCircle, RefreshCw } from "lucide-react";
 import API from "@/api";
@@ -198,6 +199,8 @@ export default function Jobs() {
 					</div>
 				</div>
 			</div>
+
+			<PageFooter />
 
 			<style>{`
 				.custom-scrollbar::-webkit-scrollbar {

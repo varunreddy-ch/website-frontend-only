@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getUser } from "../auth";
 import ApplierSubmissionForm from "../components/ApplierSubmissionForm";
 import UserNavbar from "../components/UserNavbar";
+import PageFooter from "@/components/PageFooter";
 
 export default function ApplierForm() {
 	const user = getUser();
@@ -43,6 +44,8 @@ export default function ApplierForm() {
 				{/* Applier Form */}
 				<ApplierSubmissionForm />
 			</div>
+
+			<PageFooter />
 		</div>
 	);
 }

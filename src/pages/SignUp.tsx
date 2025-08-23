@@ -11,6 +11,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import PageFooter from "@/components/PageFooter";
 
 export default function SignUp() {
 	const navigate = useNavigate();
@@ -72,6 +73,8 @@ export default function SignUp() {
 					</CardContent>
 				</Card>
 			</div>
+
+			<PageFooter />
 		</div>
 	);
 }

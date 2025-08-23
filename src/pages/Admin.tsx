@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import API from "../api";
 import Navbar from "../components/Navbar";
 import UserWithResumeForm from "../components/UserWithResumeForm";
-import { Mail, Heart, Edit, Trash2 } from "lucide-react";
+import PageFooter from "@/components/PageFooter";
+import { Edit, Trash2 } from "lucide-react";
 
 import { getUser } from "../auth";
 import { useNavigate } from "react-router-dom";
@@ -310,28 +311,7 @@ export default function Admin() {
 					</div>
 				</div>
 			)}
-			<footer className="bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 text-white py-6 px-4 mt-10">
-				<div className="max-w-4xl mx-auto flex flex-col items-center justify-between gap-4 text-center text-sm sm:flex-row sm:text-left">
-					{/* Left - Contact */}
-					<div className="flex items-center gap-2 text-blue-200">
-						<Mail className="h-4 w-4" />
-						<a
-							href="mailto:support@resumevar.com"
-							className="hover:underline"
-						>
-							support@resumevar.com
-						</a>
-					</div>
-
-					{/* Right - Copyright */}
-					<div className="flex items-center gap-1 text-blue-200">
-						<span>© {new Date().getFullYear()} ResumeVar.</span>
-						<span>Made with</span>
-						<Heart className="h-4 w-4 text-pink-400" />
-						<span>for professionals.</span>
-					</div>
-				</div>
-			</footer>
+			<PageFooter />
 		</div>
 	);
 }
