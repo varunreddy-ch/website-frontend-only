@@ -733,7 +733,8 @@ export default function GeneratedResumes({ userId, fullName }) {
 								{/* Content Section */}
 								<div className="p-6">
 									{/* Action Buttons */}
-									<div className="flex flex-wrap gap-3 mb-6">
+									{/* Make the buttons center aligned */}
+									<div className="flex flex-wrap gap-3 mb-6 justify-center">
 										<Button
 											onClick={() =>
 												handleCopyJDAndResume(
