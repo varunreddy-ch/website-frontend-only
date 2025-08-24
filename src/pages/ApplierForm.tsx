@@ -15,9 +15,15 @@ export default function ApplierForm() {
 			return;
 		}
 
-		// Redirect non-applier users to dashboard
+		// Redirect non-applier users to appropriate page based on role
 		if (user.role !== "applier") {
-			navigate("/dashboard");
+			if (user.role === "admin") {
+				navigate("/admin");
+			} else if (user.role === "tier2") {
+				navigate("/jobs");
+			} else {
+				navigate("/dashboard");
+			}
 			return;
 		}
 	}, [user, navigate]);

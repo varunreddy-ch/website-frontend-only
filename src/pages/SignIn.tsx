@@ -29,7 +29,19 @@ export default function SignIn() {
 	useEffect(() => {
 		const token = localStorage.getItem("token");
 		if (token) {
-			navigate("/dashboard");
+			const user = getUser();
+			const role = user?.role;
+
+			// Redirect based on user role
+			if (role === "admin") {
+				navigate("/admin");
+			} else if (role === "tier2") {
+				navigate("/jobs");
+			} else if (role === "applier") {
+				navigate("/applier-form");
+			} else {
+				navigate("/dashboard");
+			}
 		}
 	}, [navigate]);
 
@@ -49,6 +61,8 @@ export default function SignIn() {
 				navigate("/admin");
 			} else if (role === "tier2") {
 				navigate("/jobs");
+			} else if (role === "applier") {
+				navigate("/applier-form");
 			} else {
 				// tier1 and user roles go to dashboard (generate page)
 				navigate("/dashboard");
