@@ -16,7 +16,7 @@ const HeroSection = () => {
 			<div className="relative container mx-auto px-4 py-16 flex flex-col lg:flex-row items-center min-h-screen">
 				{/* Left Content */}
 				<div className="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0">
-					<h1 className="text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+					<h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
 						Build Smarter
 						<span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
 							{" "}
@@ -26,7 +26,7 @@ const HeroSection = () => {
 						with AI
 					</h1>
 
-					<p className="text-xl lg:text-2xl text-blue-100 mb-8 leading-relaxed">
+					<p className="text-lg lg:text-xl text-blue-100 mb-8 leading-relaxed">
 						Create or upload your resume in seconds using
 						intelligent tools.
 					</p>
@@ -56,23 +56,29 @@ const HeroSection = () => {
 					{/* Animated Metrics */}
 					<div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
 						<div className="animate-fade-in">
-							<div className="text-3xl lg:text-4xl font-bold text-cyan-400 mb-2">
+							<div className="text-2xl lg:text-3xl font-bold text-cyan-400 mb-2">
 								50K+
 							</div>
-							<div className="text-blue-200">Resumes Created</div>
+							<div className="text-blue-200 text-sm">
+								Resumes Created
+							</div>
 						</div>
 						<div className="animate-fade-in delay-200">
-							<div className="text-3xl lg:text-4xl font-bold text-green-400 mb-2">
+							<div className="text-2xl lg:text-3xl font-bold text-green-400 mb-2">
 								98%
 							</div>
-							<div className="text-blue-200">Success Rate</div>
+							<div className="text-blue-200 text-sm">
+								Success Rate
+							</div>
 						</div>
 						<div className="animate-fade-in delay-400">
-							<div className="flex items-center justify-center text-3xl lg:text-4xl font-bold text-yellow-400 mb-2">
+							<div className="flex items-center justify-center text-2xl lg:text-3xl font-bold text-yellow-400 mb-2">
 								4.9
-								<Star className="ml-1 h-6 w-6 fill-current" />
+								<Star className="ml-1 h-5 w-5 fill-current" />
 							</div>
-							<div className="text-blue-200">User Rating</div>
+							<div className="text-blue-200 text-sm">
+								User Rating
+							</div>
 						</div>
 					</div>
 				</div>

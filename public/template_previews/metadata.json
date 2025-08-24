@@ -1,0 +1,63 @@
+{
+  "templates": [
+    "template9",
+    "template10"
+  ],
+  "sample_data": {
+    "full_name": "John Smith",
+    "job_title": "Senior Software Engineer",
+    "contact_info": {
+      "phone": "+1 (555) 123-4567",
+      "email": "john.smith@email.com"
+    },
+    "summary": [
+      "Experienced software engineer with 8+ years in full-stack development",
+      "Led development of scalable web applications serving 100K+ users",
+      "Expert in React, Node.js, Python, and cloud technologies"
+    ],
+    "experience": [
+      {
+        "title": "Senior Software Engineer",
+        "company": "TechCorp Inc.",
+        "duration": "2020 - Present",
+        "achievements": [
+          "Led development of microservices architecture",
+          "Improved system performance by 40%",
+          "Mentored 5 junior developers"
+        ]
+      },
+      {
+        "title": "Software Engineer",
+        "company": "StartupXYZ",
+        "duration": "2018 - 2020",
+        "achievements": [
+          "Built RESTful APIs using Node.js",
+          "Implemented CI/CD pipelines",
+          "Reduced deployment time by 60%"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "degree": "Bachelor of Science in Computer Science",
+        "school": "University of Technology",
+        "year": "2018"
+      }
+    ],
+    "skills": [
+      "JavaScript",
+      "Python",
+      "React",
+      "Node.js",
+      "AWS",
+      "Docker",
+      "MongoDB",
+      "PostgreSQL",
+      "Git",
+      "Agile",
+      "REST APIs"
+    ]
+  },
+  "generated_at": "/Users/varunchanda/Desktop/projects/resumevar/genAI",
+  "note": "These are sample DOCX files. Convert to PDF for web previews."
+}

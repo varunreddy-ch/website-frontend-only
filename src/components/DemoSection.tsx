@@ -49,13 +49,13 @@ const DemoSection: React.FC = () => {
 						</span>
 					</div>
 
-					<h2 className="text-5xl md:text-7xl font-bold text-gray-900 mb-10 leading-tight">
+					<h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-10 leading-tight">
 						See ResumeVar in{" "}
 						<span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
 							Action
 						</span>
 					</h2>
-					<p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+					<p className="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
 						Book a personalized demo with our experts and discover
 						how AI-powered resume creation can transform your career
 						prospects in just 30 minutes.
@@ -67,10 +67,10 @@ const DemoSection: React.FC = () => {
 					<div className="space-y-12">
 						<div className="space-y-10">
 							<div className="text-center lg:text-left">
-								<h3 className="text-4xl font-bold text-gray-900 mb-6">
+								<h3 className="text-3xl font-bold text-gray-900 mb-6">
 									Why Book a Demo?
 								</h3>
-								<p className="text-lg text-gray-600">
+								<p className="text-base text-gray-600">
 									Get a firsthand look at how ResumeVar can
 									revolutionize your resume creation process
 								</p>
@@ -82,10 +82,10 @@ const DemoSection: React.FC = () => {
 										<Video className="h-8 w-8 text-blue-600" />
 									</div>
 									<div>
-										<h4 className="text-2xl font-bold text-gray-900 mb-4">
+										<h4 className="text-xl font-bold text-gray-900 mb-4">
 											Live Platform Walkthrough
 										</h4>
-										<p className="text-gray-600 text-lg leading-relaxed">
+										<p className="text-gray-600 text-base leading-relaxed">
 											See ResumeVar in real-time as our
 											experts demonstrate every feature
 											and capability with real examples.
@@ -98,10 +98,10 @@ const DemoSection: React.FC = () => {
 										<CheckSquare className="h-8 w-8 text-green-600" />
 									</div>
 									<div>
-										<h4 className="text-2xl font-bold text-gray-900 mb-4">
+										<h4 className="text-xl font-bold text-gray-900 mb-4">
 											Real Results & Examples
 										</h4>
-										<p className="text-gray-600 text-lg leading-relaxed">
+										<p className="text-gray-600 text-base leading-relaxed">
 											View actual resume transformations
 											and understand the quality you can
 											expect from our AI-powered platform.
@@ -114,10 +114,10 @@ const DemoSection: React.FC = () => {
 										<Users className="h-8 w-8 text-purple-600" />
 									</div>
 									<div>
-										<h4 className="text-2xl font-bold text-gray-900 mb-4">
+										<h4 className="text-xl font-bold text-gray-900 mb-4">
 											Personalized Q&A Session
 										</h4>
-										<p className="text-gray-600 text-lg leading-relaxed">
+										<p className="text-gray-600 text-base leading-relaxed">
 											Get answers to your specific
 											questions and discuss your unique
 											requirements with our expert team.
@@ -130,10 +130,10 @@ const DemoSection: React.FC = () => {
 										<Clock className="h-8 w-8 text-orange-600" />
 									</div>
 									<div>
-										<h4 className="text-2xl font-bold text-gray-900 mb-4">
+										<h4 className="text-xl font-bold text-gray-900 mb-4">
 											Implementation Guidance
 										</h4>
-										<p className="text-gray-600 text-lg leading-relaxed">
+										<p className="text-gray-600 text-base leading-relaxed">
 											Learn best practices and get tips
 											for maximizing your resume's impact
 											in today's competitive job market.
@@ -148,29 +148,29 @@ const DemoSection: React.FC = () => {
 								<div className="p-3 bg-white/20 rounded-2xl">
 									<Star className="h-8 w-8 text-yellow-300" />
 								</div>
-								<h4 className="text-3xl font-bold">
+								<h4 className="text-2xl font-bold">
 									What You'll Get
 								</h4>
 							</div>
 							<ul className="space-y-4 text-blue-100">
-								<li className="flex items-center gap-4 text-lg">
-									<CheckSquare className="h-6 w-6 text-green-300 flex-shrink-0" />
+								<li className="flex items-center gap-4 text-base">
+									<CheckSquare className="h-5 w-5 text-green-300 flex-shrink-0" />
 									<span>30-minute personalized session</span>
 								</li>
-								<li className="flex items-center gap-4 text-lg">
-									<CheckSquare className="h-6 w-6 text-green-300 flex-shrink-0" />
+								<li className="flex items-center gap-4 text-base">
+									<CheckSquare className="h-5 w-5 text-green-300 flex-shrink-0" />
 									<span>Live platform demonstration</span>
 								</li>
-								<li className="flex items-center gap-4 text-lg">
-									<CheckSquare className="h-6 w-6 text-green-300 flex-shrink-0" />
+								<li className="flex items-center gap-4 text-base">
+									<CheckSquare className="h-5 w-5 text-green-300 flex-shrink-0" />
 									<span>Real resume examples</span>
 								</li>
-								<li className="flex items-center gap-4 text-lg">
-									<CheckSquare className="h-6 w-6 text-green-300 flex-shrink-0" />
+								<li className="flex items-center gap-4 text-base">
+									<CheckSquare className="h-5 w-5 text-green-300 flex-shrink-0" />
 									<span>Pricing & plan details</span>
 								</li>
-								<li className="flex items-center gap-4 text-lg">
-									<CheckSquare className="h-6 w-6 text-green-300 flex-shrink-0" />
+								<li className="flex items-center gap-4 text-base">
+									<CheckSquare className="h-5 w-5 text-green-300 flex-shrink-0" />
 									<span>No sales pressure</span>
 								</li>
 							</ul>
@@ -186,10 +186,10 @@ const DemoSection: React.FC = () => {
 										<Calendar className="h-10 w-10 text-white" />
 									</div>
 								</div>
-								<CardTitle className="text-3xl mb-3">
+								<CardTitle className="text-2xl mb-3">
 									Book Your Demo
 								</CardTitle>
-								<CardDescription className="text-green-100 text-lg">
+								<CardDescription className="text-green-100 text-base">
 									Choose your preferred time slot
 								</CardDescription>
 							</CardHeader>
@@ -199,10 +199,10 @@ const DemoSection: React.FC = () => {
 										<div className="bg-green-100 p-6 rounded-2xl inline-block mb-6">
 											<Video className="h-12 w-12 text-green-600" />
 										</div>
-										<h3 className="text-2xl font-bold text-gray-900 mb-4">
+										<h3 className="text-xl font-bold text-gray-900 mb-4">
 											Schedule Your Session
 										</h3>
-										<p className="text-gray-600 text-lg">
+										<p className="text-gray-600 text-base">
 											Pick a date and time that works for
 											you. We'll confirm within 24 hours.
 										</p>
@@ -211,46 +211,45 @@ const DemoSection: React.FC = () => {
 									<div className="space-y-5">
 										<div className="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors duration-200">
 											<Clock className="h-7 w-7 text-blue-600" />
-											<span className="text-lg text-gray-700 font-semibold">
+											<span className="text-base text-gray-700 font-semibold">
 												30-minute sessions
 											</span>
 										</div>
 
 										<div className="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors duration-200">
-											<Video className="h-7 w-7 text-green-600" />
-											<span className="text-lg text-gray-700 font-semibold">
+											<Video className="h-6 w-6 text-green-600" />
+											<span className="text-base text-gray-700 font-semibold">
 												Zoom, Google Meet, or Teams
 											</span>
 										</div>
 
 										<div className="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors duration-200">
-											<Users className="h-7 w-7 text-purple-600" />
-											<span className="text-lg text-gray-700 font-semibold">
+											<Users className="h-6 w-6 text-purple-600" />
+											<span className="text-base text-gray-700 font-semibold">
 												One-on-one with experts
 											</span>
 										</div>
 									</div>
+								</div>
 
-									<Link to="/demo">
-										<Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-5 text-xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 rounded-2xl">
-											<Calendar className="h-7 w-7 mr-3" />
-											Book Demo Now
-											<ArrowRight className="h-7 w-7 ml-3" />
-										</Button>
-									</Link>
+								<Link to="/demo">
+									<Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-5 text-xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 rounded-2xl">
+										<Calendar className="h-7 w-7 mr-3" />
+										Book Demo Now
+										<ArrowRight className="h-7 w-7 ml-3" />
+									</Button>
+								</Link>
 
-									<div className="text-center">
-										<p className="text-sm text-gray-500 mb-3">
-											Free demo • No commitment required •
-											Available worldwide
-										</p>
-										<div className="flex items-center justify-center gap-2 text-xs text-gray-400">
-											<Globe className="h-3 w-3" />
-											<span>
-												Times shown in your local
-												timezone
-											</span>
-										</div>
+								<div className="text-center">
+									<p className="text-sm text-gray-500 mb-3">
+										Free demo • No commitment required •
+										Available worldwide
+									</p>
+									<div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+										<Globe className="h-3 w-3" />
+										<span>
+											Times shown in your local timezone
+										</span>
 									</div>
 								</div>
 							</CardContent>
@@ -377,7 +376,7 @@ const DemoSection: React.FC = () => {
 								<Link to="/signup">
 									<Button
 										variant="outline"
-										className="border-2 border-white/30 text-white hover:bg-white/10 px-10 py-6 text-xl font-semibold backdrop-blur-sm transition-all duration-300 rounded-2xl"
+										className="bg-white text-blue-600 hover:bg-gray-100 px-12 py-6 text-2xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 flex items-center gap-4 rounded-2xl"
 									>
 										Try It Free
 									</Button>

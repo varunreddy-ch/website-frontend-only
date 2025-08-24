@@ -45,6 +45,8 @@ const HomepageNavbar = () => {
 						{[
 							{ name: "Home", href: "#home" },
 							{ name: "Features", href: "#features" },
+							{ name: "Templates", href: "#templates" },
+							{ name: "Demo", href: "#demo" },
 							{ name: "Contact", href: "#contact" },
 							{ name: "FAQs", href: "#faqs" },
 						].map((link) => (
@@ -107,6 +109,8 @@ const HomepageNavbar = () => {
 							{[
 								{ name: "Home", href: "#home" },
 								{ name: "Features", href: "#features" },
+								{ name: "Templates", href: "#templates" },
+								{ name: "Demo", href: "#demo" },
 								{ name: "Contact", href: "#contact" },
 								{ name: "FAQs", href: "#faqs" },
 							].map((link) => (
