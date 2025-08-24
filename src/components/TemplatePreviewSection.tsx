@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-	ChevronLeft,
-	ChevronRight,
-	Eye,
-	Download,
-	Mail,
-	Calendar,
-	X,
-} from "lucide-react";
+import { Eye, Download, Mail, Calendar, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -99,55 +91,7 @@ const TemplatePreviewSection: React.FC = () => {
 		number | null
 	>(null);
 
-	const scrollLeft = () => {
-		if (scrollContainerRef.current) {
-			const newIndex =
-				currentTemplateIndex === 0
-					? templates.length - 1
-					: currentTemplateIndex - 1;
-			setCurrentTemplateIndex(newIndex);
-
-			// If we're at the beginning, scroll to the end smoothly
-			if (newIndex === templates.length - 1) {
-				scrollContainerRef.current.scrollTo({
-					left:
-						scrollContainerRef.current.scrollWidth -
-						scrollContainerRef.current.clientWidth,
-					behavior: "smooth",
-				});
-			} else {
-				scrollContainerRef.current.scrollBy({
-					left: -400,
-					behavior: "smooth",
-				});
-			}
-		}
-	};
-
-	const scrollRight = () => {
-		if (scrollContainerRef.current) {
-			const newIndex =
-				currentTemplateIndex === templates.length - 1
-					? 0
-					: currentTemplateIndex + 1;
-			setCurrentTemplateIndex(newIndex);
-
-			// If we're at the end, scroll to the beginning smoothly
-			if (newIndex === 0) {
-				scrollContainerRef.current.scrollTo({
-					left: 0,
-					behavior: "smooth",
-				});
-			} else {
-				scrollContainerRef.current.scrollBy({
-					left: 400,
-					behavior: "smooth",
-				});
-			}
-		}
-	};
-
-	// Auto-scroll functionality with circular behavior
+	// Auto-scroll functionality with smooth restart from end to start
 	useEffect(() => {
 		if (isScrolling) {
 			scrollIntervalRef.current = setInterval(() => {
@@ -157,19 +101,44 @@ const TemplatePreviewSection: React.FC = () => {
 
 					// If we're at the end, smoothly scroll back to the beginning
 					if (scrollLeft >= scrollWidth - clientWidth - 10) {
+						// Pause the interval temporarily for smooth transition
+						if (scrollIntervalRef.current) {
+							clearInterval(scrollIntervalRef.current);
+						}
+
+						// Smooth scroll back to start with slower speed
 						scrollContainerRef.current.scrollTo({
 							left: 0,
 							behavior: "smooth",
 						});
+
+						// Reset template index
 						setCurrentTemplateIndex(0);
-					} else {
-						scrollContainerRef.current.scrollBy({
-							left: 1,
-							behavior: "smooth",
-						});
+
+						// Resume scrolling after a brief pause to allow smooth transition
+						setTimeout(() => {
+							if (isScrolling) {
+								scrollIntervalRef.current = setInterval(() => {
+									if (scrollContainerRef.current) {
+										scrollContainerRef.current.scrollBy({
+											left: 1,
+											behavior: "smooth",
+										});
+									}
+								}, 25);
+							}
+						}, 2000); // 2 second pause for smooth transition
+
+						return;
 					}
+
+					// Continue scrolling
+					scrollContainerRef.current.scrollBy({
+						left: 1,
+						behavior: "smooth",
+					});
 				}
-			}, 25); // Slower scroll for smoother movement
+			}, 2); // Slower scroll for smoother movement
 		}
 
 		return () => {
@@ -224,9 +193,9 @@ const TemplatePreviewSection: React.FC = () => {
 			<div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-400/5 to-purple-400/5 rounded-full blur-3xl"></div>
 			<div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-tl from-purple-400/5 to-blue-400/5 rounded-full blur-3xl"></div>
 
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+			<div className="w-full relative z-10">
 				{/* Section Header */}
-				<div className="text-center mb-16">
+				<div className="text-center mb-16 px-4 sm:px-6 lg:px-8">
 					<h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-8 leading-tight">
 						Choose Your Perfect{" "}
 						<span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent animate-gradient">
@@ -241,7 +210,7 @@ const TemplatePreviewSection: React.FC = () => {
 				</div>
 
 				{/* Current Template Indicator */}
-				<div className="text-center mb-12">
+				<div className="text-center mb-12 px-4 sm:px-6 lg:px-8">
 					<div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-sm px-8 py-4 rounded-full shadow-lg border border-blue-100">
 						<div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
 						<p className="text-lg text-gray-700 font-medium">
@@ -255,28 +224,12 @@ const TemplatePreviewSection: React.FC = () => {
 					</div>
 				</div>
 
-				{/* Templates Grid with Horizontal Scrolling */}
-				<div className="relative group">
-					{/* Left Scroll Button */}
-					<button
-						onClick={scrollLeft}
-						className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-full p-4 shadow-2xl hover:shadow-3xl transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 hover:-translate-x-1"
-					>
-						<ChevronLeft className="h-7 w-7 text-gray-600" />
-					</button>
-
-					{/* Right Scroll Button */}
-					<button
-						onClick={scrollRight}
-						className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-full p-4 shadow-2xl hover:shadow-3xl transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 hover:translate-x-1"
-					>
-						<ChevronRight className="h-7 w-7 text-gray-600" />
-					</button>
-
-					{/* Scrollable Container */}
+				{/* Templates Grid with Full Width Horizontal Scrolling */}
+				<div className="w-full">
+					{/* Scrollable Container - Full Width */}
 					<div
 						ref={scrollContainerRef}
-						className="flex gap-8 overflow-x-auto scrollbar-hide pb-8 px-4"
+						className="flex gap-8 overflow-x-auto scrollbar-hide pb-8 px-8"
 						style={{
 							scrollbarWidth: "none",
 							msOverflowStyle: "none",
@@ -355,7 +308,7 @@ const TemplatePreviewSection: React.FC = () => {
 				</div>
 
 				{/* Custom Template CTA */}
-				<div className="text-center mt-16 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 rounded-3xl p-10 shadow-2xl border border-blue-100/50 backdrop-blur-sm relative overflow-hidden">
+				<div className="text-center mt-16 mx-4 sm:mx-6 lg:mx-8 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 rounded-3xl p-10 shadow-2xl border border-blue-100/50 backdrop-blur-sm relative overflow-hidden">
 					{/* Background decorative elements */}
 					<div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl"></div>
 					<div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-purple-400/10 to-blue-400/10 rounded-full blur-3xl"></div>
@@ -388,40 +341,11 @@ const TemplatePreviewSection: React.FC = () => {
 								</span>
 							</div>
 						</div>
-
-						<div className="flex flex-col sm:flex-row gap-6 justify-center">
-							<Button
-								className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-4 text-xl font-bold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-110 hover:-translate-y-1 border-0"
-								onClick={() => {
-									window.open(
-										"mailto:support@resumevar.com?subject=Custom Template Request&body=Hi, I would like to request a custom resume template. Please provide more details about your requirements.",
-										"_blank"
-									);
-								}}
-							>
-								<Mail className="h-5 w-5 mr-3" />
-								Contact Support
-							</Button>
-							<Button
-								variant="outline"
-								className="border-3 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-10 py-4 text-xl font-bold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-110 hover:-translate-y-1 bg-white/90 backdrop-blur-sm"
-								onClick={() => {
-									// You can replace this with your actual demo booking URL
-									window.open(
-										"https://calendly.com/resumevar/demo",
-										"_blank"
-									);
-								}}
-							>
-								<Calendar className="h-5 w-5 mr-3" />
-								Book Demo
-							</Button>
-						</div>
 					</div>
 				</div>
 
 				{/* Bottom CTA */}
-				<div className="text-center mt-20">
+				<div className="text-center mt-20 px-4 sm:px-6 lg:px-8">
 					<div className="bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-blue-600/10 rounded-3xl p-8 border border-blue-200/50">
 						<p className="text-xl text-gray-700 mb-8 font-medium">
 							Ready to get started? Choose your template and begin
