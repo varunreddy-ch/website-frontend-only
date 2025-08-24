@@ -29,11 +29,7 @@ const UserNavbar = () => {
 				<div className="flex items-center justify-between h-16">
 					{/* Logo */}
 					<Link
-						to={
-							user?.role === "applier"
-								? "/applier-form"
-								: "/dashboard"
-						}
+						to="/dashboard"
 						className="flex items-center space-x-2 cursor-pointer"
 					>
 						<div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -46,34 +42,24 @@ const UserNavbar = () => {
 
 					{/* Desktop Navigation */}
 					<div className="hidden md:flex items-center space-x-8">
-						<Link
-							to={
-								user?.role === "applier"
-									? "/applier-form"
-									: "/dashboard"
-							}
-						>
-							<Button
-								variant={
-									location.pathname === "/dashboard" ||
-									(user?.role === "applier" &&
-										location.pathname === "/applier-form")
-										? "default"
-										: "ghost"
-								}
-								className={`transition-colors duration-200 font-medium text-sm ${
-									location.pathname === "/dashboard" ||
-									(user?.role === "applier" &&
-										location.pathname === "/applier-form")
-										? "bg-blue-600 text-white hover:bg-blue-700"
-										: "text-gray-700 hover:text-blue-600"
-								}`}
-							>
-								{user?.role === "applier"
-									? "Submit Job"
-									: "Generate"}
-							</Button>
-						</Link>
+						{user?.role !== "applier" && (
+							<Link to="/dashboard">
+								<Button
+									variant={
+										location.pathname === "/dashboard"
+											? "default"
+											: "ghost"
+									}
+									className={`transition-colors duration-200 font-medium text-sm ${
+										location.pathname === "/dashboard"
+											? "bg-blue-600 text-white hover:bg-blue-700"
+											: "text-gray-700 hover:text-blue-600"
+									}`}
+								>
+									Generate
+								</Button>
+							</Link>
+						)}
 						{user?.role === "tier2" && (
 							<Link to="/jobs">
 								<Button
@@ -105,42 +91,22 @@ const UserNavbar = () => {
 							</Button>
 						)}
 						{user?.role === "applier" && (
-							<>
-								<Link to="/jobs">
-									<Button
-										variant={
-											location.pathname === "/jobs"
-												? "default"
-												: "ghost"
-										}
-										className={`transition-colors duration-200 font-medium text-sm ${
-											location.pathname === "/jobs"
-												? "bg-blue-600 text-white hover:bg-blue-700"
-												: "text-gray-700 hover:text-blue-600"
-										}`}
-									>
-										Jobs
-									</Button>
-								</Link>
-								<Link to="/applier-form">
-									<Button
-										variant={
-											location.pathname ===
-											"/applier-form"
-												? "default"
-												: "ghost"
-										}
-										className={`transition-colors duration-200 font-medium text-sm ${
-											location.pathname ===
-											"/applier-form"
-												? "bg-blue-600 text-white hover:bg-blue-700"
-												: "text-gray-700 hover:text-blue-600"
-										}`}
-									>
-										Applier Form
-									</Button>
-								</Link>
-							</>
+							<Link to="/applier-form">
+								<Button
+									variant={
+										location.pathname === "/applier-form"
+											? "default"
+											: "ghost"
+									}
+									className={`transition-colors duration-200 font-medium text-sm ${
+										location.pathname === "/applier-form"
+											? "bg-blue-600 text-white hover:bg-blue-700"
+											: "text-gray-700 hover:text-blue-600"
+									}`}
+								>
+									Submit Job
+								</Button>
+							</Link>
 						)}
 						{user?.role === "tier2" && (
 							<Link to={getProfileLink()}>
@@ -210,37 +176,25 @@ const UserNavbar = () => {
 				{isMenuOpen && (
 					<div className="md:hidden py-4 border-t border-gray-100 bg-white">
 						<div className="flex flex-col space-y-3">
-							<Link
-								to={
-									user?.role === "applier"
-										? "/applier-form"
-										: "/dashboard"
-								}
-							>
-								<Button
-									variant={
-										location.pathname === "/dashboard" ||
-										(user?.role === "applier" &&
-											location.pathname ===
-												"/applier-form")
-											? "default"
-											: "ghost"
-									}
-									className={`transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
-										location.pathname === "/dashboard" ||
-										(user?.role === "applier" &&
-											location.pathname ===
-												"/applier-form")
-											? "bg-blue-600 text-white hover:bg-blue-700"
-											: "text-gray-700 hover:text-blue-600"
-									}`}
-									onClick={() => setIsMenuOpen(false)}
-								>
-									{user?.role === "applier"
-										? "Submit Job"
-										: "Generate"}
-								</Button>
-							</Link>
+							{user?.role !== "applier" && (
+								<Link to="/dashboard">
+									<Button
+										variant={
+											location.pathname === "/dashboard"
+												? "default"
+												: "ghost"
+										}
+										className={`transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
+											location.pathname === "/dashboard"
+												? "bg-blue-600 text-white hover:bg-blue-700"
+												: "text-gray-700 hover:text-blue-600"
+										}`}
+										onClick={() => setIsMenuOpen(false)}
+									>
+										Generate
+									</Button>
+								</Link>
+							)}
 							{user?.role === "tier2" && (
 								<Link to="/jobs">
 									<Button
@@ -277,44 +231,25 @@ const UserNavbar = () => {
 								</Button>
 							)}
 							{user?.role === "applier" && (
-								<>
-									<Link to="/jobs">
-										<Button
-											variant={
-												location.pathname === "/jobs"
-													? "default"
-													: "ghost"
-											}
-											className={`transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
-												location.pathname === "/jobs"
-													? "bg-blue-600 text-white hover:bg-blue-700"
-													: "text-gray-700 hover:text-blue-600"
-											}`}
-											onClick={() => setIsMenuOpen(false)}
-										>
-											Jobs
-										</Button>
-									</Link>
-									<Link to="/applier-form">
-										<Button
-											variant={
-												location.pathname ===
-												"/applier-form"
-													? "default"
-													: "ghost"
-											}
-											className={`transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
-												location.pathname ===
-												"/applier-form"
-													? "bg-blue-600 text-white hover:bg-blue-700"
-													: "text-gray-700 hover:text-blue-600"
-											}`}
-											onClick={() => setIsMenuOpen(false)}
-										>
-											Applier Form
-										</Button>
-									</Link>
-								</>
+								<Link to="/applier-form">
+									<Button
+										variant={
+											location.pathname ===
+											"/applier-form"
+												? "default"
+												: "ghost"
+										}
+										className={`transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
+											location.pathname ===
+											"/applier-form"
+												? "bg-blue-600 text-white hover:bg-blue-700"
+												: "text-gray-700 hover:text-blue-600"
+										}`}
+										onClick={() => setIsMenuOpen(false)}
+									>
+										Submit Job
+									</Button>
+								</Link>
 							)}
 							{user?.role === "tier2" && (
 								<Link to={getProfileLink()}>

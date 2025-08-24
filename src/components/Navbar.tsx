@@ -14,7 +14,6 @@ const Navbar = () => {
 		location.pathname === "/dashboard" ||
 		location.pathname === "/profile" ||
 		location.pathname === "/jobs" ||
-		location.pathname === "/applier-form" ||
 		location.pathname.startsWith("/profile/");
 	const isAdmin = location.pathname.startsWith("/admin");
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment } from "react";
 import API from "../api";
 import PDFPreview from "../components/PDFPreview";
-import { getUser, logout } from "../auth";
+import { getUser, logout, isTokenExpired } from "../auth";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import PageFooter from "@/components/PageFooter";
@@ -40,12 +40,12 @@ export default function Dashboard() {
 		}
 
 		// Check if token is expired
-		if (user && user.exp && user.exp < Date.now() / 1000) {
+		if (isTokenExpired()) {
 			logout();
 			return;
 		}
 
-		// Redirect applier users to applier form by default
+		// Redirect applier users to submit job page
 		if (user.role === "applier") {
 			navigate("/applier-form");
 			return;
@@ -55,28 +55,13 @@ export default function Dashboard() {
 		// No additional checks needed here
 	}, [user, navigate]);
 
-	// Check token expiration periodically with warning
+	// Check token expiration periodically
 	useEffect(() => {
 		const checkTokenInterval = setInterval(() => {
-			const user = getUser();
-			if (user && user.exp) {
-				const timeUntilExpiry = user.exp - Date.now() / 1000;
-
-				// If token expires in less than 10 minutes, show warning
-				if (timeUntilExpiry < 600 && timeUntilExpiry > 0) {
-					alert(
-						`Your session will expire in ${Math.floor(
-							timeUntilExpiry / 60
-						)} minutes. Please save your work.`
-					);
-				}
-
-				// If token has expired, logout
-				if (timeUntilExpiry <= 0) {
-					logout();
-				}
+			if (isTokenExpired()) {
+				logout();
 			}
-		}, 300000); // Check every 5 minutes
+		}, 5000); // Check every 5 seconds
 
 		return () => clearInterval(checkTokenInterval);
 	}, []);

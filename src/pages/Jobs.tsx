@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
+import UserNavbar from "@/components/UserNavbar";
 import GeneratedResumes from "@/components/GeneratedResumes";
 import PremiumUpgrade from "@/components/PremiumUpgrade";
 import PageFooter from "@/components/PageFooter";
@@ -31,8 +32,8 @@ export default function Jobs() {
 		}
 		setUser(currentUser);
 
-		// Only fetch job stats for tier2 users
-		if (currentUser.role === "tier2") {
+		// Only fetch job stats for tier2 and applier users
+		if (currentUser.role === "tier2" || currentUser.role === "applier") {
 			fetchJobStats();
 		}
 	}, []);
@@ -132,12 +133,11 @@ export default function Jobs() {
 		);
 	}
 
-	// If user is applier, show jobs page but without stats
+	// If user is applier, show jobs page with UserNavbar
 	if (currentUser && currentUser.role === "applier") {
 		return (
 			<div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
-				<Navbar />
-
+				<UserNavbar />
 				<div className="max-w-7xl mx-auto p-6 mt-16 space-y-8">
 					{/* Header Section */}
 					<div className="flex items-center justify-between">
@@ -146,8 +146,8 @@ export default function Jobs() {
 								💼 Available Jobs
 							</h1>
 							<p className="text-lg text-gray-600 max-w-2xl">
-								Browse available job opportunities and track
-								your applications
+								Browse and apply to job opportunities shared by
+								the community
 							</p>
 						</div>
 					</div>
@@ -192,98 +192,92 @@ export default function Jobs() {
 		);
 	}
 
-	// Only tier2 users get the full jobs page with stats
-	if (currentUser && currentUser.role === "tier2") {
-		return (
-			<div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
-				<Navbar />
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+			<Navbar />
 
-				<div className="max-w-7xl mx-auto p-6 mt-16 space-y-8">
-					{/* Header Section */}
-					<div className="flex items-center justify-between">
-						<div className="flex-1">
-							<h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-								💼 Jobs for You
-							</h1>
-							<p className="text-lg text-gray-600 max-w-2xl">
-								Track your generated resumes and discover new
-								opportunities tailored to your profile
-							</p>
-						</div>
-						<Button
-							onClick={handleRefresh}
-							disabled={refreshing}
-							className="inline-flex items-center gap-2 px-4 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							<RefreshCw
-								className={`h-5 w-5 ${
-									refreshing ? "animate-spin" : ""
-								}`}
-							/>
-							{refreshing ? "Refreshing..." : "Refresh"}
-						</Button>
+			<div className="max-w-7xl mx-auto p-6 mt-16 space-y-8">
+				{/* Header Section */}
+				<div className="flex items-center justify-between">
+					<div className="flex-1">
+						<h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+							💼 Jobs for You
+						</h1>
+						<p className="text-lg text-gray-600 max-w-2xl">
+							Track your generated resumes and discover new
+							opportunities tailored to your profile
+						</p>
 					</div>
-
-					{/* Enhanced Stats Cards */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<StatCard
-							title="Available Jobs"
-							value={jobStats.availableJobs}
-							icon={Briefcase}
-							color="bg-gradient-to-r from-blue-500 to-blue-600"
-							subtitle="New opportunities"
-							change=""
+					<Button
+						onClick={handleRefresh}
+						disabled={refreshing}
+						className="inline-flex items-center gap-2 px-4 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						<RefreshCw
+							className={`h-5 w-5 ${
+								refreshing ? "animate-spin" : ""
+							}`}
 						/>
-						<StatCard
-							title="Applied Today"
-							value={jobStats.appliedToday}
-							icon={CheckCircle}
-							color="bg-gradient-to-r from-green-500 to-green-600"
-							subtitle="Today's applications"
-							change=""
-						/>
-					</div>
-
-					{/* Generated Resumes Section */}
-					<div className="bg-white rounded-xl shadow-lg p-8">
-						<div className="max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-							<GeneratedResumes
-								key={refreshKey}
-								fullName={
-									currentUser?.firstname
-										? currentUser.firstname
-												.split(" ")
-												.filter(Boolean)
-												.join("_")
-										: "user"
-								}
-							/>
-						</div>
-					</div>
+						{refreshing ? "Refreshing..." : "Refresh"}
+					</Button>
 				</div>
 
-				<PageFooter />
+				{/* Enhanced Stats Cards */}
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<StatCard
+						title="Available Jobs"
+						value={jobStats.availableJobs}
+						icon={Briefcase}
+						color="bg-gradient-to-r from-blue-500 to-blue-600"
+						subtitle="New opportunities"
+						change=""
+					/>
+					<StatCard
+						title="Applied Today"
+						value={jobStats.appliedToday}
+						icon={CheckCircle}
+						color="bg-gradient-to-r from-green-500 to-green-600"
+						subtitle="Today's applications"
+						change=""
+					/>
+				</div>
 
-				<style>{`
-					.custom-scrollbar::-webkit-scrollbar {
-						width: 8px;
-					}
-					.custom-scrollbar::-webkit-scrollbar-track {
-						background: #f1f5f9;
-						border-radius: 4px;
-					}
-					.custom-scrollbar::-webkit-scrollbar-thumb {
-						background: #cbd5e1;
-						border-radius: 4px;
-					}
-					.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-						background: #94a3b8;
-					}
-				`}</style>
+				{/* Generated Resumes Section */}
+				<div className="bg-white rounded-xl shadow-lg p-8">
+					<div className="max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+						<GeneratedResumes
+							key={refreshKey}
+							fullName={
+								currentUser?.firstname
+									? currentUser.firstname
+											.split(" ")
+											.filter(Boolean)
+											.join("_")
+									: "user"
+							}
+						/>
+					</div>
+				</div>
 			</div>
-		);
-	}
 
-	// Default case - should not reach here for authenticated users
-	return null;
+			<PageFooter />
+
+			<style>{`
+				.custom-scrollbar::-webkit-scrollbar {
+					width: 8px;
+				}
+				.custom-scrollbar::-webkit-scrollbar-track {
+					background: #f1f5f9;
+					border-radius: 4px;
+				}
+				.custom-scrollbar::-webkit-scrollbar-thumb {
+					background: #cbd5e1;
+					border-radius: 4px;
+				}
+				.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+					background: #94a3b8;
+				}
+			`}</style>
+		</div>
+	);
 }

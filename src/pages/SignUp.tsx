@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import { getUser } from "../auth";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -18,7 +19,22 @@ export default function SignUp() {
 
 	useEffect(() => {
 		const token = localStorage.getItem("token");
-		if (token) navigate("/dashboard");
+		if (token) {
+			const user = getUser();
+			const role = user?.role;
+
+			// Redirect based on user role
+			if (role === "admin") {
+				navigate("/admin");
+			} else if (role === "tier2") {
+				navigate("/jobs");
+			} else if (role === "applier") {
+				navigate("/applier-form");
+			} else {
+				// tier1 and user roles go to dashboard
+				navigate("/dashboard");
+			}
+		}
 	}, [navigate]);
 
 	return (

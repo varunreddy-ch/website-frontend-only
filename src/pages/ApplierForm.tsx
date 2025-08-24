@@ -22,6 +22,7 @@ export default function ApplierForm() {
 			} else if (user.role === "tier2") {
 				navigate("/jobs");
 			} else {
+				// tier1 and user roles go to dashboard
 				navigate("/dashboard");
 			}
 			return;
@@ -40,14 +41,14 @@ export default function ApplierForm() {
 				{/* Header Section */}
 				<div className="text-center mb-8">
 					<h1 className="text-3xl font-bold text-gray-800 mb-2">
-						Submit Job Information
+						Submit Job
 					</h1>
 					<p className="text-gray-600">
 						Share job opportunities with the community
 					</p>
 				</div>
 
-				{/* Applier Form */}
+				{/* Submit Job Form */}
 				<ApplierSubmissionForm />
 			</div>
 

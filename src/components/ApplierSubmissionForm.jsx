@@ -105,7 +105,7 @@ export default function ApplierSubmissionForm() {
 				className="text-2xl font-bold text-center text-blue-700"
 				data-lov-id="applier-form-heading"
 			>
-				Applier Submission
+				Submit Job
 			</h2>
 
 			{formError && (
@@ -278,7 +278,7 @@ export default function ApplierSubmissionForm() {
 					data-lov-id="submit-applier"
 					className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
 				>
-					{submitting ? "Submitting..." : "Submit Applier Info"}
+					{submitting ? "Submitting..." : "Submit Job"}
 				</button>
 			</div>
 		</form>

@@ -40,6 +40,7 @@ export default function SignIn() {
 			} else if (role === "applier") {
 				navigate("/applier-form");
 			} else {
+				// tier1 and user roles go to dashboard
 				navigate("/dashboard");
 			}
 		}
