@@ -60,6 +60,14 @@ const HomepageNavbar = () => {
 
 					{/* Desktop CTA Buttons */}
 					<div className="hidden md:flex items-center space-x-3">
+						<Link to="/demo">
+							<Button
+								variant="outline"
+								className="border-green-500 text-green-600 hover:bg-green-50 font-medium"
+							>
+								Book Demo
+							</Button>
+						</Link>
 						<Link to="/signin">
 							<Button
 								variant="outline"
@@ -114,6 +122,14 @@ const HomepageNavbar = () => {
 								</button>
 							))}
 							<div className="flex flex-col space-y-3 px-4 pt-4 border-t border-gray-100">
+								<Link to="/demo">
+									<Button
+										variant="outline"
+										className="border-green-500 text-green-600 hover:bg-green-50 font-medium w-full"
+									>
+										Book Demo
+									</Button>
+								</Link>
 								<Link to="/signin">
 									<Button
 										variant="outline"

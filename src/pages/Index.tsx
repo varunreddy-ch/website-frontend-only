@@ -6,6 +6,7 @@ import PricingSection from "@/components/PricingSection";
 import FAQSection from "@/components/FAQSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
+import DemoSection from "@/components/DemoSection";
 
 const Index = () => {
 	return (
@@ -16,6 +17,7 @@ const Index = () => {
 			</div>
 			<FeaturesSection />
 			<UploadSection />
+			<DemoSection />
 			{/* <div id="pricing">
         <PricingSection />
       </div> */}

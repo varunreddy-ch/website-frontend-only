@@ -16,6 +16,7 @@ import {
 	BarChart3,
 	UserCheck,
 	FileCheck,
+	Video,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -104,12 +105,20 @@ export default function AdminDashboard() {
 								user activity
 							</p>
 						</div>
-						<button
-							onClick={() => navigate("/admin")}
-							className="px-6 py-3 text-sm bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
-						>
-							User Management →
-						</button>
+						<div className="flex gap-3">
+							<button
+								onClick={() => navigate("/admin")}
+								className="px-6 py-3 text-sm bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+							>
+								User Management →
+							</button>
+							<button
+								onClick={() => navigate("/admin/demos")}
+								className="px-6 py-3 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+							>
+								Demo Management →
+							</button>
+						</div>
 					</div>
 
 					{/* Overview Stats */}
@@ -173,6 +182,38 @@ export default function AdminDashboard() {
 							icon={FileCheck}
 							color="bg-gradient-to-r from-red-500 to-red-600"
 							subtitle="Past deadline"
+						/>
+					</div>
+
+					{/* Demo Statistics */}
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+						<StatCard
+							label="Total Demos"
+							value={stats.totalDemos || 0}
+							icon={Video}
+							color="bg-gradient-to-r from-pink-500 to-pink-600"
+							subtitle="Booked demos"
+						/>
+						<StatCard
+							label="Pending Demos"
+							value={stats.pendingDemos || 0}
+							icon={Clock}
+							color="bg-gradient-to-r from-yellow-500 to-yellow-600"
+							subtitle="Awaiting confirmation"
+						/>
+						<StatCard
+							label="Confirmed Demos"
+							value={stats.confirmedDemos || 0}
+							icon={CheckCircle}
+							color="bg-gradient-to-r from-emerald-500 to-emerald-600"
+							subtitle="Scheduled sessions"
+						/>
+						<StatCard
+							label="Completed Demos"
+							value={stats.completedDemos || 0}
+							icon={Users}
+							color="bg-gradient-to-r from-blue-500 to-blue-600"
+							subtitle="Finished sessions"
 						/>
 					</div>
 
