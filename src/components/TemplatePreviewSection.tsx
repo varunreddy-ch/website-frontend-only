@@ -241,7 +241,7 @@ const TemplatePreviewSection: React.FC = () => {
 						{templates.map((template, index) => (
 							<Card
 								key={template.id}
-								className={`min-w-[350px] max-w-[350px] bg-white shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border-0 rounded-2xl overflow-hidden ${
+								className={`min-w-[350px] max-w-[350px] bg-white shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border-0 rounded-2xl overflow-hidden cursor-pointer ${
 									index === currentTemplateIndex
 										? "ring-4 ring-blue-500/30 shadow-2xl"
 										: ""
@@ -252,6 +252,14 @@ const TemplatePreviewSection: React.FC = () => {
 								onMouseLeave={() =>
 									setHoveredTemplateIndex(null)
 								}
+								onClick={() => {
+									console.log(
+										"Card clicked for template:",
+										template.name
+									);
+									setSelectedTemplate(template.preview);
+									setIsPreviewOpen(true);
+								}}
 							>
 								<CardHeader className="pb-3 bg-gradient-to-r from-gray-50 to-blue-50/30">
 									<CardTitle className="text-lg font-bold text-gray-800 text-center">
@@ -262,12 +270,7 @@ const TemplatePreviewSection: React.FC = () => {
 									{/* Template Preview Card */}
 									<div className="w-full h-80 bg-gradient-to-br from-gray-100 to-blue-50 rounded-xl overflow-hidden mb-3 border border-gray-200 relative group">
 										{/* PDF Preview */}
-										<div
-											className="pdf-container"
-											onContextMenu={(e) =>
-												e.preventDefault()
-											}
-										>
+										<div className="pdf-container">
 											<iframe
 												src={`${template.preview}#toolbar=0&navpanes=0&scrollbar=0&download=0&print=0&fullscreen=0&view=FitH&zoom=110`}
 												className="w-full h-full border-0"
@@ -283,22 +286,12 @@ const TemplatePreviewSection: React.FC = () => {
 											/>
 										</div>
 
-										{/* Hover Overlay with Preview Button */}
+										{/* Hover Overlay - Shows clickable indication */}
 										<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-6">
-											<Button
-												variant="outline"
-												size="sm"
-												className="bg-white text-gray-900 hover:bg-gray-100 border-white shadow-lg hover:shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300"
-												onClick={() => {
-													setSelectedTemplate(
-														template.preview
-													);
-													setIsPreviewOpen(true);
-												}}
-											>
-												<Eye className="h-4 w-4 mr-2" />
-												Preview
-											</Button>
+											<div className="bg-white text-gray-900 px-4 py-2 rounded-full shadow-lg border-white">
+												<Eye className="h-4 w-4 inline mr-2" />
+												Click to Preview
+											</div>
 										</div>
 									</div>
 								</CardContent>
