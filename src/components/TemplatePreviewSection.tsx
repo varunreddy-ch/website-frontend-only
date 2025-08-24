@@ -163,7 +163,7 @@ const TemplatePreviewSection: React.FC = () => {
 	const handleScroll = () => {
 		if (scrollContainerRef.current) {
 			const { scrollLeft, clientWidth } = scrollContainerRef.current;
-			const templateWidth = 320 + 24; // template width + gap
+			const templateWidth = 340 + 24; // template width + gap
 			const newIndex = Math.round(scrollLeft / templateWidth);
 			setCurrentTemplateIndex(Math.min(newIndex, templates.length - 1));
 		}
@@ -241,25 +241,13 @@ const TemplatePreviewSection: React.FC = () => {
 						{templates.map((template, index) => (
 							<Card
 								key={template.id}
-								className={`min-w-[350px] max-w-[350px] bg-white shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border-0 rounded-2xl overflow-hidden cursor-pointer ${
-									index === currentTemplateIndex
-										? "ring-4 ring-blue-500/30 shadow-2xl"
-										: ""
-								}`}
+								className={`min-w-[340px] max-w-[340px] bg-white shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border-0 rounded-2xl overflow-hidden mr-2`}
 								onMouseEnter={() =>
 									setHoveredTemplateIndex(index)
 								}
 								onMouseLeave={() =>
 									setHoveredTemplateIndex(null)
 								}
-								onClick={() => {
-									console.log(
-										"Card clicked for template:",
-										template.name
-									);
-									setSelectedTemplate(template.preview);
-									setIsPreviewOpen(true);
-								}}
 							>
 								<CardHeader className="pb-3 bg-gradient-to-r from-gray-50 to-blue-50/30">
 									<CardTitle className="text-lg font-bold text-gray-800 text-center">
@@ -268,9 +256,22 @@ const TemplatePreviewSection: React.FC = () => {
 								</CardHeader>
 								<CardContent className="pt-0">
 									{/* Template Preview Card */}
-									<div className="w-full h-80 bg-gradient-to-br from-gray-100 to-blue-50 rounded-xl overflow-hidden mb-3 border border-gray-200 relative group">
+									<div
+										className="w-full h-80 bg-gradient-to-br from-gray-100 to-blue-50 rounded-xl overflow-hidden mb-3 border border-gray-200 relative group cursor-pointer"
+										onClick={() => {
+											setSelectedTemplate(
+												template.preview
+											);
+											setIsPreviewOpen(true);
+										}}
+									>
 										{/* PDF Preview */}
-										<div className="pdf-container">
+										<div
+											className="pdf-container"
+											onContextMenu={(e) =>
+												e.preventDefault()
+											}
+										>
 											<iframe
 												src={`${template.preview}#toolbar=0&navpanes=0&scrollbar=0&download=0&print=0&fullscreen=0&view=FitH&zoom=110`}
 												className="w-full h-full border-0"
@@ -286,11 +287,10 @@ const TemplatePreviewSection: React.FC = () => {
 											/>
 										</div>
 
-										{/* Hover Overlay - Shows clickable indication */}
-										<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-6">
-											<div className="bg-white text-gray-900 px-4 py-2 rounded-full shadow-lg border-white">
-												<Eye className="h-4 w-4 inline mr-2" />
-												Click to Preview
+										{/* Hover Overlay - No Button, Just Visual Feedback */}
+										<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center">
+											<div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+												<Eye className="h-5 w-5 text-gray-700" />
 											</div>
 										</div>
 									</div>
