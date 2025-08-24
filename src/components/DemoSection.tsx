@@ -246,7 +246,10 @@ const DemoSection: React.FC = () => {
 										</p>
 										<div className="flex items-center justify-center gap-2 text-xs text-gray-400">
 											<Globe className="h-3 w-3" />
-											<span>All times in EST</span>
+											<span>
+												Times shown in your local
+												timezone
+											</span>
 										</div>
 									</div>
 								</div>

@@ -100,7 +100,11 @@ const Demo: React.FC = () => {
 	const fetchAvailableSlots = async (date: string) => {
 		try {
 			setLoading(true);
-			const response = await API.get(`/demo/available-slots/${date}`);
+			const response = await API.get(
+				`/demo/available-slots/${date}?timezone=${encodeURIComponent(
+					formData.timezone
+				)}`
+			);
 			setAvailableSlots(response.data.availableSlots);
 			setFormData((prev) => ({ ...prev, preferredTime: "" }));
 		} catch (error) {
@@ -307,15 +311,6 @@ const Demo: React.FC = () => {
 											</CardDescription>
 										</div>
 									</div>
-
-									{/* EST Timezone Notice */}
-									<div className="flex items-center gap-3 p-3 bg-white/20 rounded-xl backdrop-blur-sm w-fit">
-										<Globe className="h-4 w-4 text-blue-100" />
-										<p className="text-blue-100 text-sm font-medium">
-											All times are displayed in Eastern
-											Standard Time (EST)
-										</p>
-									</div>
 								</div>
 							</CardHeader>
 
@@ -435,6 +430,20 @@ const Demo: React.FC = () => {
 										</h3>
 
 										<div className="space-y-6">
+											<div className="space-y-3">
+												<Label className="text-base font-semibold text-gray-700">
+													Your Timezone
+												</Label>
+												<div className="h-12 flex items-center px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-700">
+													<Clock className="h-5 w-5 text-gray-500 mr-2" />
+													{formData.timezone}
+												</div>
+												<p className="text-xs text-gray-500">
+													All times will be displayed
+													in your local timezone
+												</p>
+											</div>
+
 											<div className="space-y-3">
 												<Label
 													htmlFor="date"

@@ -177,21 +177,49 @@ const AdminDemos: React.FC = () => {
 		return matchesStatus && matchesSearch;
 	});
 
-	const formatDate = (dateString: string) => {
-		return new Date(dateString).toLocaleDateString("en-US", {
-			weekday: "short",
-			year: "numeric",
-			month: "short",
-			day: "numeric",
-		});
+	const formatDate = (dateString: string, timezone: string = "UTC") => {
+		try {
+			const date = new Date(dateString);
+			return date.toLocaleDateString("en-US", {
+				weekday: "short",
+				year: "numeric",
+				month: "short",
+				day: "numeric",
+				timeZone: timezone,
+			});
+		} catch (error) {
+			// Fallback to original format if timezone conversion fails
+			return new Date(dateString).toLocaleDateString("en-US", {
+				weekday: "short",
+				year: "numeric",
+				month: "short",
+				day: "numeric",
+			});
+		}
 	};
 
-	const formatTime = (timeString: string) => {
-		const [hours, minutes] = timeString.split(":");
-		const hour = parseInt(hours);
-		const ampm = hour >= 12 ? "PM" : "AM";
-		const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-		return `${displayHour}:${minutes} ${ampm}`;
+	const formatTime = (timeString: string, timezone: string = "UTC") => {
+		try {
+			// Create a date object for today with the time
+			const [hours, minutes] = timeString.split(":");
+			const today = new Date();
+			today.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+			// Format the time in the user's timezone
+			return today.toLocaleTimeString("en-US", {
+				hour: "numeric",
+				minute: "2-digit",
+				hour12: true,
+				timeZone: timezone,
+			});
+		} catch (error) {
+			// Fallback to original format if timezone conversion fails
+			const [hours, minutes] = timeString.split(":");
+			const hour = parseInt(hours);
+			const ampm = hour >= 12 ? "PM" : "AM";
+			const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+			return `${displayHour}:${minutes} ${ampm}`;
+		}
 	};
 
 	if (loading) {
@@ -434,8 +462,13 @@ const AdminDemos: React.FC = () => {
 														</span>
 														<p className="text-gray-900 font-medium">
 															{formatDate(
-																demo.preferredDate
+																demo.preferredDate,
+																demo.timezone
 															)}
+														</p>
+														<p className="text-xs text-gray-500">
+															{demo.timezone}{" "}
+															timezone
 														</p>
 													</div>
 												</div>
@@ -448,8 +481,13 @@ const AdminDemos: React.FC = () => {
 														</span>
 														<p className="text-gray-900 font-medium">
 															{formatTime(
-																demo.preferredTime
+																demo.preferredTime,
+																demo.timezone
 															)}
+														</p>
+														<p className="text-xs text-gray-500">
+															{demo.timezone}{" "}
+															timezone
 														</p>
 													</div>
 												</div>
@@ -478,7 +516,8 @@ const AdminDemos: React.FC = () => {
 														</span>
 														<p className="text-gray-900 font-medium">
 															{formatDate(
-																demo.createdAt
+																demo.createdAt,
+																demo.timezone
 															)}
 														</p>
 													</div>
@@ -498,6 +537,36 @@ const AdminDemos: React.FC = () => {
 										</div>
 
 										<div className="flex gap-3 ml-6">
+											{demo.status === "confirmed" && (
+												<Button
+													variant="outline"
+													size="lg"
+													onClick={async () => {
+														try {
+															await API.post(
+																`/demo/${demo._id}/send-reminder`
+															);
+															toast({
+																title: "Success",
+																description:
+																	"Reminder email sent successfully",
+															});
+														} catch (error) {
+															toast({
+																title: "Error",
+																description:
+																	"Failed to send reminder email",
+																variant:
+																	"destructive",
+															});
+														}
+													}}
+													className="border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400 transition-all duration-200"
+												>
+													<Clock className="h-5 w-5 mr-2" />
+													Send Reminder
+												</Button>
+											)}
 											<Button
 												variant="outline"
 												size="lg"
