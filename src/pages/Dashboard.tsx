@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment } from "react";
 import API from "../api";
 import PDFPreview from "../components/PDFPreview";
-import { getUser, logout } from "../auth";
+import { getUser, logout, isTokenExpired } from "../auth";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import PageFooter from "@/components/PageFooter";
@@ -39,9 +39,26 @@ export default function Dashboard() {
 			return;
 		}
 
+		// Check if token is expired
+		if (isTokenExpired()) {
+			logout();
+			return;
+		}
+
 		// All users (tier1, tier2, user) can access dashboard for resume generation
 		// No additional checks needed here
 	}, [user, navigate]);
+
+	// Check token expiration periodically
+	useEffect(() => {
+		const checkTokenInterval = setInterval(() => {
+			if (isTokenExpired()) {
+				logout();
+			}
+		}, 5000); // Check every 5 seconds
+
+		return () => clearInterval(checkTokenInterval);
+	}, []);
 
 	const fullName = user.firstname
 		? user.firstname.split(" ").filter(Boolean).join("_")
