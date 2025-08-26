@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import API from "../api";
 import Navbar from "../components/Navbar";
 import UserWithResumeForm from "../components/UserWithResumeForm";
+import TemplatePreviewSection from "@/components/TemplatePreviewSection";
 import PageFooter from "@/components/PageFooter";
 import { Edit, Trash2 } from "lucide-react";
 
@@ -193,6 +194,9 @@ export default function Admin() {
 						{error}
 					</div>
 				)}
+
+				{/* Template Preview Section */}
+				<TemplatePreviewSection />
 
 				{/* ✅ Unified Form */}
 				<UserWithResumeForm onSubmit={handleCreate} />
