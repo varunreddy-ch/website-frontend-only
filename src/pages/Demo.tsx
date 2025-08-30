@@ -59,6 +59,7 @@ interface DemoFormData {
 	email: string;
 	company: string;
 	phone: string;
+	whatsappPreferred: boolean;
 	preferredDate: string;
 	preferredTime: string;
 	meetingDuration: number;
@@ -72,6 +73,7 @@ const Demo: React.FC = () => {
 		email: "",
 		company: "",
 		phone: "",
+		whatsappPreferred: false,
 		preferredDate: "",
 		preferredTime: "",
 		meetingDuration: 30,
@@ -121,7 +123,7 @@ const Demo: React.FC = () => {
 
 	const handleInputChange = (
 		field: keyof DemoFormData,
-		value: string | number
+		value: string | number | boolean
 	) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
 	};
@@ -141,6 +143,7 @@ const Demo: React.FC = () => {
 		if (
 			!formData.name ||
 			!formData.email ||
+			!formData.phone ||
 			!formData.preferredDate ||
 			!formData.preferredTime
 		) {
@@ -168,6 +171,7 @@ const Demo: React.FC = () => {
 				email: "",
 				company: "",
 				phone: "",
+				whatsappPreferred: false,
 				preferredDate: "",
 				preferredTime: "",
 				meetingDuration: 30,
@@ -404,7 +408,7 @@ const Demo: React.FC = () => {
 													className="text-sm font-semibold text-gray-700 flex items-center gap-2"
 												>
 													<Phone className="h-4 w-4 text-green-500" />
-													Phone Number
+													Phone Number *
 												</Label>
 												<Input
 													id="phone"
@@ -415,9 +419,38 @@ const Demo: React.FC = () => {
 															e.target.value
 														)
 													}
-													placeholder="+1 (555) 123-4567"
+													placeholder="+1 (555) 123-4567 (WhatsApp preferred)"
+													required
 													className="h-12 text-base border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white rounded-xl px-4"
 												/>
+												<div className="flex items-center space-x-2">
+													<input
+														type="checkbox"
+														id="whatsappPreferred"
+														checked={
+															formData.whatsappPreferred
+														}
+														onChange={(e) =>
+															handleInputChange(
+																"whatsappPreferred",
+																e.target.checked
+															)
+														}
+														className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+													/>
+													<Label
+														htmlFor="whatsappPreferred"
+														className="text-sm text-gray-600"
+													>
+														Prefer WhatsApp for
+														communication
+													</Label>
+												</div>
+												<p className="text-xs text-gray-500 mt-1">
+													We'll use WhatsApp for
+													scheduling updates and
+													meeting reminders
+												</p>
 											</div>
 										</div>
 									</div>
@@ -645,6 +678,7 @@ const Demo: React.FC = () => {
 												isSubmitting ||
 												!formData.name ||
 												!formData.email ||
+												!formData.phone ||
 												!formData.preferredDate ||
 												!formData.preferredTime
 											}
