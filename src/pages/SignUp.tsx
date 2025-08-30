@@ -70,15 +70,33 @@ export default function SignUp() {
 								className="text-blue-600 hover:underline"
 							>
 								support@resumevar.com
+							</a>{" "}
+							or WhatsApp us at{" "}
+							<a
+								href="https://wa.me/919573140921"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-green-600 hover:underline"
+							>
+								+91 9573140921
 							</a>
 							. Include your full name and desired email address.
-							We’ll get you set up ASAP.
+							We'll get you set up ASAP.
 						</p>
 
 						<div className="flex items-center justify-center gap-3">
 							<a href="mailto:support@resumevar.com">
 								<Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl">
 									Email Support
+								</Button>
+							</a>
+							<a
+								href="https://wa.me/919573140921"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								<Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl">
+									WhatsApp Support
 								</Button>
 							</a>
 
