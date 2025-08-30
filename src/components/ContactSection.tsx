@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send } from "lucide-react";
+import { Send, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import API from "@/api.js";
@@ -8,6 +8,8 @@ const ContactSection = () => {
 	const [formData, setFormData] = useState({
 		name: "",
 		email: "",
+		phone: "",
+		whatsappPreferred: false,
 		message: "",
 	});
 	const [loading, setLoading] = useState(false);
@@ -27,7 +29,13 @@ const ContactSection = () => {
 				setSuccess(
 					"Your message has been sent successfully! We'll get back to you soon."
 				);
-				setFormData({ name: "", email: "", message: "" });
+				setFormData({
+					name: "",
+					email: "",
+					phone: "",
+					whatsappPreferred: false,
+					message: "",
+				});
 			} else {
 				throw new Error(
 					response.data?.error || "Failed to send message."
@@ -186,6 +194,56 @@ const ContactSection = () => {
 											/>
 										</div>
 									</div>
+								</div>
+
+								<div className="space-y-3">
+									<label
+										htmlFor="phone"
+										className="block text-white font-semibold text-sm uppercase tracking-wide"
+									>
+										Phone Number
+									</label>
+									<div className="relative">
+										<div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+											<Phone className="h-5 w-5 text-blue-200" />
+										</div>
+										<input
+											type="tel"
+											id="phone"
+											name="phone"
+											value={formData.phone}
+											onChange={handleChange}
+											className="w-full pl-12 pr-4 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300 backdrop-blur-sm"
+											placeholder="+1 (555) 123-4567 (WhatsApp preferred)"
+										/>
+									</div>
+									<p className="text-xs text-blue-200 mt-1">
+										We'll use WhatsApp for quick responses
+										and updates
+									</p>
+								</div>
+
+								<div className="flex items-center space-x-3">
+									<input
+										type="checkbox"
+										id="whatsappPreferred"
+										name="whatsappPreferred"
+										checked={formData.whatsappPreferred}
+										onChange={() =>
+											setFormData({
+												...formData,
+												whatsappPreferred:
+													!formData.whatsappPreferred,
+											})
+										}
+										className="h-5 w-5 text-cyan-400 focus:ring-cyan-400 border-white/20 rounded"
+									/>
+									<label
+										htmlFor="whatsappPreferred"
+										className="text-white text-sm"
+									>
+										Prefer WhatsApp for communication?
+									</label>
 								</div>
 
 								<div className="space-y-3">
