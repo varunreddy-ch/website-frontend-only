@@ -86,6 +86,18 @@ const AdminNavbar = () => {
 								Demos
 							</Button>
 						</Link>
+						<Link to="/admin/contacts">
+							<Button
+								variant="ghost"
+								className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm ${
+									isActive("/admin/contacts")
+										? "text-blue-600"
+										: ""
+								}`}
+							>
+								Contacts
+							</Button>
+						</Link>
 					</div>
 
 					{/* Desktop User Section */}
@@ -174,6 +186,19 @@ const AdminNavbar = () => {
 									onClick={() => setOpen(false)}
 								>
 									Demos
+								</Button>
+							</Link>
+							<Link to="/admin/contacts">
+								<Button
+									variant="ghost"
+									className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
+										isActive("/admin/contacts")
+											? "text-blue-600 bg-blue-600"
+											: ""
+									}`}
+									onClick={() => setOpen(false)}
+								>
+									Contacts
 								</Button>
 							</Link>
 
