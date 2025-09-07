@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { Eye, Download, Mail, Calendar, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import API from "@/api";
 
 const TemplatePreviewSection: React.FC = () => {
-	const templates = [
+	const [templates, setTemplates] = useState([
 		{
 			id: "template1",
 			name: "Template 1",
@@ -77,7 +78,7 @@ const TemplatePreviewSection: React.FC = () => {
 			preview: "/template_previews/template10.pdf",
 			download: "/template_previews/template10.pdf",
 		},
-	];
+	]);
 
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const [isScrolling, setIsScrolling] = useState(true);
@@ -90,6 +91,23 @@ const TemplatePreviewSection: React.FC = () => {
 	const [hoveredTemplateIndex, setHoveredTemplateIndex] = useState<
 		number | null
 	>(null);
+
+	// Fetch templates from API on component mount
+	useEffect(() => {
+		const fetchTemplates = async () => {
+			try {
+				const response = await API.get("/templates");
+				if (response.data && response.data.templates) {
+					setTemplates(response.data.templates);
+				}
+			} catch (error) {
+				console.error("Error fetching templates:", error);
+				// Keep the default templates if API call fails
+			}
+		};
+
+		fetchTemplates();
+	}, []);
 
 	// Auto-scroll functionality with smooth restart from end to start
 	useEffect(() => {
