@@ -75,6 +75,12 @@ export default function ApplierSubmissionForm() {
 		if (applierData.location?.trim())
 			payload.location = applierData.location.trim();
 
+		// Since i will use company name to create a .pdf file, prevent special characters(Keep only letters, numbers, spaces, hyphens, and underscores)
+		payload.company_name = payload.company_name.replace(
+			/[^a-zA-Z0-9 _-]/g,
+			""
+		);
+
 		try {
 			await API.post("/add-job", payload);
 			setMessage("Application info submitted!");
