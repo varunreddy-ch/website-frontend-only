@@ -76,6 +76,36 @@ export default function Profile() {
 		}
 	}, []);
 
+	const downloadResume = async (url) => {
+		if (!url) {
+			return false;
+		}
+
+		try {
+			console.log("Downloading resume: once user clicks");
+			console.log("URL: ", url);
+			const response = await fetch(url);
+			const blob = await response.blob();
+			const link = document.createElement("a");
+			link.href = URL.createObjectURL(blob);
+
+			// Extract company name from URL and create filename
+			// URL format: 'https://pub-fd295e1d895d4ac7a93c849818802589.r2.dev/Varun_Reddy/2025/49/10/16/25/pregenerated/SADA/Resume_SADA.pdf'
+			const urlParts = url.split("/");
+			const companyName = urlParts[urlParts.length - 2]; // Get the company name (SADA)
+			const userFirstName = userInfo.firstname || "User";
+			const userLastName = userInfo.lastname || "";
+			const fileName = `${userFirstName}_${userLastName}_${companyName}.pdf`;
+
+			link.download = fileName;
+			console.log(link.href);
+			link.click();
+		} catch (err) {
+			console.error("Failed to download resume:", err);
+			return false;
+		}
+	};
+
 	const fetchData = async () => {
 		try {
 			setLoading(true);
@@ -85,6 +115,7 @@ export default function Profile() {
 			setUserInfo(data.user || {});
 
 			const resumes = data.resumes || [];
+			const resumeUrls = resumes.map((r) => r.resume_url);
 			const appliedResumesData = data.appliedResumes || [];
 			const generatedResumesData = data.generatedResumes || [];
 
@@ -728,6 +759,11 @@ export default function Profile() {
 															<div
 																key={resume.id}
 																className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200 hover:shadow transition-all relative group"
+																onClick={() =>
+																	downloadResume(
+																		resume.resume_url
+																	)
+																}
 															>
 																{/* Chronological indicator */}
 																<div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-green-400 to-green-600 rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
