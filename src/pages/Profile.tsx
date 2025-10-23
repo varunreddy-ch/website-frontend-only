@@ -84,10 +84,10 @@ export default function Profile() {
 		try {
 			console.log("Downloading resume: once user clicks");
 			console.log("URL: ", url);
-			const response = await fetch(url);
-			const blob = await response.blob();
+
 			const link = document.createElement("a");
-			link.href = URL.createObjectURL(blob);
+			link.href = url; // direct R2 public URL
+			link.target = "_blank";
 
 			// Extract company name from URL and create filename
 			// URL format: 'https://pub-fd295e1d895d4ac7a93c849818802589.r2.dev/Varun_Reddy/2025/49/10/16/25/pregenerated/SADA/Resume_SADA.pdf'
