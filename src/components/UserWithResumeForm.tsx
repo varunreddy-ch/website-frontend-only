@@ -31,6 +31,7 @@ export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 		summary_points: 0,
 		experience_points: 0,
 		complete_change: false,
+		verified_applier: false,
 		template: "",
 		resume: initialResume,
 	});
@@ -62,7 +63,12 @@ export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 
 	const handleChange = (section, key, value) => {
 		if (section === "root") {
-			setForm({ ...form, [key]: value });
+			// Reset verified_applier if role changes away from "applier"
+			if (key === "role" && value !== "applier") {
+				setForm({ ...form, [key]: value, verified_applier: false });
+			} else {
+				setForm({ ...form, [key]: value });
+			}
 		} else if (section === "contact" || section === "education") {
 			setForm({
 				...form,
@@ -271,6 +277,33 @@ export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 						className="ml-2 text-sm font-semibold text-gray-900"
 					>
 						Enable Complete Change
+					</label>
+				</div>
+
+				<div className="flex items-center justify-center col-span-1 md:col-span-2">
+					<input
+						type="checkbox"
+						id="verified_applier"
+						className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 accent-blue-600"
+						checked={form.verified_applier}
+						onChange={(e) =>
+							handleChange(
+								"root",
+								"verified_applier",
+								e.target.checked
+							)
+						}
+						disabled={form.role !== "applier"}
+					/>
+					<label
+						htmlFor="verified_applier"
+						className={`ml-2 text-sm font-semibold ${
+							form.role !== "applier"
+								? "text-gray-400"
+								: "text-gray-900"
+						}`}
+					>
+						Verified Applier (Auto-verify jobs)
 					</label>
 				</div>
 			</div>

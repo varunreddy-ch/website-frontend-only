@@ -152,6 +152,17 @@ export default function Admin() {
 		</span>
 	);
 
+	const verifiedBadge = (user) => {
+		if (user.role === "applier" && user.verified_applier) {
+			return (
+				<span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+					✓ Verified Applier
+				</span>
+			);
+		}
+		return null;
+	};
+
 	useEffect(() => {
 		fetchUsers();
 	}, []);
@@ -239,6 +250,7 @@ export default function Admin() {
 									<span className="text-gray-800 flex items-center">
 										{u.username}
 										{roleBadge(u.role)}
+										{verifiedBadge(u)}
 									</span>
 
 									<div className="flex gap-4 items-center text-sm">
