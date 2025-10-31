@@ -90,7 +90,6 @@ export default function Profile() {
 			link.target = "_blank";
 
 			// Extract company name from URL and create filename
-			// URL format: 'https://pub-fd295e1d895d4ac7a93c849818802589.r2.dev/Varun_Reddy/2025/49/10/16/25/pregenerated/SADA/Resume_SADA.pdf'
 			const urlParts = url.split("/");
 			const companyName = urlParts[urlParts.length - 2]; // Get the company name (SADA)
 			const userFirstName = userInfo.firstname || "User";
@@ -843,6 +842,11 @@ export default function Profile() {
 															<div
 																key={resume.id}
 																className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-200 hover:shadow transition-all relative group"
+																onClick={() =>
+																	downloadResume(
+																		resume.jd_link
+																	)
+																}
 															>
 																{/* Chronological indicator */}
 																<div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-blue-600 rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
