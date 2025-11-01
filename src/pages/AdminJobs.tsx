@@ -13,6 +13,8 @@ import {
 	DollarSign,
 	Trash2,
 	AlertTriangle,
+	MapPin,
+	User,
 } from "lucide-react";
 import API from "@/api";
 import Navbar from "@/components/Navbar";
@@ -32,6 +34,8 @@ type Job = {
 	job_title: string;
 	job_link: string;
 	salary?: string;
+	location?: string;
+	pushedBy?: string;
 	status: "reported" | "verified" | "expired" | "pending";
 	createdAt: string;
 	reportNotes?: ReportNote[]; // <— NEW
@@ -380,7 +384,7 @@ const AdminJobs = () => {
 													)}
 												</div>
 
-												<div className="flex items-center gap-6 text-sm text-gray-600 mb-3">
+												<div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 mb-3">
 													<div className="flex items-center gap-2">
 														<Briefcase className="h-4 w-4" />
 														<span className="font-medium">
@@ -393,11 +397,28 @@ const AdminJobs = () => {
 															{job.job_role}
 														</span>
 													</div>
+													{job.location && (
+														<div className="flex items-center gap-2">
+															<MapPin className="h-4 w-4" />
+															<span>
+																{job.location}
+															</span>
+														</div>
+													)}
 													{job.salary && (
 														<div className="flex items-center gap-2">
 															<DollarSign className="h-4 w-4" />
 															<span>
 																{job.salary}
+															</span>
+														</div>
+													)}
+													{job.pushedBy && (
+														<div className="flex items-center gap-2">
+															<User className="h-4 w-4" />
+															<span>
+																Added by:{" "}
+																{job.pushedBy}
 															</span>
 														</div>
 													)}
