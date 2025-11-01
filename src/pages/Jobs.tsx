@@ -22,8 +22,19 @@ import {
 	AlertTriangle,
 	CheckCircle2,
 	Trash2,
+	Edit,
 } from "lucide-react";
 import API from "@/api";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 type Job = {
 	_id: string;
@@ -51,6 +62,11 @@ type ConfirmationModal = {
 	companyName: string;
 };
 
+type EditModal = {
+	isOpen: boolean;
+	job: Job | null;
+};
+
 // ApplierJobsView Component - Similar to AdminJobs with verify and delete actions
 function ApplierJobsView({ currentUser }: ApplierJobsViewProps) {
 	const [jobs, setJobs] = useState<Job[]>([]);
@@ -65,6 +81,19 @@ function ApplierJobsView({ currentUser }: ApplierJobsViewProps) {
 			jobTitle: "",
 			companyName: "",
 		});
+	const [editModal, setEditModal] = useState<EditModal>({
+		isOpen: false,
+		job: null,
+	});
+	const [editFormData, setEditFormData] = useState({
+		company_name: "",
+		job_description: "",
+		job_title: "",
+		job_link: "",
+		salary: "",
+		location: "",
+	});
+	const [isUpdating, setIsUpdating] = useState(false);
 
 	const fetchJobs = async () => {
 		try {
@@ -115,6 +144,64 @@ function ApplierJobsView({ currentUser }: ApplierJobsViewProps) {
 			jobTitle: "",
 			companyName: "",
 		});
+	};
+
+	const openEditModal = (job: Job) => {
+		setEditFormData({
+			company_name: job.company_name || "",
+			job_description: job.JD || "",
+			job_title: job.job_title || "",
+			job_link: job.job_link || "",
+			salary: job.salary || "",
+			location: job.location || "",
+		});
+		setEditModal({ isOpen: true, job });
+	};
+
+	const closeEditModal = () => {
+		setEditModal({ isOpen: false, job: null });
+		setEditFormData({
+			company_name: "",
+			job_description: "",
+			job_title: "",
+			job_link: "",
+			salary: "",
+			location: "",
+		});
+	};
+
+	const handleUpdateJob = async () => {
+		if (!editModal.job) return;
+
+		setIsUpdating(true);
+		try {
+			await API.patch(
+				`/jobs/${editModal.job._id}`,
+				{
+					company_name: editFormData.company_name,
+					job_description: editFormData.job_description,
+					job_title: editFormData.job_title,
+					job_link: editFormData.job_link,
+					salary: editFormData.salary,
+					location: editFormData.location,
+				},
+				{
+					headers: { Accept: "application/json" },
+					withCredentials: true,
+				}
+			);
+			closeEditModal();
+			await fetchJobs();
+		} catch (e: any) {
+			const msg =
+				e?.response?.data?.message ||
+				e?.response?.data?.error ||
+				e?.message ||
+				"Failed to update job";
+			setError(msg);
+		} finally {
+			setIsUpdating(false);
+		}
 	};
 
 	const doAction = async (id: string, action: "verify" | "delete") => {
@@ -378,6 +465,17 @@ function ApplierJobsView({ currentUser }: ApplierJobsViewProps) {
 
 										<div className="flex items-center gap-3">
 											<Button
+												variant="outline"
+												onClick={() =>
+													openEditModal(job)
+												}
+												disabled={actionId === job._id}
+												className="border-blue-300 text-blue-700 hover:bg-blue-50 px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+											>
+												<Edit className="h-4 w-4 mr-2" />
+												Edit
+											</Button>
+											<Button
 												onClick={() =>
 													openConfirmation(
 														job._id,
@@ -504,6 +602,134 @@ function ApplierJobsView({ currentUser }: ApplierJobsViewProps) {
 					</div>
 				</div>
 			)}
+
+			{/* Edit Modal */}
+			<Dialog open={editModal.isOpen} onOpenChange={closeEditModal}>
+				<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+					<DialogHeader>
+						<DialogTitle className="text-2xl font-bold">
+							Edit Job Details
+						</DialogTitle>
+					</DialogHeader>
+					<div className="space-y-4 py-4">
+						<div className="space-y-2">
+							<Label htmlFor="company_name">Company Name *</Label>
+							<Input
+								id="company_name"
+								value={editFormData.company_name}
+								onChange={(e) =>
+									setEditFormData({
+										...editFormData,
+										company_name: e.target.value,
+									})
+								}
+								placeholder="Enter company name"
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="job_title">Job Title</Label>
+							<Input
+								id="job_title"
+								value={editFormData.job_title}
+								onChange={(e) =>
+									setEditFormData({
+										...editFormData,
+										job_title: e.target.value,
+									})
+								}
+								placeholder="Enter job title"
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="job_link">Job Link *</Label>
+							<Input
+								id="job_link"
+								value={editFormData.job_link}
+								onChange={(e) =>
+									setEditFormData({
+										...editFormData,
+										job_link: e.target.value,
+									})
+								}
+								placeholder="Enter job link"
+							/>
+						</div>
+						<div className="grid grid-cols-2 gap-4">
+							<div className="space-y-2">
+								<Label htmlFor="location">Location</Label>
+								<Input
+									id="location"
+									value={editFormData.location}
+									onChange={(e) =>
+										setEditFormData({
+											...editFormData,
+											location: e.target.value,
+										})
+									}
+									placeholder="Enter location"
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="salary">Salary</Label>
+								<Input
+									id="salary"
+									value={editFormData.salary}
+									onChange={(e) =>
+										setEditFormData({
+											...editFormData,
+											salary: e.target.value,
+										})
+									}
+									placeholder="Enter salary"
+								/>
+							</div>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="job_description">
+								Job Description *
+							</Label>
+							<Textarea
+								id="job_description"
+								value={editFormData.job_description}
+								onChange={(e) =>
+									setEditFormData({
+										...editFormData,
+										job_description: e.target.value,
+									})
+								}
+								placeholder="Enter job description"
+								className="min-h-[200px]"
+							/>
+						</div>
+					</div>
+					<DialogFooter>
+						<Button
+							variant="outline"
+							onClick={closeEditModal}
+							disabled={isUpdating}
+						>
+							Cancel
+						</Button>
+						<Button
+							onClick={handleUpdateJob}
+							disabled={isUpdating}
+							className="bg-blue-600 hover:bg-blue-700"
+						>
+							{isUpdating ? (
+								<>
+									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+									Updating...
+								</>
+							) : (
+								<>
+									<CheckCircle2 className="h-4 w-4 mr-2" />
+									Update Job
+								</>
+							)}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			<PageFooter />
 		</div>
