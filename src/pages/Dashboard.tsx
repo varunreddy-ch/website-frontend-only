@@ -20,6 +20,7 @@ export default function Dashboard() {
 	const [jobDesc, setJobDesc] = useState("");
 	const [generatedResume, setGeneratedResume] = useState("");
 	const [pdfBlob, setPdfBlob] = useState(null);
+	const [docxBlob, setDocxBlob] = useState(null);
 	const [loading, setLoading] = useState(false);
 
 	const [resumeMessage, setResumeMessage] = useState("");
@@ -51,7 +52,7 @@ export default function Dashboard() {
 			return;
 		}
 
-		// All other users (tier1, tier2, user) can access dashboard for resume generation
+		// All other users (tier1, tier2, tier3, user) can access dashboard for resume generation
 		// No additional checks needed here
 	}, [user, navigate]);
 
@@ -123,7 +124,10 @@ export default function Dashboard() {
 		setLoading(true);
 		setResumeError("");
 		setResumeMessage("");
+		setPdfBlob(null);
+		setDocxBlob(null);
 		try {
+			const isTier3 = user?.role === "tier3";
 			const res = await API.post(
 				"/generate-resume",
 				{
@@ -131,29 +135,72 @@ export default function Dashboard() {
 					company_name: companyName,
 				},
 				{
-					responseType: "blob",
+					responseType: isTier3 ? "json" : "blob",
 				}
 			);
 
-			const blob = new Blob([res.data], { type: "application/pdf" });
-			const blobUrl = URL.createObjectURL(blob);
-			setPdfBlob(blobUrl);
+			if (isTier3 && res.data.pdf && res.data.docx) {
+				// Tier3 users get JSON response with both PDF and DOCX
+				const pdfBase64 = res.data.pdf;
+				const docxBase64 = res.data.docx;
 
-			const arrayBuffer = await blob.arrayBuffer();
+				// Convert PDF base64 to blob
+				const pdfBytes = Uint8Array.from(atob(pdfBase64), (c) =>
+					c.charCodeAt(0)
+				);
+				const pdfBlob = new Blob([pdfBytes], {
+					type: "application/pdf",
+				});
+				const pdfBlobUrl = URL.createObjectURL(pdfBlob);
+				setPdfBlob(pdfBlobUrl);
 
-			const pdf = await pdfjsLib.getDocument({ data: arrayBuffer })
-				.promise;
-			let text = "";
+				// Convert DOCX base64 to blob
+				const docxBytes = Uint8Array.from(atob(docxBase64), (c) =>
+					c.charCodeAt(0)
+				);
+				const docxBlob = new Blob([docxBytes], {
+					type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+				});
+				const docxBlobUrl = URL.createObjectURL(docxBlob);
+				setDocxBlob(docxBlobUrl);
 
-			for (let i = 1; i <= pdf.numPages; i++) {
-				const page = await pdf.getPage(i);
-				const content = await page.getTextContent();
-				const pageText = content.items
-					.map((item: any) => item.str || "")
-					.join(" ");
-				text += pageText + "\n\n";
+				// Extract text from PDF for preview
+				const arrayBuffer = await pdfBlob.arrayBuffer();
+				const pdf = await pdfjsLib.getDocument({ data: arrayBuffer })
+					.promise;
+				let text = "";
+
+				for (let i = 1; i <= pdf.numPages; i++) {
+					const page = await pdf.getPage(i);
+					const content = await page.getTextContent();
+					const pageText = content.items
+						.map((item: any) => item.str || "")
+						.join(" ");
+					text += pageText + "\n\n";
+				}
+				setGeneratedResume(text);
+			} else {
+				// Other users get blob response (PDF only)
+				const blob = new Blob([res.data], { type: "application/pdf" });
+				const blobUrl = URL.createObjectURL(blob);
+				setPdfBlob(blobUrl);
+
+				const arrayBuffer = await blob.arrayBuffer();
+
+				const pdf = await pdfjsLib.getDocument({ data: arrayBuffer })
+					.promise;
+				let text = "";
+
+				for (let i = 1; i <= pdf.numPages; i++) {
+					const page = await pdf.getPage(i);
+					const content = await page.getTextContent();
+					const pageText = content.items
+						.map((item: any) => item.str || "")
+						.join(" ");
+					text += pageText + "\n\n";
+				}
+				setGeneratedResume(text);
 			}
-			setGeneratedResume(text);
 			setResumeMessage("Resume generated successfully!");
 		} catch (err) {
 			setResumeError(
@@ -275,6 +322,18 @@ export default function Dashboard() {
 								>
 									📥 Download PDF
 								</a>
+								{user?.role === "tier3" && docxBlob && (
+									<a
+										href={docxBlob}
+										download={`${fullName}_${companyName
+											.split(" ")
+											.filter(Boolean)
+											.join("_")}.docx`}
+										className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-md"
+									>
+										📄 Download DOCX
+									</a>
+								)}
 								<button
 									onClick={handleDownloadJobDesc}
 									className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-md"

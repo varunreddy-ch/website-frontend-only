@@ -777,6 +777,35 @@ export default function GeneratedResumes({ userId, fullName }) {
 											</a>
 										)}
 
+										{/* Download DOCX for tier3 users if available */}
+										{user?.role === "tier3" &&
+											resume.docx && (
+												<a
+													href={`data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${resume.docx}`}
+													download={`${
+														safeFullName
+															? `${safeFullName}_${
+																	resume.company_name ||
+																	"Resume"
+															  }`
+															: `${
+																	resume.company_name ||
+																	"Resume"
+															  }`
+													}.docx`}
+													target="_blank"
+													rel="noopener noreferrer"
+												>
+													<Button
+														variant="primary"
+														size="sm"
+													>
+														<Download className="h-4 w-4" />
+														Download DOCX
+													</Button>
+												</a>
+											)}
+
 										{resume.JD && resume.JD.trim() && (
 											<Button
 												onClick={() =>
