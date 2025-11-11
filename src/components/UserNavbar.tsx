@@ -78,6 +78,26 @@ const UserNavbar = () => {
 								</Button>
 							</Link>
 						)}
+
+						{user?.role === "applier" && (
+							<Link to="/jobs">
+								<Button
+									variant={
+										location.pathname === "/jobs"
+											? "default"
+											: "ghost"
+									}
+									className={`transition-colors duration-200 font-medium text-sm ${
+										location.pathname === "/jobs"
+											? "bg-blue-600 text-white hover:bg-blue-700"
+											: "text-gray-700 hover:text-blue-600"
+									}`}
+								>
+									Jobs
+								</Button>
+							</Link>
+						)}
+
 						{(user?.role === "tier1" || user?.role === "user") && (
 							<Button
 								variant="ghost"
@@ -196,6 +216,25 @@ const UserNavbar = () => {
 								</Link>
 							)}
 							{user?.role === "tier2" && (
+								<Link to="/jobs">
+									<Button
+										variant={
+											location.pathname === "/jobs"
+												? "default"
+												: "ghost"
+										}
+										className={`transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
+											location.pathname === "/jobs"
+												? "bg-blue-600 text-white hover:bg-blue-700"
+												: "text-gray-700 hover:text-blue-600"
+										}`}
+										onClick={() => setIsMenuOpen(false)}
+									>
+										Jobs
+									</Button>
+								</Link>
+							)}
+							{user?.role === "applier" && (
 								<Link to="/jobs">
 									<Button
 										variant={
