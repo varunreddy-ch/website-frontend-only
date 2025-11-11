@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
@@ -17,12 +17,42 @@ import {
 	UserCheck,
 	FileCheck,
 	Video,
+	ChevronDown,
+	ChevronUp,
 } from "lucide-react";
+import { DateTime } from "luxon";
+import {
+	Chart as ChartJS,
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	Filler,
+	Title,
+	Tooltip,
+	Legend,
+} from "chart.js";
+import { Line } from "react-chartjs-2";
+
+// Register Chart.js components
+ChartJS.register(
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	Filler,
+	Title,
+	Tooltip,
+	Legend
+);
 
 export default function AdminDashboard() {
 	const [stats, setStats] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [sortKey, setSortKey] = useState("generated");
+	const [expandedUsers, setExpandedUsers] = useState(new Set());
+	const [userAnalytics, setUserAnalytics] = useState({});
+	const [loadingAnalytics, setLoadingAnalytics] = useState({});
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -40,23 +70,271 @@ export default function AdminDashboard() {
 		fetchStats();
 	}, []);
 
-	const sortedUsers = stats?.userStats.slice().sort((a, b) => {
-		if (sortKey === "name") {
-			return `${a.firstname} ${a.lastname}`.localeCompare(
-				`${b.firstname} ${b.lastname}`
-			);
-		} else if (sortKey === "applied") {
-			return b.resumesApplied - a.resumesApplied;
-		} else if (sortKey === "appliedToday") {
-			return (b.appliedToday || 0) - (a.appliedToday || 0);
-		} else if (sortKey === "generatedToday") {
-			return (b.generatedToday || 0) - (a.generatedToday || 0);
-		} else if (sortKey === "availableJobs") {
-			return (b.availableJobs || 0) - (a.availableJobs || 0);
-		} else {
-			return b.resumesGenerated - a.resumesGenerated;
+	const sortedUsers = useMemo(() => {
+		if (!stats?.userStats) return [];
+		return stats.userStats.slice().sort((a, b) => {
+			if (sortKey === "name") {
+				return `${a.firstname} ${a.lastname}`.localeCompare(
+					`${b.firstname} ${b.lastname}`
+				);
+			} else if (sortKey === "applied") {
+				return b.resumesApplied - a.resumesApplied;
+			} else if (sortKey === "appliedToday") {
+				return (b.appliedToday || 0) - (a.appliedToday || 0);
+			} else if (sortKey === "generatedToday") {
+				return (b.generatedToday || 0) - (a.generatedToday || 0);
+			} else if (sortKey === "availableJobs") {
+				return (b.availableJobs || 0) - (a.availableJobs || 0);
+			} else {
+				return b.resumesGenerated - a.resumesGenerated;
+			}
+		});
+	}, [stats?.userStats, sortKey]);
+
+	// Calculate maxActivity once to avoid recomputing for each user
+	const maxActivity = useMemo(() => {
+		if (!sortedUsers || sortedUsers.length === 0) return 0;
+		return Math.max(
+			...sortedUsers.map(
+				(u) => (u.resumesGenerated || 0) + (u.resumesApplied || 0)
+			)
+		);
+	}, [sortedUsers]);
+
+	const fetchUserAnalytics = async (username) => {
+		if (userAnalytics[username]) {
+			return; // Already fetched
 		}
-	});
+
+		setLoadingAnalytics((prev) => ({ ...prev, [username]: true }));
+
+		try {
+			// Fetch user analytics from the new endpoint
+			const response = await API.get(`/admin/user-analytics/${username}`);
+			if (response.data.success) {
+				setUserAnalytics((prev) => ({
+					...prev,
+					[username]: {
+						appliedResumes: response.data.appliedResumes || [],
+						generatedResumes: response.data.generatedResumes || [],
+					},
+				}));
+			}
+		} catch (err) {
+			console.error(`Failed to fetch analytics for ${username}:`, err);
+			// Fallback: try to get data from activity log
+			try {
+				const activityResponse = await API.get(
+					`/admin/user-activity?username=${username}&limit=1000`
+				);
+				if (activityResponse.data.success) {
+					const activities = activityResponse.data.data.activities || [];
+					setUserAnalytics((prev) => ({
+						...prev,
+						[username]: {
+							appliedResumes: activities.filter((a) => a.applied),
+							generatedResumes: activities,
+						},
+					}));
+				}
+			} catch (fallbackErr) {
+				console.error("Fallback fetch also failed:", fallbackErr);
+				// Set empty data on complete failure
+				setUserAnalytics((prev) => ({
+					...prev,
+					[username]: {
+						appliedResumes: [],
+						generatedResumes: [],
+					},
+				}));
+			}
+		} finally {
+			setLoadingAnalytics((prev) => ({ ...prev, [username]: false }));
+		}
+	};
+
+	const calculateLast30DaysStats = (appliedResumes, generatedResumes) => {
+		const days = [];
+		const estNow = DateTime.now().setZone("America/New_York");
+
+		for (let i = 29; i >= 0; i--) {
+			const date = estNow.minus({ days: i });
+
+			// Count applied resumes based on updatedAt
+			const dayApplied = appliedResumes.filter((r) => {
+				const resumeDate = DateTime.fromISO(r.updatedAt).setZone(
+					"America/New_York"
+				);
+				return resumeDate.startOf("day").equals(date.startOf("day"));
+			});
+
+			// Count generated resumes based on createdAt
+			const dayGenerated = generatedResumes.filter((r) => {
+				const resumeDate = DateTime.fromISO(r.createdAt).setZone(
+					"America/New_York"
+				);
+				return resumeDate.startOf("day").equals(date.startOf("day"));
+			});
+
+			days.push({
+				day: date.toFormat("MMM d"),
+				applied: dayApplied.length,
+				generated: dayGenerated.length,
+			});
+		}
+
+		return days;
+	};
+
+	const toggleUserAnalytics = async (username) => {
+		const newExpanded = new Set(expandedUsers);
+		if (newExpanded.has(username)) {
+			// If clicking on the same user, close it
+			newExpanded.delete(username);
+		} else {
+			// Close any previously expanded user (only one at a time)
+			newExpanded.clear();
+			// Open the new user
+			newExpanded.add(username);
+			await fetchUserAnalytics(username);
+		}
+		setExpandedUsers(newExpanded);
+	};
+
+	const DailyActivityChart = ({ data, username }) => {
+		if (!data || data.length === 0) {
+			return (
+				<div className="flex items-center justify-center h-[300px] text-gray-500">
+					<div className="text-center">
+						<TrendingUp className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+						<p className="text-sm font-medium">No activity data</p>
+						<p className="text-xs text-gray-400">
+							No resumes generated or applied in the last 30 days
+						</p>
+					</div>
+				</div>
+			);
+		}
+
+		const chartData = {
+			labels: data.map((d) => d.day),
+			datasets: [
+				{
+					label: "Applied",
+					data: data.map((d) => d.applied),
+					borderColor: "rgba(59, 130, 246, 1)",
+					backgroundColor: "rgba(59, 130, 246, 0.1)",
+					borderWidth: 3,
+					tension: 0.4,
+					fill: true,
+					pointBackgroundColor: "rgba(59, 130, 246, 1)",
+					pointBorderColor: "#ffffff",
+					pointBorderWidth: 2,
+					pointRadius: 4,
+					pointHoverRadius: 6,
+					pointHoverBorderWidth: 2,
+				},
+				{
+					label: "Generated",
+					data: data.map((d) => d.generated),
+					borderColor: "rgba(139, 92, 246, 1)",
+					backgroundColor: "rgba(139, 92, 246, 0.1)",
+					borderWidth: 3,
+					tension: 0.4,
+					fill: true,
+					pointBackgroundColor: "rgba(139, 92, 246, 1)",
+					pointBorderColor: "#ffffff",
+					pointBorderWidth: 2,
+					pointRadius: 4,
+					pointHoverRadius: 6,
+					pointHoverBorderWidth: 2,
+				},
+			],
+		};
+
+		const options = {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: {
+					position: "top",
+					labels: {
+						usePointStyle: true,
+						padding: 15,
+						font: {
+							size: 11,
+							weight: 600,
+						},
+					},
+				},
+				tooltip: {
+					backgroundColor: "rgba(255, 255, 255, 0.95)",
+					titleColor: "#1f2937",
+					bodyColor: "#374151",
+					borderColor: "#e5e7eb",
+					borderWidth: 1,
+					cornerRadius: 8,
+					displayColors: true,
+					padding: 10,
+					titleFont: {
+						size: 12,
+						weight: 600,
+					},
+					bodyFont: {
+						size: 11,
+					},
+					callbacks: {
+						label: (context) =>
+							`${context.dataset.label}: ${context.parsed.y}`,
+					},
+				},
+			},
+			scales: {
+				x: {
+					grid: {
+						display: false,
+					},
+					ticks: {
+						font: {
+							size: 10,
+							weight: 500,
+						},
+						color: "#6b7280",
+						maxRotation: 45,
+						minRotation: 45,
+					},
+				},
+				y: {
+					beginAtZero: true,
+					grid: {
+						color: "rgba(229, 231, 235, 0.5)",
+						drawBorder: false,
+					},
+					ticks: {
+						font: {
+							size: 10,
+							weight: 500,
+						},
+						color: "#6b7280",
+						padding: 6,
+					},
+					border: {
+						display: false,
+					},
+				},
+			},
+			interaction: {
+				intersect: false,
+				mode: "index",
+			},
+			animation: {
+				duration: 800,
+				easing: "easeInOutQuart",
+			},
+		};
+
+		return <Line data={chartData} options={options} height={300} />;
+	};
 
 	const StatCard = ({ label, value, icon: Icon, color, subtitle }) => (
 		<div className="bg-white rounded-xl shadow-lg border-0 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
@@ -309,7 +587,7 @@ export default function AdminDashboard() {
 								</select>
 							</div>
 
-							<div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+							<div className="space-y-3 max-h-[72rem] overflow-y-auto pr-2 custom-scrollbar">
 								{sortedUsers.map((u, index) => (
 									<div
 										key={u.id || u.username}
@@ -335,7 +613,7 @@ export default function AdminDashboard() {
 															) ||
 															"U"}
 													</div>
-													<div>
+													<div className="flex-1">
 														<h3 className="font-semibold text-gray-800 text-lg">
 															{u.firstname &&
 															u.lastname
@@ -349,6 +627,40 @@ export default function AdminDashboard() {
 															</p>
 														)}
 													</div>
+													<button
+														onClick={() =>
+															toggleUserAnalytics(
+																u.username
+															)
+														}
+														disabled={loadingAnalytics[u.username]}
+														className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+													>
+														{loadingAnalytics[u.username] ? (
+															<>
+																<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700"></div>
+																<span className="text-sm font-medium">
+																	Loading...
+																</span>
+															</>
+														) : expandedUsers.has(
+																u.username
+														  ) ? (
+															<>
+																<ChevronUp className="w-4 h-4" />
+																<span className="text-sm font-medium">
+																	Hide Analytics
+																</span>
+															</>
+														) : (
+															<>
+																<ChevronDown className="w-4 h-4" />
+																<span className="text-sm font-medium">
+																	View Analytics
+																</span>
+															</>
+														)}
+													</button>
 												</div>
 											</div>
 
@@ -404,118 +716,89 @@ export default function AdminDashboard() {
 											<div className="flex justify-between text-xs text-gray-600 mb-1">
 												<span>Activity Level</span>
 												<span>
-													{(() => {
-														const maxActivity =
-															Math.max(
-																...sortedUsers.map(
-																	(u) =>
-																		u.resumesGenerated +
-																		u.resumesApplied
-																)
-															);
-														return maxActivity > 0
-															? `${Math.round(
-																	((u.resumesGenerated +
-																		u.resumesApplied) /
-																		maxActivity) *
-																		100
-															  )}%`
-															: "0%";
-													})()}
+													{maxActivity > 0
+														? `${Math.round(
+																((u.resumesGenerated || 0) +
+																	(u.resumesApplied || 0)) /
+																	maxActivity *
+																	100
+														  )}%`
+														: "0%"}
 												</span>
 											</div>
 											<div className="w-full bg-gray-200 rounded-full h-2">
 												<div
 													className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500"
 													style={{
-														width: (() => {
-															const maxActivity =
-																Math.max(
-																	...sortedUsers.map(
-																		(u) =>
-																			u.resumesGenerated +
-																			u.resumesApplied
-																	)
-																);
-															return maxActivity >
-																0
+														width:
+															maxActivity > 0
 																? `${Math.max(
 																		5,
 																		Math.round(
-																			((u.resumesGenerated +
-																				u.resumesApplied) /
-																				maxActivity) *
+																			((u.resumesGenerated || 0) +
+																				(u.resumesApplied || 0)) /
+																				maxActivity *
 																				100
 																		)
 																  )}%`
-																: "5%";
-														})(),
+																: "5%",
 													}}
 												></div>
 											</div>
 										</div>
+
+										{/* Analytics Dropdown */}
+										{expandedUsers.has(u.username) && (
+											<div className="mt-4 pt-4 border-t border-gray-200 animate-in slide-in-from-top-2 duration-300">
+												{loadingAnalytics[u.username] ? (
+													<div className="flex items-center justify-center h-[300px]">
+														<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+													</div>
+												) : userAnalytics[u.username] ? (
+													<div className="space-y-4">
+														<div className="flex items-center gap-2 mb-2">
+															<TrendingUp className="w-5 h-5 text-blue-600" />
+															<h4 className="text-lg font-semibold text-gray-800">
+																30-Day Activity
+															</h4>
+														</div>
+														<div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+															<DailyActivityChart
+																data={calculateLast30DaysStats(
+																	userAnalytics[
+																		u.username
+																	]
+																		?.appliedResumes ||
+																		[],
+																	userAnalytics[
+																		u.username
+																	]
+																		?.generatedResumes ||
+																		[]
+																)}
+																username={
+																	u.username
+																}
+															/>
+														</div>
+													</div>
+												) : (
+													<div className="flex items-center justify-center h-[300px] text-gray-500">
+														<div className="text-center">
+															<BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+															<p className="text-sm font-medium">
+																No analytics data
+																available
+															</p>
+														</div>
+													</div>
+												)}
+											</div>
+										)}
 									</div>
 								))}
 							</div>
 
-							{/* Summary Stats */}
-							{stats.userStats.length > 0 && (
-								<div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-									<div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-										<div>
-											<p className="text-sm text-gray-600">
-												Most Active User
-											</p>
-											<p className="font-semibold text-gray-800">
-												{stats.userStats[0]
-													?.firstname &&
-												stats.userStats[0]?.lastname
-													? `${stats.userStats[0].firstname} ${stats.userStats[0].lastname}`
-													: stats.userStats[0]
-															?.username || "N/A"}
-											</p>
-										</div>
-										<div>
-											<p className="text-sm text-gray-600">
-												Total Activity
-											</p>
-											<p className="font-semibold text-gray-800">
-												{stats.userStats.reduce(
-													(sum, user) =>
-														sum +
-														user.resumesGenerated +
-														user.resumesApplied,
-													0
-												)}
-											</p>
-										</div>
-										<div>
-											<p className="text-sm text-gray-600">
-												Avg Available Jobs
-											</p>
-											<p className="font-semibold text-gray-800">
-												{Math.round(
-													stats.userStats.reduce(
-														(sum, user) =>
-															sum +
-															(user.availableJobs ||
-																0),
-														0
-													) / stats.userStats.length
-												)}
-											</p>
-										</div>
-										<div>
-											<p className="text-sm text-gray-600">
-												Active Users
-											</p>
-											<p className="font-semibold text-gray-800">
-												{stats.userStats.length}
-											</p>
-										</div>
-									</div>
-								</div>
-							)}
 						</CardContent>
 					</Card>
 				</div>
