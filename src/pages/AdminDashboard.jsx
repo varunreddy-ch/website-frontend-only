@@ -47,8 +47,20 @@ ChartJS.register(
 );
 
 export default function AdminDashboard() {
-	const [stats, setStats] = useState(null);
-	const [loading, setLoading] = useState(true);
+	const [stats, setStats] = useState({
+		overview: null,
+		activity: null,
+		jobs: null,
+		demos: null,
+		users: null,
+	});
+	const [loading, setLoading] = useState({
+		overview: true,
+		activity: true,
+		jobs: true,
+		demos: true,
+		users: true,
+	});
 	const [sortKey, setSortKey] = useState("generated");
 	const [expandedUsers, setExpandedUsers] = useState(new Set());
 	const [userAnalytics, setUserAnalytics] = useState({});
@@ -56,23 +68,41 @@ export default function AdminDashboard() {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		async function fetchStats() {
-			try {
-				setLoading(true);
-				const res = await API.get("/admin/dashboard");
-				setStats(res.data);
-			} catch (err) {
-				console.error("Dashboard load failed", err);
-			} finally {
-				setLoading(false);
-			}
+		async function fetchAllStats() {
+			// Fetch all endpoints in parallel
+			const endpoints = [
+				{ key: "overview", url: "/admin/dashboard/overview" },
+				{ key: "activity", url: "/admin/dashboard/activity" },
+				{ key: "jobs", url: "/admin/dashboard/jobs" },
+				{ key: "demos", url: "/admin/dashboard/demos" },
+				{ key: "users", url: "/admin/dashboard/users" },
+			];
+
+			const promises = endpoints.map(async ({ key, url }) => {
+				try {
+					setLoading((prev) => ({ ...prev, [key]: true }));
+					const res = await API.get(url);
+					if (res.data.success) {
+						setStats((prev) => ({
+							...prev,
+							[key]: res.data,
+						}));
+					}
+				} catch (err) {
+					console.error(`Failed to load ${key}:`, err);
+				} finally {
+					setLoading((prev) => ({ ...prev, [key]: false }));
+				}
+			});
+
+			await Promise.all(promises);
 		}
-		fetchStats();
+		fetchAllStats();
 	}, []);
 
 	const sortedUsers = useMemo(() => {
-		if (!stats?.userStats) return [];
-		return stats.userStats.slice().sort((a, b) => {
+		if (!stats?.users?.userStats) return [];
+		return stats.users.userStats.slice().sort((a, b) => {
 			if (sortKey === "name") {
 				return `${a.firstname} ${a.lastname}`.localeCompare(
 					`${b.firstname} ${b.lastname}`
@@ -89,7 +119,7 @@ export default function AdminDashboard() {
 				return b.resumesGenerated - a.resumesGenerated;
 			}
 		});
-	}, [stats?.userStats, sortKey]);
+	}, [stats?.users?.userStats, sortKey]);
 
 	// Calculate maxActivity once to avoid recomputing for each user
 	const maxActivity = useMemo(() => {
@@ -367,7 +397,11 @@ export default function AdminDashboard() {
 		<div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
 			<Navbar />
 
-			{loading ? (
+			{loading.overview &&
+			loading.activity &&
+			loading.jobs &&
+			loading.demos &&
+			loading.users ? (
 				<div className="flex items-center justify-center h-[80vh]">
 					<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
 				</div>
@@ -401,98 +435,146 @@ export default function AdminDashboard() {
 
 					{/* Overview Stats */}
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-						<StatCard
-							label="Total Users"
-							value={stats.totalUsers}
-							icon={Users}
-							color="bg-gradient-to-r from-blue-500 to-blue-600"
-							subtitle="Registered users"
-						/>
-						<StatCard
-							label="Total Resumes"
-							value={stats.totalResumes}
-							icon={FileText}
-							color="bg-gradient-to-r from-green-500 to-green-600"
-							subtitle="Generated resumes"
-						/>
-						<StatCard
-							label="Applied Resumes"
-							value={stats.resumesApplied}
-							icon={CheckCircle}
-							color="bg-gradient-to-r from-purple-500 to-purple-600"
-							subtitle="Successfully applied"
-						/>
-						<StatCard
-							label="Pending Resumes"
-							value={stats.resumesPending}
-							icon={Clock}
-							color="bg-gradient-to-r from-orange-500 to-orange-600"
-							subtitle="Awaiting application"
-						/>
+						{loading.overview ? (
+							<>
+								{[...Array(4)].map((_, i) => (
+									<div
+										key={i}
+										className="bg-white rounded-xl shadow-lg border-0 p-6 animate-pulse"
+									>
+										<div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+										<div className="h-8 bg-gray-200 rounded w-1/3"></div>
+									</div>
+								))}
+							</>
+						) : (
+							<>
+								<StatCard
+									label="Total Users"
+									value={stats.overview?.totalUsers || 0}
+									icon={Users}
+									color="bg-gradient-to-r from-blue-500 to-blue-600"
+									subtitle="Registered users"
+								/>
+								<StatCard
+									label="Total Resumes"
+									value={stats.overview?.totalResumes || 0}
+									icon={FileText}
+									color="bg-gradient-to-r from-green-500 to-green-600"
+									subtitle="Generated resumes"
+								/>
+								<StatCard
+									label="Applied Resumes"
+									value={stats.overview?.resumesApplied || 0}
+									icon={CheckCircle}
+									color="bg-gradient-to-r from-purple-500 to-purple-600"
+									subtitle="Successfully applied"
+								/>
+								<StatCard
+									label="Pending Resumes"
+									value={stats.overview?.resumesPending || 0}
+									icon={Clock}
+									color="bg-gradient-to-r from-orange-500 to-orange-600"
+									subtitle="Awaiting application"
+								/>
+							</>
+						)}
 					</div>
 
 					{/* Job Statistics */}
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-						<StatCard
-							label="Total Jobs"
-							value={stats.totalJobs}
-							icon={Briefcase}
-							color="bg-gradient-to-r from-indigo-500 to-indigo-600"
-							subtitle="All job postings"
-						/>
-						<StatCard
-							label="Active Jobs"
-							value={stats.activeJobs}
-							icon={TrendingUp}
-							color="bg-gradient-to-r from-emerald-500 to-emerald-600"
-							subtitle="Pending verification"
-						/>
-						<StatCard
-							label="Verified Jobs"
-							value={stats.verifiedJobs}
-							icon={UserCheck}
-							color="bg-gradient-to-r from-teal-500 to-teal-600"
-							subtitle="Approved jobs"
-						/>
-						<StatCard
-							label="Expired Jobs"
-							value={stats.expiredJobs}
-							icon={FileCheck}
-							color="bg-gradient-to-r from-red-500 to-red-600"
-							subtitle="Past deadline"
-						/>
+						{loading.jobs ? (
+							<>
+								{[...Array(4)].map((_, i) => (
+									<div
+										key={i}
+										className="bg-white rounded-xl shadow-lg border-0 p-6 animate-pulse"
+									>
+										<div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+										<div className="h-8 bg-gray-200 rounded w-1/3"></div>
+									</div>
+								))}
+							</>
+						) : (
+							<>
+								<StatCard
+									label="Total Jobs"
+									value={stats.jobs?.totalJobs || 0}
+									icon={Briefcase}
+									color="bg-gradient-to-r from-indigo-500 to-indigo-600"
+									subtitle="All job postings"
+								/>
+								<StatCard
+									label="Active Jobs"
+									value={stats.jobs?.activeJobs || 0}
+									icon={TrendingUp}
+									color="bg-gradient-to-r from-emerald-500 to-emerald-600"
+									subtitle="Pending verification"
+								/>
+								<StatCard
+									label="Verified Jobs"
+									value={stats.jobs?.verifiedJobs || 0}
+									icon={UserCheck}
+									color="bg-gradient-to-r from-teal-500 to-teal-600"
+									subtitle="Approved jobs"
+								/>
+								<StatCard
+									label="Expired Jobs"
+									value={stats.jobs?.expiredJobs || 0}
+									icon={FileCheck}
+									color="bg-gradient-to-r from-red-500 to-red-600"
+									subtitle="Past deadline"
+								/>
+							</>
+						)}
 					</div>
 
 					{/* Demo Statistics */}
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-						<StatCard
-							label="Total Demos"
-							value={stats.totalDemos || 0}
-							icon={Video}
-							color="bg-gradient-to-r from-pink-500 to-pink-600"
-							subtitle="Booked demos"
-						/>
-						<StatCard
-							label="Pending Demos"
-							value={stats.pendingDemos || 0}
-							icon={Clock}
-							color="bg-gradient-to-r from-yellow-500 to-yellow-600"
-							subtitle="Awaiting confirmation"
-						/>
-						<StatCard
-							label="Confirmed Demos"
-							value={stats.confirmedDemos || 0}
-							icon={CheckCircle}
-							color="bg-gradient-to-r from-emerald-500 to-emerald-600"
-							subtitle="Scheduled sessions"
-						/>
-						<StatCard
-							label="Completed Demos"
-							value={stats.completedDemos || 0}
-							icon={Users}
-							color="bg-gradient-to-r from-blue-500 to-blue-600"
-							subtitle="Finished sessions"
-						/>
+						{loading.demos ? (
+							<>
+								{[...Array(4)].map((_, i) => (
+									<div
+										key={i}
+										className="bg-white rounded-xl shadow-lg border-0 p-6 animate-pulse"
+									>
+										<div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+										<div className="h-8 bg-gray-200 rounded w-1/3"></div>
+									</div>
+								))}
+							</>
+						) : (
+							<>
+								<StatCard
+									label="Total Demos"
+									value={stats.demos?.totalDemos || 0}
+									icon={Video}
+									color="bg-gradient-to-r from-pink-500 to-pink-600"
+									subtitle="Booked demos"
+								/>
+								<StatCard
+									label="Pending Demos"
+									value={stats.demos?.pendingDemos || 0}
+									icon={Clock}
+									color="bg-gradient-to-r from-yellow-500 to-yellow-600"
+									subtitle="Awaiting confirmation"
+								/>
+								<StatCard
+									label="Confirmed Demos"
+									value={stats.demos?.confirmedDemos || 0}
+									icon={CheckCircle}
+									color="bg-gradient-to-r from-emerald-500 to-emerald-600"
+									subtitle="Scheduled sessions"
+								/>
+								<StatCard
+									label="Completed Demos"
+									value={stats.demos?.completedDemos || 0}
+									icon={Users}
+									color="bg-gradient-to-r from-blue-500 to-blue-600"
+									subtitle="Finished sessions"
+								/>
+							</>
+						)}
 					</div>
 
 					{/* Recent Activity */}
@@ -504,47 +586,68 @@ export default function AdminDashboard() {
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-6">
-							<div>
-								<h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-									<FileText className="w-5 h-5 text-green-600" />
-									Generated Resumes
-								</h4>
-								<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-									<Stat
-										label="Today"
-										value={stats.generatedToday}
-									/>
-									<Stat
-										label="This Week"
-										value={stats.generatedThisWeek}
-									/>
-									<Stat
-										label="This Month"
-										value={stats.generatedThisMonth}
-									/>
+							{loading.activity ? (
+								<div className="space-y-6">
+									<div>
+										<div className="h-6 bg-gray-200 rounded w-1/3 mb-4 animate-pulse"></div>
+										<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+											{[...Array(3)].map((_, i) => (
+												<div
+													key={i}
+													className="border border-gray-200 rounded-xl py-4 bg-white animate-pulse"
+												>
+													<div className="h-4 bg-gray-200 rounded w-1/2 mx-auto mb-2"></div>
+													<div className="h-8 bg-gray-200 rounded w-1/3 mx-auto"></div>
+												</div>
+											))}
+										</div>
+									</div>
 								</div>
-							</div>
+							) : (
+								<>
+									<div>
+										<h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+											<FileText className="w-5 h-5 text-green-600" />
+											Generated Resumes
+										</h4>
+										<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+											<Stat
+												label="Today"
+												value={stats.activity?.generatedToday || 0}
+											/>
+											<Stat
+												label="This Week"
+												value={stats.activity?.generatedThisWeek || 0}
+											/>
+											<Stat
+												label="This Month"
+												value={stats.activity?.generatedThisMonth || 0}
+											/>
+										</div>
+									</div>
 
-							<div>
-								<h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-									<CheckCircle className="w-5 h-5 text-purple-600" />
-									Applied Resumes
-								</h4>
-								<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-									<Stat
-										label="Today"
-										value={stats.appliedToday}
-									/>
-									<Stat
-										label="This Week"
-										value={stats.appliedThisWeek}
-									/>
-									<Stat
-										label="This Month"
-										value={stats.appliedThisMonth}
-									/>
-								</div>
-							</div>
+									<div>
+										<h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+											<CheckCircle className="w-5 h-5 text-purple-600" />
+											Applied Resumes
+										</h4>
+										<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+											<Stat
+												label="Today"
+												value={stats.activity?.appliedToday || 0}
+											/>
+											<Stat
+												label="This Week"
+												value={stats.activity?.appliedThisWeek || 0}
+											/>
+											<Stat
+												label="This Month"
+												value={stats.activity?.appliedThisMonth || 0}
+											/>
+										</div>
+									</div>
+								</>
+							)}
 						</CardContent>
 					</Card>
 
@@ -556,8 +659,14 @@ export default function AdminDashboard() {
 								Per User Statistics
 							</CardTitle>
 							<p className="text-sm text-gray-600 mt-2">
-								Showing {stats.userStats.length} active users •
-								Sorted by total activity
+								{loading.users ? (
+									"Loading user statistics..."
+								) : (
+									<>
+										Showing {stats.users?.userStats?.length || 0} active users
+										• Sorted by total activity
+									</>
+								)}
 							</p>
 						</CardHeader>
 						<CardContent className="space-y-4">
@@ -570,7 +679,8 @@ export default function AdminDashboard() {
 								<select
 									value={sortKey}
 									onChange={(e) => setSortKey(e.target.value)}
-									className="border rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+									disabled={loading.users}
+									className="border rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									<option value="generated">Generated</option>
 									<option value="generatedToday">
@@ -587,7 +697,12 @@ export default function AdminDashboard() {
 								</select>
 							</div>
 
-							<div className="space-y-3 max-h-[72rem] overflow-y-auto pr-2 custom-scrollbar">
+							{loading.users ? (
+								<div className="flex items-center justify-center h-[400px]">
+									<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
+								</div>
+							) : (
+								<div className="space-y-3 max-h-[72rem] overflow-y-auto pr-2 custom-scrollbar">
 								{sortedUsers.map((u, index) => (
 									<div
 										key={u.id || u.username}
@@ -797,8 +912,8 @@ export default function AdminDashboard() {
 										)}
 									</div>
 								))}
-							</div>
-
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				</div>
