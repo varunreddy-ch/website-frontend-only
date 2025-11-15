@@ -4,7 +4,7 @@ import PremiumUpgrade from "./PremiumUpgrade";
 
 interface TierRouteGuardProps {
 	children: ReactNode;
-	requiredTier: "tier2" | "all";
+	requiredTier: "tier2" | "tier4" | "all";
 	feature: "jobs" | "profile";
 }
 
@@ -20,8 +20,8 @@ const TierRouteGuard = ({
 		return <>{children}</>;
 	}
 
-	// If tier2 is required and user is not tier2, show premium upgrade
-	if (requiredTier === "tier2" && user.role !== "tier2") {
+	// If tier2 or tier4 is required and user is not tier2/tier4, show premium upgrade
+	if ((requiredTier === "tier2" || requiredTier === "tier4") && user.role !== "tier2" && user.role !== "tier4") {
 		return <PremiumUpgrade feature={feature} />;
 	}
 

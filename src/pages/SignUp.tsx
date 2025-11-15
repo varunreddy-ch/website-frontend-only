@@ -26,7 +26,7 @@ export default function SignUp() {
 			// Redirect based on user role
 			if (role === "admin") {
 				navigate("/admin");
-			} else if (role === "tier2") {
+			} else if (role === "tier2" || role === "tier4") {
 				navigate("/jobs");
 			} else if (role === "applier") {
 				navigate("/applier-form");

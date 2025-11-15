@@ -756,8 +756,8 @@ export default function Jobs() {
 		}
 		setUser(currentUser);
 
-		// Only fetch job stats for tier2 and applier users
-		if (currentUser.role === "tier2" || currentUser.role === "applier") {
+		// Only fetch job stats for tier2, tier4 and applier users
+		if (currentUser.role === "tier2" || currentUser.role === "tier4" || currentUser.role === "applier") {
 			fetchJobStats();
 		}
 	}, []);

@@ -70,8 +70,8 @@ export default function Profile() {
 			return;
 		}
 
-		// Only fetch data for tier2 users
-		if (currentUser.role === "tier2") {
+		// Only fetch data for tier2 and tier4 users
+		if (currentUser.role === "tier2" || currentUser.role === "tier4") {
 			fetchData();
 		}
 	}, []);

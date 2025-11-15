@@ -35,7 +35,7 @@ export default function SignIn() {
 			// Redirect based on user role
 			if (role === "admin") {
 				navigate("/admin");
-			} else if (role === "tier2" || role === "tier3") {
+			} else if (role === "tier2" || role === "tier3" || role === "tier4") {
 				navigate("/jobs");
 			} else if (role === "applier") {
 				navigate("/applier-form");
@@ -60,7 +60,7 @@ export default function SignIn() {
 			// Redirect based on user tier
 			if (role === "admin") {
 				navigate("/admin");
-			} else if (role === "tier2") {
+			} else if (role === "tier2" || role === "tier4") {
 				navigate("/jobs");
 			} else if (role === "applier") {
 				navigate("/applier-form");

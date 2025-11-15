@@ -19,7 +19,7 @@ export default function ApplierForm() {
 		if (user.role !== "applier") {
 			if (user.role === "admin") {
 				navigate("/admin");
-			} else if (user.role === "tier2") {
+			} else if (user.role === "tier2" || user.role === "tier4") {
 				navigate("/jobs");
 			} else {
 				// tier1 and user roles go to dashboard

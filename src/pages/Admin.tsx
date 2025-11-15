@@ -231,6 +231,7 @@ export default function Admin() {
 								<option value="tier1">Tier1</option>
 								<option value="tier2">Tier2</option>
 								<option value="tier3">Tier3</option>
+								<option value="tier4">Tier4</option>
 								<option value="applier">Applier</option>
 							</select>
 						</div>
