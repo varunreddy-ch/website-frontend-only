@@ -20,8 +20,8 @@ const TierRouteGuard = ({
 		return <>{children}</>;
 	}
 
-	// If tier2 or tier4 is required and user is not tier2/tier4, show premium upgrade
-	if ((requiredTier === "tier2" || requiredTier === "tier4") && user.role !== "tier2" && user.role !== "tier4") {
+	// If tier2, tier3 or tier4 is required and user is not tier2/tier3/tier4, show premium upgrade
+	if ((requiredTier === "tier2" || requiredTier === "tier4") && user.role !== "tier2" && user.role !== "tier3" && user.role !== "tier4") {
 		return <PremiumUpgrade feature={feature} />;
 	}
 

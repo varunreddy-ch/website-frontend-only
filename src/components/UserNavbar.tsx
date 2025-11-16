@@ -60,7 +60,7 @@ const UserNavbar = () => {
 								</Button>
 							</Link>
 						)}
-						{(user?.role === "tier2" || user?.role === "tier4") && (
+						{user?.role === "tier2" && (
 							<Link to="/jobs">
 								<Button
 									variant={
@@ -128,7 +128,7 @@ const UserNavbar = () => {
 								</Button>
 							</Link>
 						)}
-						{(user?.role === "tier2" || user?.role === "tier4") && (
+						{(user?.role === "tier2" || user?.role === "tier3" || user?.role === "tier4") && (
 							<Link to={getProfileLink()}>
 								<Button
 									variant={
@@ -215,7 +215,7 @@ const UserNavbar = () => {
 									</Button>
 								</Link>
 							)}
-							{(user?.role === "tier2" || user?.role === "tier4") && (
+							{user?.role === "tier2" && (
 								<Link to="/jobs">
 									<Button
 										variant={
@@ -290,7 +290,7 @@ const UserNavbar = () => {
 									</Button>
 								</Link>
 							)}
-							{(user?.role === "tier2" || user?.role === "tier4") && (
+							{(user?.role === "tier2" || user?.role === "tier3" || user?.role === "tier4") && (
 								<Link to={getProfileLink()}>
 									<Button
 										variant={

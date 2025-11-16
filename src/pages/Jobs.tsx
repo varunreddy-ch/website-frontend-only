@@ -744,6 +744,7 @@ export default function Jobs() {
 	const [jobStats, setJobStats] = useState({
 		availableJobs: 0,
 		appliedToday: 0,
+		manuallyAppliedToday: 0,
 	});
 	const [refreshing, setRefreshing] = useState(false);
 	const [refreshKey, setRefreshKey] = useState(0);
@@ -758,8 +759,8 @@ export default function Jobs() {
 		}
 		setUser(currentUser);
 
-		// Only fetch job stats for tier2, tier4 and applier users
-		if (currentUser.role === "tier2" || currentUser.role === "tier4" || currentUser.role === "applier") {
+		// Only fetch job stats for tier2, tier3, tier4 and applier users
+		if (currentUser.role === "tier2" || currentUser.role === "tier3" || currentUser.role === "tier4" || currentUser.role === "applier") {
 			fetchJobStats();
 		}
 	}, []);
@@ -772,11 +773,12 @@ export default function Jobs() {
 			const { data } = await API.get(`/user-job-stats`);
 
 			if (data.success) {
-				const { availableJobs, appliedToday } = data.data;
+				const { availableJobs, appliedToday, manuallyAppliedToday } = data.data;
 
 				setJobStats({
 					availableJobs,
 					appliedToday,
+					manuallyAppliedToday: manuallyAppliedToday || 0,
 				});
 			} else {
 				throw new Error("Failed to fetch job stats");
@@ -787,6 +789,7 @@ export default function Jobs() {
 			setJobStats({
 				availableJobs: -1,
 				appliedToday: -1,
+				manuallyAppliedToday: -1,
 			});
 		} finally {
 			setRefreshing(false);
@@ -895,7 +898,7 @@ export default function Jobs() {
 				</div>
 
 				{/* Enhanced Stats Cards */}
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 					<StatCard
 						title="Available Jobs"
 						value={jobStats.availableJobs}
@@ -910,6 +913,14 @@ export default function Jobs() {
 						icon={CheckCircle}
 						color="bg-gradient-to-r from-green-500 to-green-600"
 						subtitle="Today's applications"
+						change=""
+					/>
+					<StatCard
+						title="Manually applied Today"
+						value={jobStats.manuallyAppliedToday}
+						icon={CheckCircle2}
+						color="bg-gradient-to-r from-purple-500 to-purple-600"
+						subtitle="Manual applications"
 						change=""
 					/>
 				</div>
