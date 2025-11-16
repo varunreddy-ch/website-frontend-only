@@ -19,6 +19,7 @@ import AdminDemos from "./pages/AdminDemos";
 import AdminContacts from "./pages/AdminContacts";
 import ApplierForm from "./pages/ApplierForm";
 import Demo from "./pages/Demo";
+import PublicProfile from "./pages/PublicProfile";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
 					/>
 					<Route path="/applier-form" element={<ApplierForm />} />
 					<Route path="/demo" element={<Demo />} />
+					<Route path="/profile-public" element={<PublicProfile />} />
 					{/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
 					<Route path="*" element={<NotFound />} />
 				</Routes>
