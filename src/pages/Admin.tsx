@@ -168,25 +168,26 @@ export default function Admin() {
 	}, []);
 
 	return (
-		<div>
+		<div className="flex flex-col min-h-screen">
 			<Navbar />
 
-			{message && (
-				<div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
-					<div className="bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg animate-fade-in">
-						{message}
+			<main className="flex-1">
+				{message && (
+					<div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+						<div className="bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg animate-fade-in">
+							{message}
+						</div>
 					</div>
-				</div>
-			)}
-			{error && (
-				<div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
-					<div className="bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg animate-fade-in">
-						{error}
+				)}
+				{error && (
+					<div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+						<div className="bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg animate-fade-in">
+							{error}
+						</div>
 					</div>
-				</div>
-			)}
+				)}
 
-			<div className="max-w-4xl mx-auto p-6 space-y-6 bg-white shadow rounded-xl mt-20">
+				<div className="max-w-4xl mx-auto p-6 space-y-6 bg-white shadow rounded-xl mt-20">
 				<div className="text-left mb-4">
 					<button
 						onClick={() => navigate("/admin/dashboard")}
@@ -296,7 +297,8 @@ export default function Admin() {
 						)}
 					</ul>
 				</div>
-			</div>
+				</div>
+			</main>
 
 			{/* Confirm Modal */}
 			{userToRemove && (

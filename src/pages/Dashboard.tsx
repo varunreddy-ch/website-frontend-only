@@ -222,10 +222,11 @@ export default function Dashboard() {
 					<Spinner />
 				</div>
 			)}
-			<div className="bg-gray-100 min-h-screen">
+			<div className="flex flex-col min-h-screen bg-gray-100">
 				<Navbar />
 
-				<div className="max-w-4xl mx-auto p-4 space-y-4">
+				<main className="flex-1">
+					<div className="max-w-4xl mx-auto p-4 space-y-4">
 					{/* Header Section */}
 					<div className="text-center mt-20 mb-8">
 						<h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -361,7 +362,8 @@ export default function Dashboard() {
 							</p>
 						</div>
 					)}
-				</div>
+					</div>
+				</main>
 
 				{/* Company Modal */}
 				{showCompanyModal && (

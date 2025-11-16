@@ -34,10 +34,11 @@ export default function ApplierForm() {
 	}
 
 	return (
-		<div className="bg-gray-100 min-h-screen">
+		<div className="flex flex-col min-h-screen bg-gray-100">
 			<UserNavbar />
 
-			<div className="max-w-4xl mx-auto p-4 pt-24">
+			<main className="flex-1">
+				<div className="max-w-4xl mx-auto p-4 pt-24">
 				{/* Header Section */}
 				<div className="text-center mb-8">
 					<h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -50,7 +51,8 @@ export default function ApplierForm() {
 
 				{/* Submit Job Form */}
 				<ApplierSubmissionForm />
-			</div>
+				</div>
+			</main>
 
 			<PageFooter />
 		</div>

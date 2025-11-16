@@ -631,10 +631,11 @@ export default function Profile() {
 
 	return (
 		<TierRouteGuard requiredTier="tier2" feature="profile">
-			<div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+			<div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
 				<Navbar />
 
-				{loading ? (
+				<main className="flex-1">
+					{loading ? (
 					<div className="flex items-center justify-center h-[80vh]">
 						<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
 					</div>
@@ -931,10 +932,11 @@ export default function Profile() {
 							</CardContent>
 						</Card>
 					</div>
-				)}
-			</div>
+					)}
+				</main>
 
-			<PageFooter />
+				<PageFooter />
+			</div>
 		</TierRouteGuard>
 	);
 }

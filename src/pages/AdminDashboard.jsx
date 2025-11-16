@@ -394,19 +394,20 @@ export default function AdminDashboard() {
 	);
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+		<div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
 			<Navbar />
 
-			{loading.overview &&
-			loading.activity &&
-			loading.jobs &&
-			loading.demos &&
-			loading.users ? (
-				<div className="flex items-center justify-center h-[80vh]">
-					<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
-				</div>
-			) : (
-				<div className="max-w-7xl mx-auto p-6 mt-16 space-y-8">
+			<main className="flex-1">
+				{loading.overview &&
+				loading.activity &&
+				loading.jobs &&
+				loading.demos &&
+				loading.users ? (
+					<div className="flex items-center justify-center h-[80vh]">
+						<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
+					</div>
+				) : (
+					<div className="max-w-7xl mx-auto p-6 mt-16 space-y-8">
 					<div className="text-left mb-4 flex justify-between items-center px-4">
 						<div>
 							<h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
@@ -916,8 +917,9 @@ export default function AdminDashboard() {
 							)}
 						</CardContent>
 					</Card>
-				</div>
-			)}
+					</div>
+				)}
+			</main>
 
 			<style>{`
 				.custom-scrollbar::-webkit-scrollbar {

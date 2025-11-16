@@ -326,10 +326,11 @@ const AdminJobs = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+		<div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
 			<Navbar />
-			<div className="p-6 mt-16">
-				<div className="max-w-7xl mx-auto">
+			<main className="flex-1">
+				<div className="p-6 mt-16">
+					<div className="max-w-7xl mx-auto">
 					{/* Header Section */}
 					<div className="mb-8 text-center">
 						<div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mb-4">
@@ -679,8 +680,9 @@ const AdminJobs = () => {
 							})}
 						</div>
 					)}
+					</div>
 				</div>
-			</div>
+			</main>
 
 			{/* Confirmation Modal */}
 			{confirmationModal.isOpen && (

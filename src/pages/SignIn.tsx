@@ -76,10 +76,10 @@ export default function SignIn() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+		<div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
 			<Navbar />
 
-			<div className="flex items-center justify-center min-h-screen px-4 pt-16">
+			<main className="flex-1 flex items-center justify-center px-4 pt-16">
 				<Card className="w-full max-w-md bg-white/90 backdrop-blur-sm border-white/20 shadow-xl">
 					<CardHeader className="text-center">
 						<div className="flex items-center gap-2 mb-4">
@@ -161,7 +161,7 @@ export default function SignIn() {
 						</div>
 					</CardContent>
 				</Card>
-			</div>
+			</main>
 
 			<PageFooter />
 		</div>

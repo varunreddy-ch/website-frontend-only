@@ -11,13 +11,14 @@ import { Mail, Calendar } from "lucide-react";
 
 const Index = () => {
 	return (
-		<div className="min-h-screen">
+		<div className="flex flex-col min-h-screen">
 			<Navbar />
-			<div id="home">
-				<HeroSection />
-			</div>
-			<FeaturesSection />
-			<UploadSection />
+			<main className="flex-1">
+				<div id="home">
+					<HeroSection />
+				</div>
+				<FeaturesSection />
+				<UploadSection />
 
 			{/* Template Section Header */}
 			<section
@@ -103,8 +104,9 @@ const Index = () => {
 			{/* <div id="pricing">
         <PricingSection />
       </div> */}
-			<ContactSection />
-			<FAQSection />
+				<ContactSection />
+				<FAQSection />
+			</main>
 			<Footer />
 
 			{/* Custom CSS for gradient animation */}

@@ -597,11 +597,11 @@ export default function PublicProfile() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+			<div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
 				<Navbar />
-				<div className="flex items-center justify-center h-[80vh]">
+				<main className="flex-1 flex items-center justify-center">
 					<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
-				</div>
+				</main>
 				<PageFooter />
 			</div>
 		);
@@ -609,9 +609,10 @@ export default function PublicProfile() {
 
 	if (error) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+			<div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
 				<Navbar />
-				<div className="max-w-2xl mx-auto p-6 mt-16">
+				<main className="flex-1">
+					<div className="max-w-2xl mx-auto p-6 mt-16">
 					<Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
 						<CardContent className="p-8 text-center">
 							<div className="text-red-500 mb-4">
@@ -623,15 +624,17 @@ export default function PublicProfile() {
 							<p className="text-gray-600">{error}</p>
 						</CardContent>
 					</Card>
-				</div>
+					</div>
+				</main>
 				<PageFooter />
 			</div>
 		);
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+		<div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
 			<Navbar />
+			<main className="flex-1">
 
 			<div className="max-w-6xl mx-auto p-6 mt-16 space-y-8">
 				{/* Header */}
@@ -867,6 +870,7 @@ export default function PublicProfile() {
 					</CardContent>
 				</Card>
 			</div>
+			</main>
 
 			<PageFooter />
 		</div>

@@ -146,9 +146,10 @@ export default function Analytics() {
 
 	if (user?.role !== "admin") {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+			<div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
 				<Navbar />
-				<div className="max-w-2xl mx-auto p-6 mt-20">
+				<main className="flex-1">
+					<div className="max-w-2xl mx-auto p-6 mt-20">
 					<Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0 text-center">
 						<CardContent className="p-8">
 							<Target className="w-16 h-16 mx-auto mb-4 text-red-500" />
@@ -166,16 +167,18 @@ export default function Analytics() {
 							</Button>
 						</CardContent>
 					</Card>
-				</div>
+					</div>
+				</main>
 			</div>
 		);
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+		<div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
 			<Navbar />
 
-			<div className="max-w-7xl mx-auto p-6 space-y-6">
+			<main className="flex-1">
+				<div className="max-w-7xl mx-auto p-6 space-y-6">
 				<div className="flex items-center justify-between">
 					<h1 className="text-3xl font-bold gradient-text">
 						Analytics Dashboard
@@ -400,7 +403,8 @@ export default function Analytics() {
 						</Card>
 					</>
 				)}
-			</div>
+				</div>
+			</main>
 
 			<PageFooter />
 		</div>
