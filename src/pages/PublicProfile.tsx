@@ -43,7 +43,7 @@ ChartJS.register(
 
 export default function PublicProfile() {
 	const [searchParams] = useSearchParams();
-	const username = searchParams.get("username");
+	const userId = searchParams.get("id");
 
 	const [userInfo, setUserInfo] = useState({
 		firstname: "",
@@ -58,13 +58,13 @@ export default function PublicProfile() {
 	const [appliedResumes, setAppliedResumes] = useState([]);
 
 	useEffect(() => {
-		if (username) {
+		if (userId) {
 			fetchData();
 		} else {
-			setError("Username is required");
+			setError("User id is required");
 			setLoading(false);
 		}
-	}, [username]);
+	}, [userId]);
 
 	const fetchData = async () => {
 		try {
@@ -73,7 +73,7 @@ export default function PublicProfile() {
 
 			// Call the public endpoint
 			const { data } = await API.get(`/profile-public`, {
-				params: { username },
+				params: { id: userId },
 			});
 
 			setUserInfo(data.user || {});
