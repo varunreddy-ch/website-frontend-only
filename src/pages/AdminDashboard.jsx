@@ -61,7 +61,7 @@ export default function AdminDashboard() {
 		demos: true,
 		users: true,
 	});
-	const [sortKey, setSortKey] = useState("generated");
+	const [sortKey, setSortKey] = useState("totalGenerated");
 	const [expandedUsers, setExpandedUsers] = useState(new Set());
 	const [userAnalytics, setUserAnalytics] = useState({});
 	const [loadingAnalytics, setLoadingAnalytics] = useState({});
@@ -107,16 +107,44 @@ export default function AdminDashboard() {
 				return `${a.firstname} ${a.lastname}`.localeCompare(
 					`${b.firstname} ${b.lastname}`
 				);
-			} else if (sortKey === "applied") {
-				return b.resumesApplied - a.resumesApplied;
-			} else if (sortKey === "appliedToday") {
-				return (b.appliedToday || 0) - (a.appliedToday || 0);
+			}
+			// GENERATED
+			else if (sortKey === "totalGenerated") {
+				return (b.totalGenerated || 0) - (a.totalGenerated || 0);
 			} else if (sortKey === "generatedToday") {
 				return (b.generatedToday || 0) - (a.generatedToday || 0);
-			} else if (sortKey === "availableJobs") {
-				return (b.availableJobs || 0) - (a.availableJobs || 0);
-			} else {
-				return b.resumesGenerated - a.resumesGenerated;
+			} else if (sortKey === "generatedThisWeek") {
+				return (b.generatedThisWeek || 0) - (a.generatedThisWeek || 0);
+			}
+			// APPLIED
+			else if (sortKey === "totalApplied") {
+				return (b.totalApplied || 0) - (a.totalApplied || 0);
+			} else if (sortKey === "appliedToday") {
+				return (b.appliedToday || 0) - (a.appliedToday || 0);
+			} else if (sortKey === "appliedThisWeek") {
+				return (b.appliedThisWeek || 0) - (a.appliedThisWeek || 0);
+			}
+			// MANUAL
+			else if (sortKey === "totalManualApplied") {
+				return (b.totalManualApplied || 0) - (a.totalManualApplied || 0);
+			} else if (sortKey === "manuallyAppliedToday") {
+				return (b.manuallyAppliedToday || 0) - (a.manuallyAppliedToday || 0);
+			} else if (sortKey === "manuallyAppliedThisWeek") {
+				return (b.manuallyAppliedThisWeek || 0) - (a.manuallyAppliedThisWeek || 0);
+			}
+			// AVAILABLE JOBS
+			else if (sortKey === "availableJobsTotal") {
+				return (b.availableJobsTotal || 0) - (a.availableJobsTotal || 0);
+			} else if (sortKey === "availableJobsToday") {
+				return (b.availableJobsToday || 0) - (a.availableJobsToday || 0);
+			} else if (sortKey === "availableJobsThisWeek") {
+				return (b.availableJobsThisWeek || 0) - (a.availableJobsThisWeek || 0);
+			} else if (sortKey === "availableJobsLastWeek") {
+				return (b.availableJobsLastWeek || 0) - (a.availableJobsLastWeek || 0);
+			}
+			// Default fallback
+			else {
+				return (b.totalGenerated || 0) - (a.totalGenerated || 0);
 			}
 		});
 	}, [stats?.users?.userStats, sortKey]);
@@ -126,7 +154,7 @@ export default function AdminDashboard() {
 		if (!sortedUsers || sortedUsers.length === 0) return 0;
 		return Math.max(
 			...sortedUsers.map(
-				(u) => (u.resumesGenerated || 0) + (u.resumesApplied || 0)
+				(u) => (u.totalGenerated || 0) + (u.totalApplied || 0)
 			)
 		);
 	}, [sortedUsers]);
@@ -147,6 +175,7 @@ export default function AdminDashboard() {
 					[username]: {
 						appliedResumes: response.data.appliedResumes || [],
 						generatedResumes: response.data.generatedResumes || [],
+						manualGeneratedResumes: response.data.manualGeneratedResumes || [],
 					},
 				}));
 			}
@@ -183,38 +212,43 @@ export default function AdminDashboard() {
 		}
 	};
 
-	const calculateLast30DaysStats = (appliedResumes, generatedResumes) => {
+	const calculateLast30DaysStats = (
+		appliedResumes,
+		generatedResumes,
+		manualGeneratedResumes
+	) => {
 		const days = [];
 		const estNow = DateTime.now().setZone("America/New_York");
-
+	
 		for (let i = 29; i >= 0; i--) {
 			const date = estNow.minus({ days: i });
-
-			// Count applied resumes based on updatedAt
+	
 			const dayApplied = appliedResumes.filter((r) => {
-				const resumeDate = DateTime.fromISO(r.updatedAt).setZone(
-					"America/New_York"
-				);
-				return resumeDate.startOf("day").equals(date.startOf("day"));
+				const d = DateTime.fromISO(r.updatedAt).setZone("America/New_York");
+				return d.startOf("day").equals(date.startOf("day"));
 			});
-
-			// Count generated resumes based on createdAt
+	
 			const dayGenerated = generatedResumes.filter((r) => {
-				const resumeDate = DateTime.fromISO(r.createdAt).setZone(
-					"America/New_York"
-				);
-				return resumeDate.startOf("day").equals(date.startOf("day"));
+				const d = DateTime.fromISO(r.createdAt).setZone("America/New_York");
+				return d.startOf("day").equals(date.startOf("day"));
 			});
-
+	
+			const dayManual = manualGeneratedResumes.filter((r) => {
+				const d = DateTime.fromISO(r.createdAt).setZone("America/New_York");
+				return d.startOf("day").equals(date.startOf("day"));
+			});
+	
 			days.push({
 				day: date.toFormat("MMM d"),
 				applied: dayApplied.length,
 				generated: dayGenerated.length,
+				manual: dayManual.length,
 			});
 		}
-
+	
 		return days;
 	};
+	
 
 	const toggleUserAnalytics = async (username) => {
 		const newExpanded = new Set(expandedUsers);
@@ -279,6 +313,21 @@ export default function AdminDashboard() {
 					pointHoverRadius: 6,
 					pointHoverBorderWidth: 2,
 				},
+				{
+					label: "Manual",
+					data: data.map((d) => d.manual),
+					borderColor: "rgba(16, 185, 129, 1)",          // emerald-500
+					backgroundColor: "rgba(16, 185, 129, 0.15)",
+					borderWidth: 3,
+					tension: 0.4,
+					fill: true,
+					pointBackgroundColor: "rgba(16, 185, 129, 1)",
+					pointBorderColor: "#ffffff",
+					pointBorderWidth: 2,
+					pointRadius: 4,
+					pointHoverRadius: 6,
+					pointHoverBorderWidth: 2,
+				},	
 			],
 		};
 
@@ -368,7 +417,7 @@ export default function AdminDashboard() {
 
 	const StatCard = ({ label, value, icon: Icon, color, subtitle }) => (
 		<div className="bg-white rounded-xl shadow-lg border-0 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-			<div className="p-6">
+			<div className="p-5">
 				<div className="flex items-center justify-between">
 					<div>
 						<p className="text-sm text-gray-600 font-medium">
@@ -411,7 +460,7 @@ export default function AdminDashboard() {
 					<div className="text-left mb-4 flex justify-between items-center px-4">
 						<div>
 							<h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-								📊 Admin Dashboard
+								Admin Dashboard
 							</h1>
 							<p className="text-lg text-gray-600">
 								Comprehensive overview of system statistics and
@@ -509,14 +558,14 @@ export default function AdminDashboard() {
 									label="Active Jobs"
 									value={stats.jobs?.activeJobs || 0}
 									icon={TrendingUp}
-									color="bg-gradient-to-r from-emerald-500 to-emerald-600"
+									color="bg-gradient-to-r from-orange-500 to-orange-600"
 									subtitle="Pending verification"
 								/>
 								<StatCard
 									label="Verified Jobs"
 									value={stats.jobs?.verifiedJobs || 0}
 									icon={UserCheck}
-									color="bg-gradient-to-r from-teal-500 to-teal-600"
+									color="bg-gradient-to-r from-blue-500 to-blue-600"
 									subtitle="Approved jobs"
 								/>
 								<StatCard
@@ -564,7 +613,7 @@ export default function AdminDashboard() {
 									label="Confirmed Demos"
 									value={stats.demos?.confirmedDemos || 0}
 									icon={CheckCircle}
-									color="bg-gradient-to-r from-emerald-500 to-emerald-600"
+									color="bg-gradient-to-r from-green-500 to-green-600"
 									subtitle="Scheduled sessions"
 								/>
 								<StatCard
@@ -683,18 +732,28 @@ export default function AdminDashboard() {
 									disabled={loading.users}
 									className="border rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
-									<option value="generated">Generated</option>
-									<option value="generatedToday">
-										Generated Today
-									</option>
-									<option value="applied">Applied</option>
-									<option value="appliedToday">
-										Applied Today
-									</option>
 									<option value="name">Name</option>
-									<option value="availableJobs">
-										Available Jobs
-									</option>
+									<optgroup label="GENERATED">
+										<option value="totalGenerated">Total Generated</option>
+										<option value="generatedToday">Generated Today</option>
+										<option value="generatedThisWeek">Generated This Week</option>
+									</optgroup>
+									<optgroup label="APPLIED">
+										<option value="totalApplied">Total Applied</option>
+										<option value="appliedToday">Applied Today</option>
+										<option value="appliedThisWeek">Applied This Week</option>
+									</optgroup>
+									<optgroup label="MANUAL">
+										<option value="totalManualApplied">Total Manually Applied</option>
+										<option value="manuallyAppliedToday">Manually Applied Today</option>
+										<option value="manuallyAppliedThisWeek">Manually Applied This Week</option>
+									</optgroup>
+									<optgroup label="AVAILABLE JOBS">
+										<option value="availableJobsTotal">Available Jobs Total</option>
+										<option value="availableJobsToday">Available Jobs Today</option>
+										<option value="availableJobsThisWeek">Available Jobs This Week</option>
+										<option value="availableJobsLastWeek">Available Jobs Last Week</option>
+									</optgroup>
 								</select>
 							</div>
 
@@ -716,7 +775,7 @@ export default function AdminDashboard() {
 											transform: "translateY(20px)",
 										}}
 									>
-										<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+										<div className="flex flex-col gap-4">
 											{/* User Info */}
 											<div className="flex-1">
 												<div className="flex items-center gap-3 mb-2">
@@ -780,51 +839,131 @@ export default function AdminDashboard() {
 												</div>
 											</div>
 
-											{/* Stats Grid */}
-											<div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-												<div className="text-center p-3 bg-green-50 rounded-lg border border-green-200 group-hover:bg-green-100 transition-colors duration-200">
-													<p className="text-xs text-green-600 font-medium mb-1">
-														Applied Today
-													</p>
-													<p className="text-lg font-bold text-green-800">
-														{u.appliedToday || 0}
-													</p>
-												</div>
-												<div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200 group-hover:bg-blue-100 transition-colors duration-200">
-													<p className="text-xs text-blue-600 font-medium mb-1">
-														Generated Today
-													</p>
-													<p className="text-lg font-bold text-blue-800">
-														{u.generatedToday || 0}
-													</p>
-												</div>
-												<div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200 group-hover:bg-purple-100 transition-colors duration-200">
-													<p className="text-xs text-purple-600 font-medium mb-1">
-														Total Applied
-													</p>
-													<p className="text-lg font-bold text-purple-800">
-														{u.resumesApplied || 0}
-													</p>
-												</div>
-												<div className="text-center p-3 bg-indigo-50 rounded-lg border border-indigo-200 group-hover:bg-indigo-100 transition-colors duration-200">
-													<p className="text-xs text-indigo-600 font-medium mb-1">
-														Available Jobs
-													</p>
-													<p className="text-lg font-bold text-indigo-800">
-														{u.availableJobs || 0}
-													</p>
-												</div>
-											</div>
+											{/* Stats Grid - All stats in a single line */}
+											<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
 
-											{/* Total Generated */}
-											<div className="text-center p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-												<p className="text-xs text-gray-600 font-medium mb-1">
-													Total Generated
-												</p>
-												<p className="text-2xl font-bold text-gray-800">
-													{u.resumesGenerated || 0}
-												</p>
-											</div>
+    {/* Applied Today */}
+    <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200 group-hover:bg-green-100 transition-colors duration-200">
+        <p className="text-xs text-green-600 font-medium mb-1">
+            Applied Today
+        </p>
+        <p className="text-lg font-bold text-green-800">
+            {u.appliedToday ?? -1}
+        </p>
+    </div>
+
+    {/* Manually Applied Today */}
+    <div className="text-center p-3 bg-emerald-50 rounded-lg border border-emerald-200 group-hover:bg-emerald-100 transition-colors duration-200">
+        <p className="text-xs text-emerald-600 font-medium mb-1">
+            Manually Applied Today
+        </p>
+        <p className="text-lg font-bold text-emerald-800">
+            {u.manuallyAppliedToday ?? -1}
+        </p>
+    </div>
+
+    {/* Generated Today */}
+    <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200 group-hover:bg-blue-100 transition-colors duration-200">
+        <p className="text-xs text-blue-600 font-medium mb-1">
+            Generated Today
+        </p>
+        <p className="text-lg font-bold text-blue-800">
+            {u.generatedToday ?? -1}
+        </p>
+    </div>
+
+    {/* Available Jobs Today */}
+    <div className="text-center p-3 bg-indigo-50 rounded-lg border border-indigo-200 group-hover:bg-indigo-100 transition-colors duration-200">
+        <p className="text-xs text-indigo-600 font-medium mb-1">
+            Available Jobs Today
+        </p>
+        <p className="text-lg font-bold text-indigo-800">
+            {u.availableJobsToday ?? -1}
+        </p>
+    </div>
+
+    {/* Applied This Week */}
+    <div className="text-center p-3 bg-green-100 rounded-lg border border-green-300 group-hover:bg-green-200 transition-colors duration-200">
+        <p className="text-xs text-green-700 font-medium mb-1">
+            Applied This Week
+        </p>
+        <p className="text-lg font-bold text-green-900">
+            {u.appliedThisWeek ?? -1}
+        </p>
+    </div>
+
+    {/* Manually Applied This Week */}
+    <div className="text-center p-3 bg-emerald-100 rounded-lg border border-emerald-300 group-hover:bg-emerald-200 transition-colors duration-200">
+        <p className="text-xs text-emerald-700 font-medium mb-1">
+            Manually Applied This Week
+        </p>
+        <p className="text-lg font-bold text-emerald-900">
+            {u.manuallyAppliedThisWeek ?? -1}
+        </p>
+    </div>
+
+    {/* Generated This Week */}
+    <div className="text-center p-3 bg-blue-100 rounded-lg border border-blue-300 group-hover:bg-blue-200 transition-colors duration-200">
+        <p className="text-xs text-blue-700 font-medium mb-1">
+            Generated This Week
+        </p>
+        <p className="text-lg font-bold text-blue-900">
+            {u.generatedThisWeek ?? -1}
+        </p>
+    </div>
+
+    {/* Available Jobs This Week */}
+    <div className="text-center p-3 bg-indigo-100 rounded-lg border border-indigo-300 group-hover:bg-indigo-200 transition-colors duration-200">
+        <p className="text-xs text-indigo-700 font-medium mb-1">
+            Available Jobs This Week
+        </p>
+        <p className="text-lg font-bold text-indigo-900">
+            {u.availableJobsThisWeek ?? -1}
+        </p>
+    </div>
+
+    {/* Total Applied */}
+    <div className="text-center p-3 bg-green-200 rounded-lg border border-green-400 group-hover:bg-green-300 transition-colors duration-200">
+        <p className="text-xs text-green-800 font-medium mb-1">
+            Total Applied
+        </p>
+        <p className="text-lg font-bold text-green-900">
+            {u.totalApplied ?? -1}
+        </p>
+    </div>
+
+    {/* Total Manually Applied */}
+    <div className="text-center p-3 bg-emerald-200 rounded-lg border border-emerald-400 group-hover:bg-emerald-300 transition-colors duration-200">
+        <p className="text-xs text-emerald-800 font-medium mb-1">
+            Total Manually Applied
+        </p>
+        <p className="text-lg font-bold text-emerald-900">
+            {u.totalManualApplied ?? -1}
+        </p>
+    </div>
+
+    {/* Total Generated */}
+    <div className="text-center p-3 bg-blue-200 rounded-lg border border-blue-400 group-hover:bg-blue-300 transition-colors duration-200">
+        <p className="text-xs text-blue-800 font-medium mb-1">
+            Total Generated
+        </p>
+        <p className="text-lg font-bold text-blue-900">
+            {u.totalGenerated ?? -1}
+        </p>
+    </div>
+
+    {/* Available Jobs Total */}
+    <div className="text-center p-3 bg-indigo-200 rounded-lg border border-indigo-400 group-hover:bg-indigo-300 transition-colors duration-200">
+        <p className="text-xs text-indigo-800 font-medium mb-1">
+            Available Jobs Total
+        </p>
+        <p className="text-lg font-bold text-indigo-900">
+            {u.availableJobsTotal ?? -1}
+        </p>
+    </div>
+
+</div>
+
 										</div>
 
 										{/* Progress Bar */}
@@ -834,8 +973,8 @@ export default function AdminDashboard() {
 												<span>
 													{maxActivity > 0
 														? `${Math.round(
-																((u.resumesGenerated || 0) +
-																	(u.resumesApplied || 0)) /
+																((u.totalGenerated || 0) +
+																	(u.totalApplied || 0)) /
 																	maxActivity *
 																	100
 														  )}%`
@@ -851,8 +990,8 @@ export default function AdminDashboard() {
 																? `${Math.max(
 																		5,
 																		Math.round(
-																			((u.resumesGenerated || 0) +
-																				(u.resumesApplied || 0)) /
+																			((u.totalGenerated || 0) +
+																				(u.totalApplied || 0)) /
 																				maxActivity *
 																				100
 																		)
@@ -879,22 +1018,13 @@ export default function AdminDashboard() {
 															</h4>
 														</div>
 														<div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-															<DailyActivityChart
-																data={calculateLast30DaysStats(
-																	userAnalytics[
-																		u.username
-																	]
-																		?.appliedResumes ||
-																		[],
-																	userAnalytics[
-																		u.username
-																	]
-																		?.generatedResumes ||
-																		[]
-																)}
-																username={
-																	u.username
-																}
+														<DailyActivityChart
+															data={calculateLast30DaysStats(
+																userAnalytics[u.username]?.appliedResumes || [],
+																userAnalytics[u.username]?.generatedResumes || [],
+																userAnalytics[u.username]?.manualGeneratedResumes || []
+															)}
+															username={u.username}
 															/>
 														</div>
 													</div>
@@ -960,6 +1090,9 @@ export default function AdminDashboard() {
 				/* Enhanced hover effects */
 				.group:hover .group-hover\\:bg-green-100 {
 					background-color: rgb(220 252 225);
+				}
+				.group:hover .group-hover\\:bg-emerald-100 {
+					background-color: rgb(209 250 229);
 				}
 				.group:hover .group-hover\\:bg-blue-100 {
 					background-color: rgb(219 234 254);
