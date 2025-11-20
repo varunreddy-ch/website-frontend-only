@@ -187,16 +187,17 @@ export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 						}
 						required
 					>
-						<option value="" disabled>
-							Select Job Role
-						</option>
-						<option value="SDE">Software Developer</option>
-						<option value="DATA ENGINEER">Data Engineer</option>
-						<option value=".NET">.NET</option>
-						<option value="DevOps">DevOps</option>
-						<option value="AIML">AI/ML</option>
-						<option value="DataAnalyst">Data Analyst</option>
-						<option value="default">default</option>
+					<option value="" disabled>
+						Select Job Role
+					</option>
+					<option value="SDE">Software Developer</option>
+					<option value="SDE_beta">Software Developer (Beta)</option>
+					<option value="DATA ENGINEER">Data Engineer</option>
+					<option value=".NET">.NET</option>
+					<option value="DevOps">DevOps</option>
+					<option value="AIML">AI/ML</option>
+					<option value="DataAnalyst">Data Analyst</option>
+					<option value="default">default</option>
 					</select>
 				</div>
 
