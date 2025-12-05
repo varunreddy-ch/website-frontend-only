@@ -26,6 +26,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 	const [userResumes, setUserResumes] = useState([]);
 	const [resumesLoading, setResumesLoading] = useState(false);
 	const [copiedIndex, setCopiedIndex] = useState(-1);
+	const [copiedAddressPart, setCopiedAddressPart] = useState({ resumeId: "", part: "" });
 
 	const [pendingApplyResumeId, setPendingApplyResumeId] = useState("");
 	const [applyMessage, setApplyMessage] = useState("");
@@ -140,6 +141,17 @@ export default function GeneratedResumes({ userId, fullName }) {
 		navigator.clipboard.writeText(answer);
 		setCopiedIndex(idx);
 		setTimeout(() => setCopiedIndex(-1), 1200);
+	};
+
+	const handleCopyAddressPart = async (resumeId, part, value) => {
+		if (!value) return;
+		try {
+			await navigator.clipboard.writeText(value);
+			setCopiedAddressPart({ resumeId, part });
+			setTimeout(() => setCopiedAddressPart({ resumeId: "", part: "" }), 1200);
+		} catch (err) {
+			console.error("Failed to copy address part:", err);
+		}
 	};
 
 	const requestApply = (resumeId) => setPendingApplyResumeId(resumeId);
@@ -677,10 +689,97 @@ export default function GeneratedResumes({ userId, fullName }) {
 														<div className="flex items-center gap-1.5 text-sm text-gray-500 mt-2">
 															<MapPin className="h-4 w-4 text-gray-400" />
 															<span>
-																{
+																Job location: {
 																	resume.location
 																}
 															</span>
+														</div>
+													)}
+
+													{/* Address Details */}
+													{(resume.street || resume.city || resume.state || resume.zip) && (
+														<div className="flex items-start gap-1.5 text-sm text-gray-500 mt-2">
+															<MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
+															<div className="flex flex-col gap-0.5">
+																<span>
+																	Candidate's location:{" "}
+																	{resume.street && (
+																		<span
+																			onClick={() =>
+																				handleCopyAddressPart(
+																					resume._id,
+																					"street",
+																					resume.street
+																				)
+																			}
+																			className="cursor-pointer hover:text-gray-700 hover:underline transition-colors"
+																			title="Click to copy street"
+																		>
+																			{copiedAddressPart.resumeId === resume._id &&
+																			copiedAddressPart.part === "street"
+																				? "✓ Copied!"
+																				: resume.street}
+																		</span>
+																	)}
+																	{resume.street && (resume.city || resume.state || resume.zip) && ", "}
+																	{resume.city && (
+																		<span
+																			onClick={() =>
+																				handleCopyAddressPart(
+																					resume._id,
+																					"city",
+																					resume.city
+																				)
+																			}
+																			className="cursor-pointer hover:text-gray-700 hover:underline transition-colors"
+																			title="Click to copy city"
+																		>
+																			{copiedAddressPart.resumeId === resume._id &&
+																			copiedAddressPart.part === "city"
+																				? "✓ Copied!"
+																				: resume.city}
+																		</span>
+																	)}
+																	{resume.city && (resume.state || resume.zip) && ", "}
+																	{resume.state && (
+																		<span
+																			onClick={() =>
+																				handleCopyAddressPart(
+																					resume._id,
+																					"state",
+																					resume.state
+																				)
+																			}
+																			className="cursor-pointer hover:text-gray-700 hover:underline transition-colors"
+																			title="Click to copy state"
+																		>
+																			{copiedAddressPart.resumeId === resume._id &&
+																			copiedAddressPart.part === "state"
+																				? "✓ Copied!"
+																				: resume.state}
+																		</span>
+																	)}
+																	{resume.state && resume.zip && ", "}
+																	{resume.zip && (
+																		<span
+																			onClick={() =>
+																				handleCopyAddressPart(
+																					resume._id,
+																					"zip",
+																					resume.zip
+																				)
+																			}
+																			className="cursor-pointer hover:text-gray-700 hover:underline transition-colors"
+																			title="Click to copy zip"
+																		>
+																			{copiedAddressPart.resumeId === resume._id &&
+																			copiedAddressPart.part === "zip"
+																				? "✓ Copied!"
+																				: resume.zip}
+																		</span>
+																	)}
+																</span>
+															</div>
 														</div>
 													)}
 												</div>
