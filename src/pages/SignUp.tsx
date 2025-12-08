@@ -64,19 +64,12 @@ export default function SignUp() {
 
 					<CardContent className="space-y-6 text-center">
 						<p className="text-lg text-gray-700">
-							To create a new account, please email us at{" "}
-							<a
-								href="mailto:support@resumevar.com"
-								className="text-blue-600 hover:underline"
-							>
-								support@resumevar.com
-							</a>{" "}
-							or WhatsApp us at{" "}
+							To create a new account, please WhatsApp us at{" "}
 							<a
 								href="https://wa.me/919573140921"
 								target="_blank"
 								rel="noopener noreferrer"
-								className="text-green-600 hover:underline"
+								className="text-green-600 hover:underline font-semibold"
 							>
 								+91 9573140921
 							</a>
@@ -85,11 +78,6 @@ export default function SignUp() {
 						</p>
 
 						<div className="flex items-center justify-center gap-3">
-							<a href="mailto:support@resumevar.com">
-								<Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl">
-									Email Support
-								</Button>
-							</a>
 							<a
 								href="https://wa.me/919573140921"
 								target="_blank"

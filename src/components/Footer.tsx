@@ -2,8 +2,6 @@ import {
 	Facebook,
 	Linkedin,
 	Twitter,
-	Mail,
-	Phone,
 	MapPin,
 	Heart,
 	FileText,
@@ -115,16 +113,15 @@ const Footer = () => {
 							Get in Touch
 						</h4>
 						<div className="space-y-3">
-							<div className="flex items-center justify-center lg:justify-start space-x-3 text-blue-200">
-								<Mail className="h-4 w-4 flex-shrink-0" />
-								<span className="text-sm">
-									support@resumevar.com
-								</span>
-							</div>
-							<div className="flex items-center justify-center lg:justify-start space-x-3 text-blue-200">
-								<Phone className="h-4 w-4 flex-shrink-0" />
+							<a
+								href="https://wa.me/919573140921"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="flex items-center justify-center lg:justify-start space-x-3 text-blue-200 hover:text-green-300 transition-colors"
+							>
+								<MessageCircle className="h-4 w-4 flex-shrink-0" />
 								<span className="text-sm">+91 9573140921</span>
-							</div>
+							</a>
 							<div className="flex items-center justify-center lg:justify-start space-x-3 text-blue-200">
 								<MapPin className="h-4 w-4 flex-shrink-0" />
 								<span className="text-sm">
