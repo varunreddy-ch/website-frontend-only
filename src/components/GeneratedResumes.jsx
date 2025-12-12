@@ -62,13 +62,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 		setResumesLoading(true);
 		try {
 			// If userId is provided, use the old endpoint, otherwise use the new private endpoint
-			let res;
-			if (userId) {
-				res = await API.get(`/get_generated_resumes?user_id=${userId}`);
-			} else {
-				// Use the new endpoint for authenticated users that returns full resume data
-				res = await API.get("/user-generated-resumes");
-			}
+			let res = await API.get("/user-generated-resumes");
 			setUserResumes(res.data || []);
 		} catch (err) {
 			console.error("Failed to fetch resumes:", err);
