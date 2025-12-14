@@ -63,6 +63,7 @@ export default function GeneratedResumes({ userId, fullName }) {
 		try {
 			// If userId is provided, use the old endpoint, otherwise use the new private endpoint
 			let res = await API.get("/user-generated-resumes");
+			// console.log(res);
 			setUserResumes(res.data || []);
 		} catch (err) {
 			console.error("Failed to fetch resumes:", err);
@@ -326,6 +327,45 @@ export default function GeneratedResumes({ userId, fullName }) {
 			</div>
 		);
 	};
+
+	const handleAutoFillResume = (resume) => {
+		console.log("🟢 Auto Fill clicked", resume);
+	  
+		const jobUrl = resume.company_link;
+	  
+		if (!jobUrl) {
+		  alert("No job application link found for this resume");
+		  return;
+		}
+	  
+		const payload = {
+		  type: "RESUMEVAR_AUTOFILL",
+		  userData: {
+			firstName: resume.user_raw_firstname || "",
+			lastName: resume.user_raw_lastname || "",
+			phone: resume.user_raw_phone || "",
+			email: resume.user_raw_email || "",
+			linkedin: resume.user_raw_linkedin || "",
+			github: resume.user_raw_github || "",
+			website: "",
+			address: {
+			  street: resume.street || "",
+			  city: resume.city || "",
+			  state: resume.state || "",
+			  zip: resume.zip || "",
+			  country: "United States",
+			},
+		  },
+		  jobUrl,
+		};
+	  
+		console.log("📤 Posting message to extension");
+	  
+		// Send data to extension
+		window.postMessage(payload, "*");
+	  };
+	  
+	  
 
 	// Modal component for consistent styling
 	const Modal = ({
@@ -828,6 +868,15 @@ export default function GeneratedResumes({ userId, fullName }) {
 									{/* Action Buttons */}
 									{/* Make the buttons center aligned */}
 									<div className="flex flex-wrap gap-3 mb-6 justify-center">
+										<Button
+											onClick={() => handleAutoFillResume(resume)}
+											variant="primary"
+											size="sm"
+										>
+											<Copy className="h-4 w-4" />
+											Auto Fill Resume
+										</Button>
+										
 										<Button
 											onClick={() =>
 												handleCopyJDAndResume(
