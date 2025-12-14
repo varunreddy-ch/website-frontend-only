@@ -4,7 +4,7 @@ export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 	const initialResume = {
 		full_name: "",
 		job_title: "",
-		contact: { phone: "", email: "" },
+		contact: { phone: "", email: "", linkedin: "", github: "" },
 		professional_summary: "",
 		technical_skills: "",
 		education: { degree: "", university: "", gpa: "" },
@@ -319,27 +319,37 @@ export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 					["Job Title", "job_title"],
 					["Phone", "phone", "contact"],
 					["Email", "email", "contact"],
-				].map(([label, key, section]) => (
-					<div key={key}>
-						<label className="block text-sm font-semibold mb-1">
-							{label}
-						</label>
-						<input
-							className="w-full border p-2.5 rounded-md"
-							value={
-								section
-									? form.resume[section][key]
-									: form.resume[key]
-							}
-							onChange={(e) =>
-								section
-									? handleChange(section, key, e.target.value)
-									: handleChange(null, key, e.target.value)
-							}
-							required
-						/>
-					</div>
-				))}
+					["LinkedIn", "linkedin", "contact"],
+					["GitHub", "github", "contact"],
+				].map(([label, key, section]) => {
+					const isOptional = key === "linkedin" || key === "github";
+					return (
+						<div key={key}>
+							<label className="block text-sm font-semibold mb-1">
+								{label}
+								{isOptional && (
+									<span className="text-gray-500 font-normal ml-1">
+										(optional)
+									</span>
+								)}
+							</label>
+							<input
+								className="w-full border p-2.5 rounded-md"
+								value={
+									section
+										? form.resume[section][key]
+										: form.resume[key]
+								}
+								onChange={(e) =>
+									section
+										? handleChange(section, key, e.target.value)
+										: handleChange(null, key, e.target.value)
+								}
+								required={!isOptional}
+							/>
+						</div>
+					);
+				})}
 			</div>
 
 			{/* Summary and Skills */}
