@@ -332,11 +332,14 @@ export default function GeneratedResumes({ userId, fullName }) {
 		console.log("🟢 Auto Fill clicked", resume);
 	  
 		const jobUrl = resume.company_link;
-	  
 		if (!jobUrl) {
 		  alert("No job application link found for this resume");
 		  return;
 		}
+	  
+		const fileName = safeFullName
+		  ? `${safeFullName}_${resume.company_name || "Company"}.pdf`
+		  : `${resume.company_name || "Company"}.pdf`;
 	  
 		const payload = {
 		  type: "RESUMEVAR_AUTOFILL",
@@ -356,12 +359,16 @@ export default function GeneratedResumes({ userId, fullName }) {
 			  country: "United States",
 			},
 		  },
+		  // ✅ NEW: send resume base64
+		  resumeFile: {
+			base64: resume.resume || "",          // this is your PDF base64 (you already use it for download)
+			mimeType: "application/pdf",
+			fileName,
+		  },
 		  jobUrl,
 		};
 	  
 		console.log("📤 Posting message to extension");
-	  
-		// Send data to extension
 		window.postMessage(payload, "*");
 	  };
 	  
