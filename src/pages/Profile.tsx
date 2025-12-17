@@ -1,7 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import TierRouteGuard from "@/components/TierRouteGuard";
 import PageFooter from "@/components/PageFooter";
@@ -13,10 +22,15 @@ import {
 	BarChart3,
 	CheckCircle,
 	Briefcase,
+	Lock,
+	Upload,
+	X,
+	Image as ImageIcon,
 } from "lucide-react";
 import API from "@/api";
 import { DateTime } from "luxon";
 import { getUser } from "@/auth";
+import { useToast } from "@/hooks/use-toast";
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -61,8 +75,37 @@ export default function Profile() {
 		availableJobs: 0,
 	});
 
+	const [accessRequestDialog, setAccessRequestDialog] = useState({
+		open: false,
+		companyName: "",
+		fileType: "", // "resume" or "jd"
+		resumeId: null,
+	});
+
+	const [uploadedFiles, setUploadedFiles] = useState([]);
+	const [filePreviews, setFilePreviews] = useState([]);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
 	const navigate = useNavigate();
 	const currentUser = getUser();
+	const { toast } = useToast();
+
+	// Create Maps for O(1) resume lookup by ID
+	const appliedResumesMap = useMemo(() => {
+		const map = new Map();
+		appliedResumes.forEach((resume) => {
+			map.set(resume.id, resume);
+		});
+		return map;
+	}, [appliedResumes]);
+
+	const generatedResumesMap = useMemo(() => {
+		const map = new Map();
+		generatedResumes.forEach((resume) => {
+			map.set(resume.id, resume);
+		});
+		return map;
+	}, [generatedResumes]);
 
 	useEffect(() => {
 		if (!currentUser) {
@@ -76,9 +119,34 @@ export default function Profile() {
 		}
 	}, []);
 
-	const downloadResume = async (resumeId, type = "resume") => {
+	const downloadResume = useCallback(async (resumeId, type = "resume", resume = null) => {
 		if (!resumeId) {
 			return false;
+		}
+
+		// Use Map for O(1) lookup if resume not provided
+		if (!resume) {
+			resume = type === "resume" 
+				? appliedResumesMap.get(resumeId)
+				: generatedResumesMap.get(resumeId);
+		}
+
+		// For guest users, check if they have access
+		if (currentUser && currentUser.role === "guest") {
+			const hasAccess = type === "resume" 
+				? resume?.hasResumeUrl 
+				: resume?.hasJdLink;
+			
+			if (!hasAccess) {
+				// Show access request dialog immediately
+				setAccessRequestDialog({
+					open: true,
+					companyName: resume?.company_name || "this company",
+					fileType: type,
+					resumeId: resumeId,
+				});
+				return false;
+			}
 		}
 
 		try {
@@ -159,15 +227,27 @@ export default function Profile() {
 		} catch (err) {
 			console.error("Failed to download file:", err);
 			if (err.response?.status === 403) {
-				alert("You don't have permission to download this file.");
+				toast({
+					title: "Access Denied",
+					description: "You don't have permission to download this file.",
+					variant: "destructive",
+				});
 			} else if (err.response?.status === 404) {
-				alert("File not found.");
+				toast({
+					title: "File Not Found",
+					description: "The requested file could not be found.",
+					variant: "destructive",
+				});
 			} else {
-				alert("Failed to download file. Please try again.");
+				toast({
+					title: "Download Failed",
+					description: "Failed to download file. Please try again.",
+					variant: "destructive",
+				});
 			}
 			return false;
 		}
-	};
+	}, [currentUser, appliedResumesMap, generatedResumesMap, toast]);
 
 	const fetchData = async () => {
 		try {
@@ -240,7 +320,7 @@ export default function Profile() {
 		}
 	};
 
-	const calculateMonthlyStats = (appliedResumes, generatedResumes) => {
+	const calculateMonthlyStats = useCallback((appliedResumes, generatedResumes) => {
 		const months = [
 			"Jan",
 			"Feb",
@@ -280,9 +360,9 @@ export default function Profile() {
 				generated: monthGenerated.length,
 			};
 		});
-	};
+	}, []);
 
-	const calculateLast30DaysStats = (appliedResumes, generatedResumes) => {
+	const calculateLast30DaysStats = useCallback((appliedResumes, generatedResumes) => {
 		const days = [];
 		const estNow = DateTime.now().setZone("America/New_York");
 
@@ -313,7 +393,7 @@ export default function Profile() {
 		}
 
 		return days;
-	};
+	}, []);
 
 	const MonthlyTrendsChart = ({ data }) => {
 		if (!data || data.length === 0) {
@@ -603,7 +683,7 @@ export default function Profile() {
 		return <Line data={chartData} options={options} height={400} />;
 	};
 
-	const getStatusBadge = (status) => {
+	const getStatusBadge = useCallback((status) => {
 		const variants = {
 			downloaded: "bg-green-100 text-green-800",
 			generated: "bg-blue-100 text-blue-800",
@@ -630,9 +710,9 @@ export default function Profile() {
 				<span className="mr-1">{icons[status]}</span> {label}
 			</Badge>
 		);
-	};
+	}, []);
 
-	const getRelativeTime = (date) => {
+	const getRelativeTime = useCallback((date) => {
 		const now = DateTime.now().setZone("America/New_York");
 		const diff = now.diff(date, ["days", "hours", "minutes"]);
 
@@ -645,7 +725,113 @@ export default function Profile() {
 		} else {
 			return "Just now";
 		}
-	};
+	}, []);
+
+	const handleFileSelect = useCallback((e) => {
+		const files = Array.from(e.target.files || []);
+		if (files.length === 0) return;
+
+		// Limit to 5 files max
+		const newFiles = [...uploadedFiles, ...files].slice(0, 5);
+		setUploadedFiles(newFiles);
+
+		// Create previews for image files
+		const previewPromises = newFiles.map((file, index) => {
+			return new Promise((resolve) => {
+				if (file.type.startsWith("image/")) {
+					const reader = new FileReader();
+					reader.onload = (e) => {
+						resolve({ index, preview: e.target?.result });
+					};
+					reader.onerror = () => resolve({ index, preview: null });
+					reader.readAsDataURL(file);
+				} else {
+					resolve({ index, preview: null });
+				}
+			});
+		});
+
+		Promise.all(previewPromises).then((results) => {
+			const previews = new Array(newFiles.length).fill(null);
+			results.forEach(({ index, preview }) => {
+				if (preview) {
+					previews[index] = preview;
+				}
+			});
+			setFilePreviews(previews);
+		});
+
+		// Reset input
+		e.target.value = "";
+	}, [uploadedFiles]);
+
+	const handleRemoveFile = useCallback((index) => {
+		setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+		setFilePreviews((prev) => prev.filter((_, i) => i !== index));
+	}, []);
+
+	const handleRequestAccess = useCallback(async () => {
+		if (uploadedFiles.length === 0) {
+			toast({
+				title: "Files Required",
+				description: "Please upload at least one screenshot or proof document.",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		setIsSubmitting(true);
+		try {
+			const formData = new FormData();
+			formData.append("resumeId", String(accessRequestDialog.resumeId));
+			formData.append("fileType", accessRequestDialog.fileType);
+			formData.append("companyName", accessRequestDialog.companyName);
+
+			// Append all files
+			uploadedFiles.forEach((file, index) => {
+				formData.append(`files`, file);
+			});
+
+			const response = await API.post("/resume/request-download-access", formData, {
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			});
+
+			if (response.data.success) {
+				toast({
+					title: "Request Submitted",
+					description: `Your request for ${accessRequestDialog.fileType === "resume" ? "resume" : "job description"} access for ${accessRequestDialog.companyName} has been submitted with ${uploadedFiles.length} file(s). Check back later to download the file if access is approved.`,
+				});
+				// Reset dialog and files
+				setAccessRequestDialog({ open: false, companyName: "", fileType: "", resumeId: null });
+				setUploadedFiles([]);
+				setFilePreviews([]);
+			} else {
+				throw new Error(response.data.message || "Failed to submit request");
+			}
+		} catch (err) {
+			console.error("Failed to request access:", err);
+			toast({
+				title: "Request Failed",
+				description: err.response?.data?.message || "Failed to submit access request. Please try again.",
+				variant: "destructive",
+			});
+		} finally {
+			setIsSubmitting(false);
+		}
+	}, [accessRequestDialog, uploadedFiles, toast]);
+
+	// Memoize chart data calculations for performance
+	const monthlyStatsData = useMemo(
+		() => calculateMonthlyStats(appliedResumes, generatedResumes),
+		[appliedResumes, generatedResumes, calculateMonthlyStats]
+	);
+
+	const dailyStatsData = useMemo(
+		() => calculateLast30DaysStats(appliedResumes, generatedResumes),
+		[appliedResumes, generatedResumes, calculateLast30DaysStats]
+	);
 
 	const StatCard = ({ title, value, icon: Icon, color, subtitle }) => (
 		<Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0 hover:shadow-2xl transition-all">
@@ -768,10 +954,7 @@ export default function Profile() {
 							<CardContent className="flex-1 flex flex-col">
 								<div className="flex-1">
 									<MonthlyTrendsChart
-										data={calculateMonthlyStats(
-											appliedResumes,
-											generatedResumes
-										)}
+										data={monthlyStatsData}
 									/>
 								</div>
 							</CardContent>
@@ -788,10 +971,7 @@ export default function Profile() {
 						</CardHeader>
 						<CardContent>
 							<DailyActivityChart
-								data={calculateLast30DaysStats(
-									appliedResumes,
-									generatedResumes
-								)}
+								data={dailyStatsData}
 							/>
 						</CardContent>
 					</Card>
@@ -821,24 +1001,36 @@ export default function Profile() {
 													(resume, index) => (
 														<div
 															key={resume.id}
-															className={`flex items-center justify-between p-3 bg-white rounded-lg border border-green-200 transition-all relative group ${
-																resume.hasResumeUrl
-																	? "hover:shadow cursor-pointer"
-																	: "opacity-60 cursor-not-allowed"
+															className={`flex items-center justify-between p-3 rounded-lg border transition-all relative group ${
+																currentUser?.role === "guest" && !resume.hasResumeUrl
+																	? "bg-gray-50 border-gray-300 hover:border-gray-400 cursor-pointer"
+																	: resume.hasResumeUrl
+																	? "bg-white border-green-300 hover:border-green-400 hover:shadow-md cursor-pointer"
+																	: "bg-gray-100 border-gray-300 opacity-70 cursor-not-allowed"
 															}`}
-															onClick={() =>
-																resume.hasResumeUrl &&
-																downloadResume(
-																	resume.id,
-																	"resume"
-																)
-															}
+															onClick={() => {
+																if (currentUser?.role === "guest" || resume.hasResumeUrl) {
+																	downloadResume(resume.id, "resume", resume);
+																}
+															}}
 														>
 															{/* Chronological indicator */}
-															<div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-green-400 to-green-600 rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+															<div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity ${
+																currentUser?.role === "guest" && !resume.hasResumeUrl
+																	? "bg-gradient-to-b from-gray-400 to-gray-500"
+																	: resume.hasResumeUrl
+																	? "bg-gradient-to-b from-green-400 to-green-600"
+																	: "bg-gradient-to-b from-gray-300 to-gray-400"
+															}`}></div>
 
 															<div className="flex items-center gap-3 flex-1 min-w-0">
-																<div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+																<div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+																	currentUser?.role === "guest" && !resume.hasResumeUrl
+																		? "bg-gradient-to-r from-gray-400 to-gray-500"
+																		: resume.hasResumeUrl
+																		? "bg-gradient-to-r from-green-500 to-green-600"
+																		: "bg-gradient-to-r from-gray-300 to-gray-400"
+																}`}>
 																	<FileText className="w-4 h-4 text-white" />
 																</div>
 																<div className="min-w-0 flex-1">
@@ -911,24 +1103,36 @@ export default function Profile() {
 													(resume, index) => (
 														<div
 															key={resume.id}
-															className={`flex items-center justify-between p-3 bg-white rounded-lg border border-blue-200 transition-all relative group ${
-																resume.hasJdLink
-																	? "hover:shadow cursor-pointer"
-																	: "opacity-60 cursor-not-allowed"
+															className={`flex items-center justify-between p-3 rounded-lg border transition-all relative group ${
+																currentUser?.role === "guest" && !resume.hasJdLink
+																	? "bg-gray-50 border-gray-300 hover:border-gray-400 cursor-pointer"
+																	: resume.hasJdLink
+																	? "bg-white border-blue-300 hover:border-blue-400 hover:shadow-md cursor-pointer"
+																	: "bg-gray-100 border-gray-300 opacity-70 cursor-not-allowed"
 															}`}
-															onClick={() =>
-																resume.hasJdLink &&
-																downloadResume(
-																	resume.id,
-																	"jd"
-																)
-															}
+															onClick={() => {
+																if (currentUser?.role === "guest" || resume.hasJdLink) {
+																	downloadResume(resume.id, "jd", resume);
+																}
+															}}
 														>
 															{/* Chronological indicator */}
-															<div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-blue-600 rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+															<div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity ${
+																currentUser?.role === "guest" && !resume.hasJdLink
+																	? "bg-gradient-to-b from-gray-400 to-gray-500"
+																	: resume.hasJdLink
+																	? "bg-gradient-to-b from-blue-400 to-blue-600"
+																	: "bg-gradient-to-b from-gray-300 to-gray-400"
+															}`}></div>
 
 															<div className="flex items-center gap-3 flex-1 min-w-0">
-																<div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+																<div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+																	currentUser?.role === "guest" && !resume.hasJdLink
+																		? "bg-gradient-to-r from-gray-400 to-gray-500"
+																		: resume.hasJdLink
+																		? "bg-gradient-to-r from-blue-500 to-blue-600"
+																		: "bg-gradient-to-r from-gray-300 to-gray-400"
+																}`}>
 																	<FileText className="w-4 h-4 text-white" />
 																</div>
 																<div className="min-w-0 flex-1">
@@ -1011,6 +1215,144 @@ export default function Profile() {
 			</main>
 
 			<PageFooter />
+
+			{/* Access Request Dialog for Guest Users - Instant Animation */}
+			<Dialog
+				open={accessRequestDialog.open}
+				onOpenChange={(open) =>
+					setAccessRequestDialog({
+						...accessRequestDialog,
+						open,
+					})
+				}
+			>
+				<DialogContent 
+					className="sm:max-w-[500px]"
+					fastAnimation={true}
+				>
+					<DialogHeader>
+						<div className="flex items-center gap-3 mb-2">
+							<div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+								<Lock className="w-6 h-6 text-white" />
+							</div>
+							<DialogTitle className="text-xl">
+								Request Download Access
+							</DialogTitle>
+						</div>
+						<DialogDescription className="text-base pt-2">
+							You don't have download access for the{" "}
+							<span className="font-semibold text-gray-800">
+								{accessRequestDialog.fileType === "resume"
+									? "resume"
+									: "job description"}
+							</span>{" "}
+							for{" "}
+							<span className="font-semibold text-gray-800">
+								{accessRequestDialog.companyName}
+							</span>
+							.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="py-4 space-y-4">
+						<p className="text-sm text-gray-600">
+							Please upload screenshots of screening calls or proof documents to request download access. Your request will be reviewed. Check back later to download the file if access is approved.
+						</p>
+
+						{/* File Upload Section */}
+						<div className="space-y-3">
+							<label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+								<div className="flex flex-col items-center justify-center pt-5 pb-6">
+									<Upload className="w-8 h-8 mb-2 text-gray-400" />
+									<p className="mb-2 text-sm text-gray-500">
+										<span className="font-semibold">Click to upload</span> or drag and drop
+									</p>
+									<p className="text-xs text-gray-500">
+										PNG, JPG, PDF up to 10MB (Max 5 files)
+									</p>
+								</div>
+								<input
+									type="file"
+									className="hidden"
+									multiple
+									accept="image/*,.pdf"
+									onChange={handleFileSelect}
+									disabled={isSubmitting || uploadedFiles.length >= 5}
+								/>
+							</label>
+
+							{/* File List */}
+							{uploadedFiles.length > 0 && (
+								<div className="space-y-2">
+									<p className="text-xs font-medium text-gray-700">
+										Uploaded Files ({uploadedFiles.length}/5):
+									</p>
+									<div className="space-y-2 max-h-40 overflow-y-auto">
+										{uploadedFiles.map((file, index) => (
+											<div
+												key={index}
+												className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200"
+											>
+												{file.type.startsWith("image/") && filePreviews[index] ? (
+													<img
+														src={filePreviews[index]}
+														alt={file.name}
+														className="w-10 h-10 object-cover rounded"
+													/>
+												) : (
+													<div className="w-10 h-10 bg-blue-100 rounded flex items-center justify-center">
+														<FileText className="w-5 h-5 text-blue-600" />
+													</div>
+												)}
+												<div className="flex-1 min-w-0">
+													<p className="text-xs font-medium text-gray-800 truncate">
+														{file.name}
+													</p>
+													<p className="text-xs text-gray-500">
+														{(file.size / 1024 / 1024).toFixed(2)} MB
+													</p>
+												</div>
+												<button
+													type="button"
+													onClick={() => handleRemoveFile(index)}
+													disabled={isSubmitting}
+													className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+												>
+													<X className="w-4 h-4" />
+												</button>
+											</div>
+										))}
+									</div>
+								</div>
+							)}
+						</div>
+					</div>
+					<DialogFooter className="gap-2 sm:gap-0">
+						<Button
+							variant="outline"
+							onClick={() => {
+								setAccessRequestDialog({
+									open: false,
+									companyName: "",
+									fileType: "",
+									resumeId: null,
+								});
+								setUploadedFiles([]);
+								setFilePreviews([]);
+							}}
+							disabled={isSubmitting}
+						>
+							Cancel
+						</Button>
+						<Button
+							onClick={handleRequestAccess}
+							disabled={isSubmitting || uploadedFiles.length === 0}
+							className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							{isSubmitting ? "Submitting..." : "Request Access"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 
