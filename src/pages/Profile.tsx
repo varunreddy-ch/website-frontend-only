@@ -76,31 +76,95 @@ export default function Profile() {
 		}
 	}, []);
 
-	const downloadResume = async (url) => {
-		if (!url) {
+	const downloadResume = async (resumeId, type = "resume") => {
+		if (!resumeId) {
 			return false;
 		}
 
 		try {
-			console.log("Downloading resume: once user clicks");
-			console.log("URL: ", url);
+			// Call secure backend endpoint instead of direct URL
+			const response = await API.get(
+				`/resume/download/${type}/${resumeId}`,
+				{
+					responseType: "blob", // Important: receive as blob for file download
+				}
+			);
 
+			// Extract filename from headers
+			// Axios with blob responseType may return headers as Headers object or plain object
+			let filename = `${type === "resume" ? "resume" : "jd"}_${resumeId}.${type === "resume" ? "pdf" : "txt"}`;
+			
+			// Helper to get header value (handles both Headers object and plain object)
+			const getHeader = (name) => {
+				if (!response.headers) return "";
+				// If it's a Headers object (has get method)
+				if (typeof response.headers.get === "function") {
+					return response.headers.get(name) || response.headers.get(name.toLowerCase()) || "";
+				}
+				// If it's a plain object
+				return response.headers[name] || response.headers[name.toLowerCase()] || "";
+			};
+			
+			// Try X-Filename custom header first (easier to parse)
+			const customFilename = getHeader("x-filename") || getHeader("X-Filename");
+			
+			if (customFilename) {
+				filename = customFilename;
+			} else {
+				// Fall back to Content-Disposition header parsing
+				const contentDisposition = getHeader("content-disposition") || getHeader("Content-Disposition");
+				
+				if (contentDisposition) {
+					// Parse: attachment; filename="filename.pdf" or attachment; filename=filename.pdf
+					// Also handle filename*=UTF-8''encoded format
+					let filenameMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/);
+					if (filenameMatch && filenameMatch[1]) {
+						try {
+							filename = decodeURIComponent(filenameMatch[1]);
+						} catch (e) {
+							// Fall back to regular filename parsing
+							filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+							if (filenameMatch && filenameMatch[1]) {
+								filename = filenameMatch[1].replace(/['"]/g, "").trim();
+							}
+						}
+					} else {
+						filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+						if (filenameMatch && filenameMatch[1]) {
+							filename = filenameMatch[1].replace(/['"]/g, "").trim();
+						}
+					}
+				}
+			}
+			
+			console.log("Download - Filename:", filename, "Headers:", response.headers);
+
+			// Create a blob URL from the response
+			const blob = new Blob([response.data], {
+				type: type === "resume" ? "application/pdf" : "text/plain",
+			});
+			const url = window.URL.createObjectURL(blob);
+
+			// Create a temporary link and trigger download
 			const link = document.createElement("a");
-			link.href = url; // direct R2 public URL
-			link.target = "_blank";
+			link.href = url;
+			link.download = filename;
 
-			// Extract company name from URL and create filename
-			const urlParts = url.split("/");
-			const companyName = urlParts[urlParts.length - 2]; // Get the company name (SADA)
-			const userFirstName = userInfo.firstname || "User";
-			const userLastName = userInfo.lastname || "";
-			const fileName = `${userFirstName}_${userLastName}_${companyName}.pdf`;
-
-			link.download = fileName;
-			console.log(link.href);
+			document.body.appendChild(link);
 			link.click();
+			document.body.removeChild(link);
+
+			// Clean up the blob URL
+			window.URL.revokeObjectURL(url);
 		} catch (err) {
-			console.error("Failed to download resume:", err);
+			console.error("Failed to download file:", err);
+			if (err.response?.status === 403) {
+				alert("You don't have permission to download this file.");
+			} else if (err.response?.status === 404) {
+				alert("File not found.");
+			} else {
+				alert("Failed to download file. Please try again.");
+			}
 			return false;
 		}
 	};
@@ -113,8 +177,6 @@ export default function Profile() {
 			const { data } = await API.get(`/profile-private`);
 			setUserInfo(data.user || {});
 
-			const resumes = data.resumes || [];
-			const resumeUrls = resumes.map((r) => r.resume_url);
 			const appliedResumesData = data.appliedResumes || [];
 			const generatedResumesData = data.generatedResumes || [];
 
@@ -759,10 +821,16 @@ export default function Profile() {
 													(resume, index) => (
 														<div
 															key={resume.id}
-															className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200 hover:shadow transition-all relative group"
+															className={`flex items-center justify-between p-3 bg-white rounded-lg border border-green-200 transition-all relative group ${
+																resume.hasResumeUrl
+																	? "hover:shadow cursor-pointer"
+																	: "opacity-60 cursor-not-allowed"
+															}`}
 															onClick={() =>
+																resume.hasResumeUrl &&
 																downloadResume(
-																	resume.resume_url
+																	resume.id,
+																	"resume"
 																)
 															}
 														>
@@ -843,10 +911,16 @@ export default function Profile() {
 													(resume, index) => (
 														<div
 															key={resume.id}
-															className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-200 hover:shadow transition-all relative group"
+															className={`flex items-center justify-between p-3 bg-white rounded-lg border border-blue-200 transition-all relative group ${
+																resume.hasJdLink
+																	? "hover:shadow cursor-pointer"
+																	: "opacity-60 cursor-not-allowed"
+															}`}
 															onClick={() =>
+																resume.hasJdLink &&
 																downloadResume(
-																	resume.jd_link
+																	resume.id,
+																	"jd"
 																)
 															}
 														>
