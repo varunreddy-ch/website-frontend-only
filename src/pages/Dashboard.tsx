@@ -46,6 +46,13 @@ export default function Dashboard() {
 			return;
 		}
 
+		// Redirect guest users to profile page
+		if (user.role === "guest") {
+			const profileLink = user.user ? `/profile/${user.user}` : "/profile";
+			navigate(profileLink);
+			return;
+		}
+
 		// Redirect applier users to submit job page
 		if (user.role === "applier") {
 			navigate("/applier-form");

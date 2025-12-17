@@ -757,6 +757,14 @@ export default function Jobs() {
 			navigate("/signin");
 			return;
 		}
+
+		// Redirect guest users to profile page
+		if (currentUser.role === "guest") {
+			const profileLink = currentUser.user ? `/profile/${currentUser.user}` : "/profile";
+			navigate(profileLink);
+			return;
+		}
+
 		setUser(currentUser);
 
 		// Only fetch job stats for tier2, tier3, tier4 and applier users

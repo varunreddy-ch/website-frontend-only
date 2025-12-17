@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import API from "../api";
 import Navbar from "../components/Navbar";
 import UserWithResumeForm from "../components/UserWithResumeForm";
@@ -20,12 +20,25 @@ export default function Admin() {
 	const navigate = useNavigate();
 
 	const [userToEdit, setUserToEdit] = useState(null);
+	const editFormRef = useRef(null);
 
 	useEffect(() => {
 		if (!user || user.role !== "admin") {
 			navigate("/signin");
 		}
 	}, [user, navigate]);
+
+	// Scroll to edit form when userToEdit changes
+	useEffect(() => {
+		if (userToEdit && editFormRef.current) {
+			setTimeout(() => {
+				editFormRef.current?.scrollIntoView({
+					behavior: "smooth",
+					block: "start",
+				});
+			}, 100); // Small delay to ensure form is rendered
+		}
+	}, [userToEdit]);
 
 	const fetchUsers = async () => {
 		try {
@@ -36,36 +49,48 @@ export default function Admin() {
 		}
 	};
 
-	const validateField = (key, value) => {
-		if (key === "username") {
-			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-			if (!emailRegex.test(value)) return "Invalid email address.";
-		} else if (key === "password") {
-			if (!value || value.length < 8)
-				return "Password must be at least 8 characters.";
+	const validateField = (key, value, isUpdate = false) => {
+		if (key === "password") {
+			// Password is optional when updating, but if provided must be at least 8 characters
+			if (isUpdate) {
+				if (value && value.length > 0 && value.length < 8)
+					return "Password must be at least 8 characters.";
+			} else {
+				// Required when creating
+				if (!value || value.length < 8)
+					return "Password must be at least 8 characters.";
+			}
 		} else {
 			if (!value || !value.trim()) return "This field is required.";
 		}
 		return "";
 	};
 
-	const validateFullForm = (form) => {
+	const validateFullForm = (form, isUpdate = false) => {
 		const requiredFields = [
 			"firstname",
 			"lastname",
 			"username",
-			"password",
+			...(isUpdate ? [] : ["password"]), // Password only required when creating
 			"job_role",
 			"role",
 			"template",
 		];
 
 		for (const key of requiredFields) {
-			const error = validateField(key, form[key]);
+			const error = validateField(key, form[key], isUpdate);
 			if (error) {
 				return `❌ ${
 					key.charAt(0).toUpperCase() + key.slice(1)
 				}: ${error}`;
+			}
+		}
+		
+		// Validate password separately if it's provided during update
+		if (isUpdate && form.password) {
+			const passwordError = validateField("password", form.password, true);
+			if (passwordError) {
+				return `❌ Password: ${passwordError}`;
 			}
 		}
 
@@ -88,7 +113,7 @@ export default function Admin() {
 	};
 
 	const handleCreate = async (fullForm) => {
-		const validationError = validateFullForm(fullForm);
+		const validationError = validateFullForm(fullForm, false);
 		if (validationError) {
 			setError(validationError);
 			setMessage("");
@@ -109,10 +134,26 @@ export default function Admin() {
 	};
 
 	const handleUpdate = async (updatedUser) => {
+		const validationError = validateFullForm(updatedUser, true);
+		if (validationError) {
+			setError(validationError);
+			setMessage("");
+			return;
+		}
+
+		// Remove empty password and guest_password fields so backend doesn't update them
+		const fieldsToUpdate = { ...updatedUser };
+		if (!fieldsToUpdate.password || fieldsToUpdate.password.trim() === "") {
+			delete fieldsToUpdate.password;
+		}
+		if (!fieldsToUpdate.guest_password || fieldsToUpdate.guest_password.trim() === "") {
+			delete fieldsToUpdate.guest_password;
+		}
+
 		try {
 			await API.post("/update-user", {
 				username: updatedUser.username,
-				updatedFields: updatedUser,
+				updatedFields: fieldsToUpdate,
 			});
 			setMessage(`✏️ User "${updatedUser.username}" updated.`);
 			setError("");
@@ -277,7 +318,7 @@ export default function Admin() {
 								</li>
 							))}
 						{userToEdit && (
-							<div className="border-t pt-6 mt-6">
+							<div ref={editFormRef} className="border-t pt-6 mt-6">
 								<h3 className="text-xl font-semibold mb-2 text-indigo-800">
 									Update User: {userToEdit.username}
 								</h3>

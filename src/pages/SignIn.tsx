@@ -35,6 +35,10 @@ export default function SignIn() {
 			// Redirect based on user role
 			if (role === "admin") {
 				navigate("/admin");
+			} else if (role === "guest") {
+				// Guest users go to profile
+				const profileLink = user?.user ? `/profile/${user.user}` : "/profile";
+				navigate(profileLink);
 			} else if (role === "tier2" || role === "tier3" || role === "tier4") {
 				navigate("/jobs");
 			} else if (role === "applier") {
@@ -60,6 +64,10 @@ export default function SignIn() {
 			// Redirect based on user tier
 			if (role === "admin") {
 				navigate("/admin");
+			} else if (role === "guest") {
+				// Guest users go to profile
+				const profileLink = user?.user ? `/profile/${user.user}` : "/profile";
+				navigate(profileLink);
 			} else if (role === "tier2" || role === "tier4") {
 				navigate("/jobs");
 			} else if (role === "applier") {

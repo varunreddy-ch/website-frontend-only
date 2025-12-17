@@ -70,8 +70,8 @@ export default function Profile() {
 			return;
 		}
 
-		// Only fetch data for tier2, tier3 and tier4 users
-		if (currentUser.role === "tier2" || currentUser.role === "tier3" || currentUser.role === "tier4") {
+		// Fetch data for tier2, tier3, tier4, and guest users
+		if (currentUser.role === "tier2" || currentUser.role === "tier3" || currentUser.role === "tier4" || currentUser.role === "guest") {
 			fetchData();
 		}
 	}, []);
@@ -611,6 +611,7 @@ export default function Profile() {
 	);
 
 	// If user is tier1 or regular user, show premium upgrade
+	// Guest users can access profile, so they're not redirected here
 	if (
 		currentUser &&
 		(currentUser.role === "tier1" || currentUser.role === "user")
@@ -629,314 +630,324 @@ export default function Profile() {
 		return null;
 	}
 
-	return (
-		<TierRouteGuard requiredTier="tier2" feature="profile">
-			<div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-				<Navbar />
+	// Guest users can access profile without tier guard, others need tier guard
+	const profileContent = (
+		<div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+			<Navbar />
 
-				<main className="flex-1">
-					{loading ? (
-					<div className="flex items-center justify-center h-[80vh]">
-						<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
+			<main className="flex-1">
+				{loading ? (
+				<div className="flex items-center justify-center h-[80vh]">
+					<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
+				</div>
+			) : (
+				<div className="max-w-6xl mx-auto p-6 mt-16 space-y-8">
+					{/* Header */}
+					<div className="text-center">
+						<h1 className="text-3xl font-bold text-gray-800 mb-2">
+							📊 Profile Dashboard
+						</h1>
+						<p className="text-gray-600">
+							Your job application performance and resume
+							history
+						</p>
 					</div>
-				) : (
-					<div className="max-w-6xl mx-auto p-6 mt-16 space-y-8">
-						{/* Header */}
-						<div className="text-center">
-							<h1 className="text-3xl font-bold text-gray-800 mb-2">
-								📊 Profile Dashboard
-							</h1>
-							<p className="text-gray-600">
-								Your job application performance and resume
-								history
-							</p>
+
+					{/* First Row: User Info + Stats Container and Monthly Trends */}
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+						{/* First Container: User Info and Stats */}
+						<div className="space-y-6 flex flex-col">
+							{/* User Info Card */}
+							<Card className="shadow-md bg-white/80 backdrop-blur-sm flex-1">
+								<CardContent className="p-6 text-center space-y-4">
+									<div className="mx-auto w-20 h-20 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full flex items-center justify-center">
+										<User className="w-10 h-10 text-white" />
+									</div>
+									<h2 className="text-xl font-semibold">
+										{userInfo.firstname}{" "}
+										{userInfo.lastname}
+									</h2>
+									<p className="text-gray-600 text-sm">
+										{userInfo.email}
+									</p>
+									<Badge className="bg-blue-100 text-blue-800 text-lg px-4 py-2">
+										🙋 {userInfo.role || "User"}
+									</Badge>
+								</CardContent>
+							</Card>
+
+							{/* Stats Cards Row */}
+							<div className="grid grid-cols-2 gap-4">
+								<StatCard
+									title="Total Applied"
+									value={stats.totalApplied}
+									icon={CheckCircle}
+									color="bg-gradient-to-r from-green-500 to-green-600"
+									subtitle="All time applications"
+								/>
+								<StatCard
+									title="Available Jobs"
+									value={stats.availableJobs}
+									icon={Briefcase}
+									color="bg-gradient-to-r from-blue-500 to-blue-600"
+									subtitle="New opportunities"
+								/>
+							</div>
 						</div>
 
-						{/* First Row: User Info + Stats Container and Monthly Trends */}
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-							{/* First Container: User Info and Stats */}
-							<div className="space-y-6 flex flex-col">
-								{/* User Info Card */}
-								<Card className="shadow-md bg-white/80 backdrop-blur-sm flex-1">
-									<CardContent className="p-6 text-center space-y-4">
-										<div className="mx-auto w-20 h-20 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full flex items-center justify-center">
-											<User className="w-10 h-10 text-white" />
-										</div>
-										<h2 className="text-xl font-semibold">
-											{userInfo.firstname}{" "}
-											{userInfo.lastname}
-										</h2>
-										<p className="text-gray-600 text-sm">
-											{userInfo.email}
-										</p>
-										<Badge className="bg-blue-100 text-blue-800 text-lg px-4 py-2">
-											🙋 {userInfo.role || "User"}
-										</Badge>
-									</CardContent>
-								</Card>
+						{/* Second Container: Monthly Trends Chart */}
+						<Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0 flex flex-col">
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2 text-lg">
+									<BarChart3 className="w-5 h-5 text-blue-600" />
+									Monthly Trends
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="flex-1 flex flex-col">
+								<div className="flex-1">
+									<MonthlyTrendsChart
+										data={calculateMonthlyStats(
+											appliedResumes,
+											generatedResumes
+										)}
+									/>
+								</div>
+							</CardContent>
+						</Card>
+					</div>
 
-								{/* Stats Cards Row */}
-								<div className="grid grid-cols-2 gap-4">
-									<StatCard
-										title="Total Applied"
-										value={stats.totalApplied}
-										icon={CheckCircle}
-										color="bg-gradient-to-r from-green-500 to-green-600"
-										subtitle="All time applications"
-									/>
-									<StatCard
-										title="Available Jobs"
-										value={stats.availableJobs}
-										icon={Briefcase}
-										color="bg-gradient-to-r from-blue-500 to-blue-600"
-										subtitle="New opportunities"
-									/>
+					{/* 30-Day Activity Chart - Full Width */}
+					<Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2 text-lg">
+								<TrendingUp className="w-5 h-5 text-green-600" />
+								30-Day Activity
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<DailyActivityChart
+								data={calculateLast30DaysStats(
+									appliedResumes,
+									generatedResumes
+								)}
+							/>
+						</CardContent>
+					</Card>
+
+					{/* Resume History */}
+					<Card className="shadow-md bg-white/80 backdrop-blur-sm">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<FileText className="w-5 h-5" />
+								Resume History
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							{/* Resume History Container with Grid Layout */}
+							<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+								{/* Applied Resumes */}
+								<div className="space-y-3">
+									<h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+										<CheckCircle className="w-5 h-5 text-green-600" />
+										Applied Resumes (
+										{appliedResumes.length})
+									</h3>
+									<div className="bg-green-50 rounded-lg border border-green-200 p-4 h-80 overflow-y-auto custom-scrollbar resume-section">
+										{appliedResumes.length > 0 ? (
+											<div className="space-y-3">
+												{appliedResumes.map(
+													(resume, index) => (
+														<div
+															key={resume.id}
+															className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200 hover:shadow transition-all relative group"
+															onClick={() =>
+																downloadResume(
+																	resume.resume_url
+																)
+															}
+														>
+															{/* Chronological indicator */}
+															<div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-green-400 to-green-600 rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+															<div className="flex items-center gap-3 flex-1 min-w-0">
+																<div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+																	<FileText className="w-4 h-4 text-white" />
+																</div>
+																<div className="min-w-0 flex-1">
+																	<div className="flex items-center gap-2 mb-1">
+																		<span className="text-xs text-gray-400 font-mono">
+																			#
+																			{index +
+																				1}
+																		</span>
+																		<h4 className="font-semibold text-gray-800 text-sm truncate">
+																			{resume.job_title ===
+																			"Unknown Title"
+																				? resume.company_name
+																				: `${resume.company_name} - ${resume.job_title}`}
+																		</h4>
+																	</div>
+																	<p className="text-xs text-gray-500">
+																		Applied:{" "}
+																		{resume.updatedAtEST.toFormat(
+																			"MMM d, yyyy"
+																		)}
+																		<span className="text-gray-400 ml-1">
+																			(
+																			{getRelativeTime(
+																				resume.updatedAtEST
+																			)}
+
+																			)
+																		</span>
+																	</p>
+																	<p className="text-xs text-gray-400">
+																		Generated:{" "}
+																		{resume.createdAtEST.toFormat(
+																			"MMM d, yyyy"
+																		)}
+																	</p>
+																</div>
+															</div>
+															<div className="flex-shrink-0 ml-2">
+																{getStatusBadge(
+																	resume.status
+																)}
+															</div>
+														</div>
+													)
+												)}
+											</div>
+										) : (
+											<div className="text-center text-gray-500 py-8">
+												<CheckCircle className="w-12 h-12 mx-auto mb-2 text-green-300" />
+												<p className="text-sm">
+													No applied resumes yet
+												</p>
+											</div>
+										)}
+									</div>
+								</div>
+
+								{/* Generated Resumes */}
+								<div className="space-y-3">
+									<h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+										<FileText className="w-5 h-5 text-blue-600" />
+										Generated Resumes (
+										{generatedResumes.length})
+									</h3>
+									<div className="bg-blue-50 rounded-lg border border-blue-200 p-4 h-80 overflow-y-auto custom-scrollbar resume-section">
+										{generatedResumes.length > 0 ? (
+											<div className="space-y-3">
+												{generatedResumes.map(
+													(resume, index) => (
+														<div
+															key={resume.id}
+															className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-200 hover:shadow transition-all relative group"
+															onClick={() =>
+																downloadResume(
+																	resume.jd_link
+																)
+															}
+														>
+															{/* Chronological indicator */}
+															<div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-blue-600 rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+															<div className="flex items-center gap-3 flex-1 min-w-0">
+																<div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+																	<FileText className="w-4 h-4 text-white" />
+																</div>
+																<div className="min-w-0 flex-1">
+																	<div className="flex items-center gap-2 mb-1">
+																		<span className="text-xs text-gray-400 font-mono">
+																			#
+																			{index +
+																				1}
+																		</span>
+																		<h4 className="font-semibold text-gray-800 text-sm truncate">
+																			{resume.job_title ===
+																			"Unknown Title"
+																				? resume.company_name
+																				: `${resume.company_name} - ${resume.job_title}`}
+																		</h4>
+																	</div>
+																	<p className="text-xs text-gray-500">
+																		Generated:{" "}
+																		{resume.createdAtEST.toFormat(
+																			"MMM d, yyyy"
+																		)}
+																		<span className="text-gray-400 ml-1">
+																			(
+																			{getRelativeTime(
+																				resume.createdAtEST
+																			)}
+
+																			)
+																		</span>
+																	</p>
+																	{resume.status ===
+																		"Applied" && (
+																		<p className="text-xs text-green-600 font-medium">
+																			✓
+																			Also
+																			Applied
+																		</p>
+																	)}
+																</div>
+															</div>
+															<div className="flex-shrink-0 ml-2">
+																{getStatusBadge(
+																	resume.status
+																)}
+															</div>
+														</div>
+													)
+												)}
+											</div>
+										) : (
+											<div className="text-center text-gray-500 py-8">
+												<FileText className="w-12 h-12 mx-auto mb-2 text-blue-300" />
+												<p className="text-sm">
+													No generated resumes yet
+												</p>
+											</div>
+										)}
+									</div>
 								</div>
 							</div>
 
-							{/* Second Container: Monthly Trends Chart */}
-							<Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0 flex flex-col">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2 text-lg">
-										<BarChart3 className="w-5 h-5 text-blue-600" />
-										Monthly Trends
-									</CardTitle>
-								</CardHeader>
-								<CardContent className="flex-1 flex flex-col">
-									<div className="flex-1">
-										<MonthlyTrendsChart
-											data={calculateMonthlyStats(
-												appliedResumes,
-												generatedResumes
-											)}
-										/>
+							{/* No resumes message */}
+							{appliedResumes.length === 0 &&
+								generatedResumes.length === 0 && (
+									<div className="text-center text-gray-500 py-8">
+										<FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+										<p className="text-lg font-medium">
+											No resumes generated yet
+										</p>
+										<p className="text-sm text-gray-400">
+											Start creating resumes to see
+											your history here
+										</p>
 									</div>
-								</CardContent>
-							</Card>
-						</div>
+								)}
+						</CardContent>
+					</Card>
+				</div>
+				)}
+			</main>
 
-						{/* 30-Day Activity Chart - Full Width */}
-						<Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
-							<CardHeader>
-								<CardTitle className="flex items-center gap-2 text-lg">
-									<TrendingUp className="w-5 h-5 text-green-600" />
-									30-Day Activity
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<DailyActivityChart
-									data={calculateLast30DaysStats(
-										appliedResumes,
-										generatedResumes
-									)}
-								/>
-							</CardContent>
-						</Card>
+			<PageFooter />
+		</div>
+	);
 
-						{/* Resume History */}
-						<Card className="shadow-md bg-white/80 backdrop-blur-sm">
-							<CardHeader>
-								<CardTitle className="flex items-center gap-2">
-									<FileText className="w-5 h-5" />
-									Resume History
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								{/* Resume History Container with Grid Layout */}
-								<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-									{/* Applied Resumes */}
-									<div className="space-y-3">
-										<h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-											<CheckCircle className="w-5 h-5 text-green-600" />
-											Applied Resumes (
-											{appliedResumes.length})
-										</h3>
-										<div className="bg-green-50 rounded-lg border border-green-200 p-4 h-80 overflow-y-auto custom-scrollbar resume-section">
-											{appliedResumes.length > 0 ? (
-												<div className="space-y-3">
-													{appliedResumes.map(
-														(resume, index) => (
-															<div
-																key={resume.id}
-																className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200 hover:shadow transition-all relative group"
-																onClick={() =>
-																	downloadResume(
-																		resume.resume_url
-																	)
-																}
-															>
-																{/* Chronological indicator */}
-																<div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-green-400 to-green-600 rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+	// Guest users can access profile without tier guard, others need tier guard
+	if (currentUser && currentUser.role === "guest") {
+		return profileContent;
+	}
 
-																<div className="flex items-center gap-3 flex-1 min-w-0">
-																	<div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-																		<FileText className="w-4 h-4 text-white" />
-																	</div>
-																	<div className="min-w-0 flex-1">
-																		<div className="flex items-center gap-2 mb-1">
-																			<span className="text-xs text-gray-400 font-mono">
-																				#
-																				{index +
-																					1}
-																			</span>
-																			<h4 className="font-semibold text-gray-800 text-sm truncate">
-																				{resume.job_title ===
-																				"Unknown Title"
-																					? resume.company_name
-																					: `${resume.company_name} - ${resume.job_title}`}
-																			</h4>
-																		</div>
-																		<p className="text-xs text-gray-500">
-																			Applied:{" "}
-																			{resume.updatedAtEST.toFormat(
-																				"MMM d, yyyy"
-																			)}
-																			<span className="text-gray-400 ml-1">
-																				(
-																				{getRelativeTime(
-																					resume.updatedAtEST
-																				)}
-
-																				)
-																			</span>
-																		</p>
-																		<p className="text-xs text-gray-400">
-																			Generated:{" "}
-																			{resume.createdAtEST.toFormat(
-																				"MMM d, yyyy"
-																			)}
-																		</p>
-																	</div>
-																</div>
-																<div className="flex-shrink-0 ml-2">
-																	{getStatusBadge(
-																		resume.status
-																	)}
-																</div>
-															</div>
-														)
-													)}
-												</div>
-											) : (
-												<div className="text-center text-gray-500 py-8">
-													<CheckCircle className="w-12 h-12 mx-auto mb-2 text-green-300" />
-													<p className="text-sm">
-														No applied resumes yet
-													</p>
-												</div>
-											)}
-										</div>
-									</div>
-
-									{/* Generated Resumes */}
-									<div className="space-y-3">
-										<h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-											<FileText className="w-5 h-5 text-blue-600" />
-											Generated Resumes (
-											{generatedResumes.length})
-										</h3>
-										<div className="bg-blue-50 rounded-lg border border-blue-200 p-4 h-80 overflow-y-auto custom-scrollbar resume-section">
-											{generatedResumes.length > 0 ? (
-												<div className="space-y-3">
-													{generatedResumes.map(
-														(resume, index) => (
-															<div
-																key={resume.id}
-																className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-200 hover:shadow transition-all relative group"
-																onClick={() =>
-																	downloadResume(
-																		resume.jd_link
-																	)
-																}
-															>
-																{/* Chronological indicator */}
-																<div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-blue-600 rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-																<div className="flex items-center gap-3 flex-1 min-w-0">
-																	<div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-																		<FileText className="w-4 h-4 text-white" />
-																	</div>
-																	<div className="min-w-0 flex-1">
-																		<div className="flex items-center gap-2 mb-1">
-																			<span className="text-xs text-gray-400 font-mono">
-																				#
-																				{index +
-																					1}
-																			</span>
-																			<h4 className="font-semibold text-gray-800 text-sm truncate">
-																				{resume.job_title ===
-																				"Unknown Title"
-																					? resume.company_name
-																					: `${resume.company_name} - ${resume.job_title}`}
-																			</h4>
-																		</div>
-																		<p className="text-xs text-gray-500">
-																			Generated:{" "}
-																			{resume.createdAtEST.toFormat(
-																				"MMM d, yyyy"
-																			)}
-																			<span className="text-gray-400 ml-1">
-																				(
-																				{getRelativeTime(
-																					resume.createdAtEST
-																				)}
-
-																				)
-																			</span>
-																		</p>
-																		{resume.status ===
-																			"Applied" && (
-																			<p className="text-xs text-green-600 font-medium">
-																				✓
-																				Also
-																				Applied
-																			</p>
-																		)}
-																	</div>
-																</div>
-																<div className="flex-shrink-0 ml-2">
-																	{getStatusBadge(
-																		resume.status
-																	)}
-																</div>
-															</div>
-														)
-													)}
-												</div>
-											) : (
-												<div className="text-center text-gray-500 py-8">
-													<FileText className="w-12 h-12 mx-auto mb-2 text-blue-300" />
-													<p className="text-sm">
-														No generated resumes yet
-													</p>
-												</div>
-											)}
-										</div>
-									</div>
-								</div>
-
-								{/* No resumes message */}
-								{appliedResumes.length === 0 &&
-									generatedResumes.length === 0 && (
-										<div className="text-center text-gray-500 py-8">
-											<FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-											<p className="text-lg font-medium">
-												No resumes generated yet
-											</p>
-											<p className="text-sm text-gray-400">
-												Start creating resumes to see
-												your history here
-											</p>
-										</div>
-									)}
-							</CardContent>
-						</Card>
-					</div>
-					)}
-				</main>
-
-				<PageFooter />
-			</div>
+	return (
+		<TierRouteGuard requiredTier="tier2" feature="profile">
+			{profileContent}
 		</TierRouteGuard>
 	);
 }

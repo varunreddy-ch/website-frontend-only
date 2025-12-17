@@ -26,6 +26,7 @@ export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 		lastname: "",
 		username: "",
 		password: "",
+		guest_password: "",
 		job_role: "",
 		role: "user",
 		summary_points: 0,
@@ -38,9 +39,13 @@ export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 
 	useEffect(() => {
 		if (initialData) {
+			// Exclude password and guest_password from initialData to keep them empty in edit mode
+			const { password, guest_password, ...restInitialData } = initialData;
 			setForm((prev) => ({
 				...prev,
-				...initialData,
+				...restInitialData,
+				password: "", // Always empty in edit mode
+				guest_password: "", // Always empty in edit mode
 				resume: {
 					...initialResume,
 					...(initialData.resume || {}),
@@ -157,20 +162,27 @@ export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 					["Lastname", "lastname"],
 					["Username", "username"],
 					["Password", "password"],
+					["Guest Password", "guest_password"],
 					["Template", "template"],
 				].map(([label, key]) => (
 					<div key={key}>
 						<label className="block text-sm font-semibold mb-1">
 							{label}
+							{(key === "guest_password" || (key === "password" && initialData)) && (
+								<span className="text-gray-500 font-normal ml-1">
+									(optional)
+								</span>
+							)}
 						</label>
 						<input
-							type={key === "password" ? "password" : "text"}
+							type={key === "password" || key === "guest_password" ? "password" : "text"}
 							className="w-full border p-2.5 rounded-md"
 							value={form[key]}
 							onChange={(e) =>
 								handleChange("root", key, e.target.value)
 							}
-							required
+							required={key !== "guest_password" && (!initialData || key !== "password")}
+							placeholder={initialData && key === "password" ? "Leave empty to keep current password" : ""}
 						/>
 					</div>
 				))}
