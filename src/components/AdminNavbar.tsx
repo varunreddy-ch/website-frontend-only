@@ -20,6 +20,8 @@ const AdminNavbar = () => {
 	};
 
 	const displayName = user?.firstname ?? "Admin";
+	const isDownloadManager = user?.role === "download_manager";
+	const isAdmin = user?.role === "admin";
 
 	return (
 		<nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-100 shadow-sm">
@@ -27,7 +29,7 @@ const AdminNavbar = () => {
 				<div className="flex items-center justify-between h-16">
 					{/* Logo */}
 					<Link
-						to="/admin/dashboard"
+						to={isAdmin ? "/admin/dashboard" : "/admin/download-requests"}
 						className="flex items-center space-x-2 cursor-pointer"
 					>
 						<div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -40,64 +42,68 @@ const AdminNavbar = () => {
 
 					{/* Desktop Navigation */}
 					<div className="hidden md:flex items-center space-x-8">
-						<Link to="/admin/dashboard">
-							<Button
-								variant="ghost"
-								className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm ${
-									isActive("/admin/dashboard")
-										? "text-blue-600"
-										: ""
-								}`}
-							>
-								Dashboard
-							</Button>
-						</Link>
-						<Link to="/admin">
-							<Button
-								variant="ghost"
-								className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm ${
-									isActive("/admin") ? "text-blue-600" : ""
-								}`}
-							>
-								Users
-							</Button>
-						</Link>
-						<Link to="/admin/jobs">
-							<Button
-								variant="ghost"
-								className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm ${
-									isActive("/admin/jobs")
-										? "text-blue-600"
-										: ""
-								}`}
-							>
-								Jobs
-							</Button>
-						</Link>
-						<Link to="/admin/demos">
-							<Button
-								variant="ghost"
-								className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm ${
-									isActive("/admin/demos")
-										? "text-blue-600"
-										: ""
-								}`}
-							>
-								Demos
-							</Button>
-						</Link>
-						<Link to="/admin/contacts">
-							<Button
-								variant="ghost"
-								className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm ${
-									isActive("/admin/contacts")
-										? "text-blue-600"
-										: ""
-								}`}
-							>
-								Contacts
-							</Button>
-						</Link>
+						{isAdmin && (
+							<>
+								<Link to="/admin/dashboard">
+									<Button
+										variant="ghost"
+										className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm ${
+											isActive("/admin/dashboard")
+												? "text-blue-600"
+												: ""
+										}`}
+									>
+										Dashboard
+									</Button>
+								</Link>
+								<Link to="/admin">
+									<Button
+										variant="ghost"
+										className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm ${
+											isActive("/admin") ? "text-blue-600" : ""
+										}`}
+									>
+										Users
+									</Button>
+								</Link>
+								<Link to="/admin/jobs">
+									<Button
+										variant="ghost"
+										className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm ${
+											isActive("/admin/jobs")
+												? "text-blue-600"
+												: ""
+										}`}
+									>
+										Jobs
+									</Button>
+								</Link>
+								<Link to="/admin/demos">
+									<Button
+										variant="ghost"
+										className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm ${
+											isActive("/admin/demos")
+												? "text-blue-600"
+												: ""
+										}`}
+									>
+										Demos
+									</Button>
+								</Link>
+								<Link to="/admin/contacts">
+									<Button
+										variant="ghost"
+										className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm ${
+											isActive("/admin/contacts")
+												? "text-blue-600"
+												: ""
+										}`}
+									>
+										Contacts
+									</Button>
+								</Link>
+							</>
+						)}
 						<Link to="/admin/download-requests">
 							<Button
 								variant="ghost"
@@ -115,7 +121,7 @@ const AdminNavbar = () => {
 					{/* Desktop User Section */}
 					<div className="hidden md:flex items-center space-x-4">
 						<span className="text-gray-600 text-sm">
-							Admin: <strong>{displayName}</strong>
+							{isAdmin ? "Admin" : "Download Manager"}: <strong>{displayName}</strong>
 						</span>
 						<Button
 							variant="outline"
@@ -148,71 +154,75 @@ const AdminNavbar = () => {
 				{open && (
 					<div className="md:hidden py-4 border-t border-gray-100 bg-white">
 						<div className="flex flex-col space-y-3">
-							<Link to="/admin/dashboard">
-								<Button
-									variant="ghost"
-									className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
-										isActive("/admin/dashboard")
-											? "text-blue-600 bg-blue-50"
-											: ""
-									}`}
-									onClick={() => setOpen(false)}
-								>
-									Dashboard
-								</Button>
-							</Link>
-							<Link to="/admin">
-								<Button
-									variant="ghost"
-									className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
-										isActive("/admin")
-											? "text-blue-600 bg-blue-50"
-											: ""
-									}`}
-									onClick={() => setOpen(false)}
-								>
-									Users
-								</Button>
-							</Link>
-							<Link to="/admin/jobs">
-								<Button
-									variant="ghost"
-									className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
-										isActive("/admin/jobs")
-											? "text-blue-600 bg-blue-50"
-											: ""
-									}`}
-									onClick={() => setOpen(false)}
-								>
-									Jobs
-								</Button>
-							</Link>
-							<Link to="/admin/demos">
-								<Button
-									variant="ghost"
-									className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
-										isActive("/admin/demos")
-											? "text-blue-600 bg-blue-600"
-											: ""
-									}`}
-									onClick={() => setOpen(false)}
-								>
-									Demos
-								</Button>
-							</Link>
-							<Link to="/admin/contacts">
-								<Button
-									variant="ghost"
-									className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
-										isActive("/admin/contacts")
-											? "text-blue-600 bg-blue-600"
-											: ""
-									}`}
-									onClick={() => setOpen(false)}
-								>
-									Contacts
-								</Button>
-							</Link>
+							{isAdmin && (
+								<>
+									<Link to="/admin/dashboard">
+										<Button
+											variant="ghost"
+											className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
+												isActive("/admin/dashboard")
+													? "text-blue-600 bg-blue-50"
+													: ""
+											}`}
+											onClick={() => setOpen(false)}
+										>
+											Dashboard
+										</Button>
+									</Link>
+									<Link to="/admin">
+										<Button
+											variant="ghost"
+											className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
+												isActive("/admin")
+													? "text-blue-600 bg-blue-50"
+													: ""
+											}`}
+											onClick={() => setOpen(false)}
+										>
+											Users
+										</Button>
+									</Link>
+									<Link to="/admin/jobs">
+										<Button
+											variant="ghost"
+											className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
+												isActive("/admin/jobs")
+													? "text-blue-600 bg-blue-50"
+													: ""
+											}`}
+											onClick={() => setOpen(false)}
+										>
+											Jobs
+										</Button>
+									</Link>
+									<Link to="/admin/demos">
+										<Button
+											variant="ghost"
+											className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
+												isActive("/admin/demos")
+													? "text-blue-600 bg-blue-600"
+													: ""
+											}`}
+											onClick={() => setOpen(false)}
+										>
+											Demos
+										</Button>
+									</Link>
+									<Link to="/admin/contacts">
+										<Button
+											variant="ghost"
+											className={`text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-blue-50 text-left w-full justify-start ${
+												isActive("/admin/contacts")
+													? "text-blue-600 bg-blue-600"
+													: ""
+											}`}
+											onClick={() => setOpen(false)}
+										>
+											Contacts
+										</Button>
+									</Link>
+								</>
+							)}
 							<Link to="/admin/download-requests">
 								<Button
 									variant="ghost"

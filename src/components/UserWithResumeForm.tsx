@@ -271,6 +271,7 @@ export default function UserWithResumeForm({ onSubmit, initialData = null }) {
 						<option value="tier4">Tier 4</option>
 						<option value="applier">Applier</option>
 						<option value="admin">Admin</option>
+						<option value="download_manager">Download Manager</option>
 					</select>
 				</div>
 

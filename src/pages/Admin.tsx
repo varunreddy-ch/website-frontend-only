@@ -181,17 +181,24 @@ export default function Admin() {
 		}
 	};
 
-	const roleBadge = (role) => (
-		<span
-			className={`ml-2 px-2 py-0.5 rounded-full text-xs font-semibold ${
-				role === "admin"
-					? "bg-blue-100 text-blue-800"
-					: "bg-gray-100 text-gray-700"
-			}`}
-		>
-			{role === "admin" ? "👑 Admin" : `🙋 ${role}`}
-		</span>
-	);
+	const roleBadge = (role) => {
+		let badgeClass = "bg-gray-100 text-gray-700";
+		let badgeText = `🙋 ${role}`;
+		
+		if (role === "admin") {
+			badgeClass = "bg-blue-100 text-blue-800";
+			badgeText = "👑 Admin";
+		} else if (role === "download_manager") {
+			badgeClass = "bg-purple-100 text-purple-800";
+			badgeText = "📥 Download Manager";
+		}
+		
+		return (
+			<span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-semibold ${badgeClass}`}>
+				{badgeText}
+			</span>
+		);
+	};
 
 	const verifiedBadge = (user) => {
 		if (user.role === "applier" && user.verified_applier) {
@@ -269,6 +276,7 @@ export default function Admin() {
 							>
 								<option value="all">All Roles</option>
 								<option value="admin">Admin</option>
+								<option value="download_manager">Download Manager</option>
 								<option value="user">User</option>
 								<option value="tier1">Tier1</option>
 								<option value="tier2">Tier2</option>

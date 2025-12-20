@@ -119,7 +119,7 @@ const AdminDownloadRequests = () => {
 	const { toast } = useToast();
 
 	useEffect(() => {
-		if (!user || user.role !== "admin") {
+		if (!user || (user.role !== "admin" && user.role !== "download_manager")) {
 			navigate("/signin");
 		}
 	}, [user, navigate]);

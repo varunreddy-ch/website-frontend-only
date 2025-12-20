@@ -35,6 +35,8 @@ export default function SignIn() {
 			// Redirect based on user role
 			if (role === "admin") {
 				navigate("/admin");
+			} else if (role === "download_manager") {
+				navigate("/admin/download-requests");
 			} else if (role === "guest") {
 				// Guest users go to profile
 				const profileLink = user?.user ? `/profile/${user.user}` : "/profile";
@@ -64,6 +66,8 @@ export default function SignIn() {
 			// Redirect based on user tier
 			if (role === "admin") {
 				navigate("/admin");
+			} else if (role === "download_manager") {
+				navigate("/admin/download-requests");
 			} else if (role === "guest") {
 				// Guest users go to profile
 				const profileLink = user?.user ? `/profile/${user.user}` : "/profile";

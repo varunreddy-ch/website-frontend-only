@@ -17,8 +17,8 @@ const Navbar = () => {
 		location.pathname.startsWith("/profile/");
 	const isAdmin = location.pathname.startsWith("/admin");
 
-	// Show AdminNavbar for admin routes
-	if (isAdmin && user?.role === "admin") {
+	// Show AdminNavbar for admin routes (admin and download_manager roles)
+	if (isAdmin && (user?.role === "admin" || user?.role === "download_manager")) {
 		return <AdminNavbar />;
 	}
 
