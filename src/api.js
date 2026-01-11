@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-	baseURL: "https://api.resumevar.com/api",
+	baseURL: "https://api.resvar.com/api",
 	// baseURL: "http://localhost:3000/api",
 	headers: {
 		"Content-Type": "application/json",
