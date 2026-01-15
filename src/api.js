@@ -8,6 +8,9 @@ const API = axios.create({
 	},
 });
 
+// Flag to prevent multiple redirects
+let isRedirecting = false;
+
 // Add request interceptor to include auth token
 API.interceptors.request.use(
 	(config) => {
@@ -30,17 +33,18 @@ API.interceptors.response.use(
 			// Remove expired/invalid token
 			localStorage.removeItem("token");
 
-			// Check if the error message indicates token expiration
-			const errorMessage = error.response?.data;
+			// Redirect to signin page for any 401 unauthorized errors
+			// This handles: Token expired, Invalid token, No token, etc.
+			// Only redirect if we're not already on the signin or signup page and not already redirecting
+			const currentPath = window.location.pathname;
 			if (
-				errorMessage === "Token expired" ||
-				errorMessage === "Invalid token"
+				currentPath !== "/signin" &&
+				currentPath !== "/signup" &&
+				!isRedirecting
 			) {
-				// Redirect to signin page for expired/invalid tokens
-				// Only redirect if we're not already on the signin page
-				if (window.location.pathname !== "/signin") {
-					window.location.href = "/signin";
-				}
+				isRedirecting = true;
+				// Use window.location.replace to prevent back button issues
+				window.location.replace("/signin");
 			}
 		}
 		return Promise.reject(error);

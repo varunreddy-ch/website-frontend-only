@@ -74,7 +74,12 @@ export default function Dashboard() {
 		return () => clearInterval(checkTokenInterval);
 	}, []);
 
-	const fullName = user.firstname
+	// Don't render if user is not authenticated
+	if (!user) {
+		return null;
+	}
+
+	const fullName = user?.firstname
 		? user.firstname.split(" ").filter(Boolean).join("_")
 		: "user";
 
@@ -127,6 +132,11 @@ export default function Dashboard() {
 	};
 
 	const confirmAndGenerate = async () => {
+		if (!user) {
+			navigate("/signin");
+			return;
+		}
+
 		setShowCompanyModal(false);
 		setLoading(true);
 		setResumeError("");
