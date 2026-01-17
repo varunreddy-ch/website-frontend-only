@@ -36,7 +36,7 @@ const HeroSection = () => {
 						<Button
 							size="lg"
 							onClick={() => navigate("/signin")}
-							className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 text-lg rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-2xl"
+							className="btn-primary px-8 py-3.5 text-base sm:text-lg rounded-xl hover:shadow-2xl transform hover:scale-[1.02]"
 						>
 							<FileText className="mr-2 h-5 w-5" />
 							Create My Resume
@@ -46,7 +46,7 @@ const HeroSection = () => {
 							variant="outline"
 							size="lg"
 							onClick={() => navigate("/signin")}
-							className="border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white px-8 py-4 text-lg rounded-full transition-all duration-300 transform hover:scale-105"
+							className="btn-secondary border-blue-300 text-blue-100 hover:bg-white/10 hover:text-white px-8 py-3.5 text-base sm:text-lg rounded-xl transform hover:scale-[1.02]"
 						>
 							<Upload className="mr-2 h-5 w-5" />
 							Upload Resume

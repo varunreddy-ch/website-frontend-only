@@ -105,6 +105,52 @@ All colors MUST be HSL.
 	}
 }
 
+@layer components {
+	.section-shell {
+		@apply py-20 sm:py-24;
+	}
+
+	.section-shell-tight {
+		@apply py-16 sm:py-20;
+	}
+
+	.section-container {
+		@apply container mx-auto px-6;
+	}
+
+	.section-heading {
+		@apply text-center mb-12;
+	}
+
+	.section-title {
+		@apply text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight;
+	}
+
+	.section-subtitle {
+		@apply text-base sm:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed;
+	}
+
+	.section-title-light {
+		@apply text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight;
+	}
+
+	.section-subtitle-light {
+		@apply text-base sm:text-lg text-blue-100 max-w-3xl mx-auto leading-relaxed;
+	}
+
+	.card-soft {
+		@apply bg-white rounded-2xl shadow-lg border border-gray-100;
+	}
+
+	.btn-primary {
+		@apply inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300;
+	}
+
+	.btn-secondary {
+		@apply inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3 text-base font-semibold border border-blue-200 text-blue-700 hover:bg-blue-50 transition-all duration-300;
+	}
+}
+
 /* Custom animations */
 @layer utilities {
 	.animate-fade-in {

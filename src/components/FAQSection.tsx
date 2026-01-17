@@ -31,14 +31,14 @@ const FAQSection = () => {
   ];
 
   return (
-    <section id="faqs" className="py-20 bg-gradient-to-b from-blue-50 to-white">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+    <section id="faqs" className="section-shell bg-gradient-to-b from-blue-50 to-white">
+      <div className="section-container">
+        <div className="section-heading">
+          <h2 className="section-title mb-4">
             Frequently Asked Questions
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Get answers to the most common questions about SmartCV
+          <p className="section-subtitle max-w-2xl">
+            Get answers to the most common questions about ResumeVar
           </p>
         </div>
 
@@ -48,12 +48,12 @@ const FAQSection = () => {
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`}
-                className="bg-white rounded-xl shadow-lg border-0 overflow-hidden"
+                className="card-soft overflow-hidden"
               >
-                <AccordionTrigger className="px-8 py-6 text-left text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                <AccordionTrigger className="px-6 sm:px-8 py-5 text-left text-base sm:text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="px-8 pb-6 text-gray-600 text-base leading-relaxed">
+                <AccordionContent className="px-6 sm:px-8 pb-6 text-gray-600 text-sm sm:text-base leading-relaxed">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>

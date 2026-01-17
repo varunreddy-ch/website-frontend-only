@@ -6,13 +6,13 @@ import { useNavigate } from "react-router-dom";
 const UploadSection = () => {
 	const navigate = useNavigate();
 	return (
-		<section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
-			<div className="container mx-auto px-6">
-				<div className="text-center mb-16">
-					<h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+		<section className="section-shell bg-gradient-to-br from-blue-50 to-indigo-50">
+			<div className="section-container">
+				<div className="section-heading">
+					<h2 className="section-title mb-4">
 						How would you like to create your resume?
 					</h2>
-					<p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+					<p className="section-subtitle">
 						Choose your preferred method to get started with your
 						professional resume. Our AI will help you create a
 						standout resume either way.
@@ -21,16 +21,16 @@ const UploadSection = () => {
 
 				<div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
 					{/* Upload Option */}
-					<Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-105 bg-gradient-to-br from-blue-500 to-indigo-600 border-0 overflow-hidden relative">
+					<Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] bg-gradient-to-br from-blue-600 to-indigo-600 border-0 overflow-hidden relative rounded-2xl">
 						<div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 						<CardContent className="relative z-10 p-8 text-center text-white">
 							<div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
 								<Upload className="h-10 w-10 text-white" />
 							</div>
-							<h3 className="text-2xl font-bold mb-4">
+							<h3 className="text-2xl font-bold mb-3">
 								Upload Existing Resume
 							</h3>
-							<p className="text-blue-100 mb-8 leading-relaxed">
+							<p className="text-blue-100 mb-6 leading-relaxed text-base">
 								Have a resume already? Upload it and let our AI
 								enhance it with professional formatting, ATS
 								optimization, and industry-specific
@@ -44,7 +44,7 @@ const UploadSection = () => {
 									<Button
 										variant="secondary"
 										onClick={() => navigate("/signin")}
-										className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-lg"
+										className="bg-white text-blue-700 hover:bg-blue-50 px-6 py-2.5 rounded-lg font-semibold transition-all duration-300 shadow-lg"
 									>
 										Choose File
 									</Button>
@@ -57,16 +57,16 @@ const UploadSection = () => {
 					</Card>
 
 					{/* Manual Entry Option */}
-					<Card className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-105 bg-white border-2 border-gray-200 hover:border-indigo-300 overflow-hidden relative">
+					<Card className="card-soft group hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] border-2 border-gray-200 hover:border-indigo-300 overflow-hidden relative">
 						<div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-blue-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 						<CardContent className="relative z-10 p-8 text-center">
 							<div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
 								<Edit3 className="h-10 w-10 text-white" />
 							</div>
-							<h3 className="text-2xl font-bold text-gray-900 mb-4">
+							<h3 className="text-2xl font-bold text-gray-900 mb-3">
 								Create from Scratch
 							</h3>
-							<p className="text-gray-600 mb-8 leading-relaxed">
+							<p className="text-gray-600 mb-6 leading-relaxed text-base">
 								Starting fresh? No problem! Use our guided
 								step-by-step builder with AI-powered suggestions
 								to craft the perfect resume tailored to your
@@ -79,7 +79,7 @@ const UploadSection = () => {
 									</p>
 									<Button
 										onClick={() => navigate("/signin")}
-										className="bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-lg"
+										className="bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-all duration-300 shadow-lg"
 									>
 										Start Building
 									</Button>
