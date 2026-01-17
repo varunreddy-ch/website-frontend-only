@@ -5,9 +5,10 @@ import {
 	MapPin,
 	Heart,
 	FileText,
-	MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const demoFormUrl = "https://forms.gle/AVA1DtN8ZCwx58Cd8";
 
 const Footer = () => {
 	return (
@@ -114,13 +115,15 @@ const Footer = () => {
 						</h4>
 						<div className="space-y-3">
 							<a
-								href="https://wa.me/919573140921"
+								href={demoFormUrl}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex items-center justify-center lg:justify-start space-x-3 text-blue-200 hover:text-green-300 transition-colors"
 							>
-								<MessageCircle className="h-4 w-4 flex-shrink-0" />
-								<span className="text-sm">+91 9573140921</span>
+								<FileText className="h-4 w-4 flex-shrink-0" />
+								<span className="text-sm">
+									Demo Registration Form
+								</span>
 							</a>
 							<div className="flex items-center justify-center lg:justify-start space-x-3 text-blue-200">
 								<MapPin className="h-4 w-4 flex-shrink-0" />

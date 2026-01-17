@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Send, Phone } from "lucide-react";
+import { Send, Phone, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import API from "@/api.js";
+
+const demoFormUrl = "https://forms.gle/AVA1DtN8ZCwx58Cd8";
 
 const ContactSection = () => {
 	const [formData, setFormData] = useState({
@@ -94,7 +96,7 @@ const ContactSection = () => {
 				</div>
 
 				<div className="max-w-3xl mx-auto">
-					{/* COMMENTED OUT - Contact form replaced with WhatsApp contact */}
+					{/* COMMENTED OUT - Contact form replaced with demo form CTA */}
 					{false && (
 					<Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl rounded-2xl overflow-hidden">
 						<CardHeader className="text-center p-8 pb-6">
@@ -102,14 +104,14 @@ const ContactSection = () => {
 								Send us a message
 							</CardTitle>
 							<p className="text-blue-100 text-lg">
-								WhatsApp us at{" "}
+								Fill out our demo registration form at{" "}
 								<a
-									href="https://wa.me/919573140921"
+									href={demoFormUrl}
 									target="_blank"
 									rel="noopener noreferrer"
 									className="text-green-400 hover:text-green-300 underline decoration-green-400/30 hover:decoration-green-400 transition-all duration-300 font-medium"
 								>
-									+91 9573140921
+									ResumeVar Demo Registration
 								</a>
 							</p>
 						</CardHeader>
@@ -208,12 +210,12 @@ const ContactSection = () => {
 											value={formData.phone}
 											onChange={handleChange}
 											className="w-full pl-12 pr-4 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300 backdrop-blur-sm"
-											placeholder="+1 (555) 123-4567 (WhatsApp preferred)"
+											placeholder="+1 (555) 123-4567"
 										/>
 									</div>
 									<p className="text-xs text-blue-200 mt-1">
-										We'll use WhatsApp for quick responses
-										and updates
+										We'll use your number for quick
+										responses and updates
 									</p>
 								</div>
 
@@ -236,7 +238,7 @@ const ContactSection = () => {
 										htmlFor="whatsappPreferred"
 										className="text-white text-sm"
 									>
-										Prefer WhatsApp for communication?
+										Prefer text updates for communication?
 									</label>
 								</div>
 
@@ -343,23 +345,17 @@ const ContactSection = () => {
 					</Card>
 					)}
 
-					{/* WhatsApp Contact Section */}
+					{/* Demo Registration Section */}
 					<Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl rounded-2xl overflow-hidden">
 						<CardHeader className="text-center p-8 pb-6">
 							<div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full mb-6">
-								<svg
-									className="w-10 h-10 text-white"
-									fill="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
-								</svg>
+								<FileText className="w-10 h-10 text-white" />
 							</div>
 							<CardTitle className="text-3xl text-white mb-3 font-bold">
-								Contact Us via WhatsApp
+								Register for a Demo
 							</CardTitle>
 							<p className="text-blue-100 text-lg">
-								Get in touch with us directly on WhatsApp for quick responses and support
+								Fill out the form so we can tailor the demo to your profile
 							</p>
 						</CardHeader>
 
@@ -367,34 +363,18 @@ const ContactSection = () => {
 							<div className="space-y-8 text-center">
 								<div className="py-8">
 									<p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-										Have questions about our AI-powered resume builder? We'd love to hear from you. Contact us via WhatsApp and we'll respond as soon as possible.
+										Share your details and requirements to help us personalize your demo experience.
 									</p>
 									
 									<a
-										href="https://wa.me/919573140921?text=Hi, I have a question about ResumeVar. Can you help me?"
+										href={demoFormUrl}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-10 py-5 rounded-xl font-bold text-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+										className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-5 rounded-xl font-bold text-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
 									>
-										<svg
-											className="w-7 h-7"
-											fill="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
-										</svg>
-										Contact via WhatsApp
+										<FileText className="w-7 h-7" />
+										Fill the Demo Registration Form
 									</a>
-
-									<div className="mt-8 p-6 bg-gradient-to-r from-green-50/20 to-emerald-50/20 rounded-2xl border border-green-400/30">
-										<div className="flex items-center justify-center gap-3 mb-4">
-											<Phone className="h-6 w-6 text-green-400" />
-											<span className="text-2xl font-bold text-white">+91 9573140921</span>
-										</div>
-										<p className="text-sm text-blue-200 text-center">
-											Click the button above or message us directly on WhatsApp
-										</p>
-									</div>
 								</div>
 							</div>
 						</CardContent>
@@ -406,27 +386,21 @@ const ContactSection = () => {
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
 						<div className="space-y-3">
 							<div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full">
-								<svg
-									className="w-6 h-6 text-white"
-									fill="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
-								</svg>
+								<FileText className="w-6 h-6 text-white" />
 							</div>
 							<h3 className="text-xl font-semibold text-white">
-								WhatsApp Support
+								Demo Registration
 							</h3>
 							<p className="text-blue-200">
-								Get help via WhatsApp
+								Submit your details for a tailored demo
 							</p>
 							<a
-								href="https://wa.me/919573140921"
+								href={demoFormUrl}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="text-green-400 hover:text-green-300 font-medium"
 							>
-								+91 9573140921
+								Open the Demo Registration Form
 							</a>
 						</div>
 

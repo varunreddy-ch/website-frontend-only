@@ -1,5 +1,7 @@
 import { Heart, MessageCircle } from "lucide-react";
 
+const demoFormUrl = "https://forms.gle/AVA1DtN8ZCwx58Cd8";
+
 const PageFooter = () => {
 	return (
 		<footer className="bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 text-white py-6 px-4">
@@ -9,12 +11,12 @@ const PageFooter = () => {
 					<div className="flex items-center gap-2">
 						<MessageCircle className="h-4 w-4" />
 						<a
-							href="https://wa.me/919573140921"
+							href={demoFormUrl}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="hover:underline"
 						>
-							+91 9573140921
+							Demo Registration Form
 						</a>
 					</div>
 				</div>

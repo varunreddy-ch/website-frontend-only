@@ -14,6 +14,8 @@ import {
 import { ArrowLeft } from "lucide-react";
 import PageFooter from "@/components/PageFooter";
 
+const demoFormUrl = "https://forms.gle/AVA1DtN8ZCwx58Cd8";
+
 export default function SignUp() {
 	const navigate = useNavigate();
 
@@ -64,27 +66,19 @@ export default function SignUp() {
 
 					<CardContent className="space-y-6 text-center">
 						<p className="text-lg text-gray-700">
-							To create a new account, please WhatsApp us at{" "}
-							<a
-								href="https://wa.me/919573140921"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-green-600 hover:underline font-semibold"
-							>
-								+91 9573140921
-							</a>
-							. Include your full name and desired email address.
-							We'll get you set up ASAP.
+							To create a new account, please fill out our demo
+							registration form with your full name and desired
+							email address. We'll get you set up ASAP.
 						</p>
 
 						<div className="flex items-center justify-center gap-3">
 							<a
-								href="https://wa.me/919573140921"
+								href={demoFormUrl}
 								target="_blank"
 								rel="noopener noreferrer"
 							>
 								<Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl">
-									WhatsApp Support
+									Open Registration Form
 								</Button>
 							</a>
 
