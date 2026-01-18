@@ -204,5 +204,6 @@ html {
 
 /* Ensure consistent heights for resume sections */
 .resume-section {
-	min-height: 320px; /* 80 * 4 = 320px to match h-80 */
+	min-height: 320px;
+	/* 80 * 4 = 320px to match h-80 */
 }

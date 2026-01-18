@@ -43,10 +43,9 @@ const HeroSection = () => {
 						</Button>
 
 						<Button
-							variant="outline"
 							size="lg"
 							onClick={() => navigate("/signin")}
-							className="btn-secondary border-blue-300 text-blue-100 hover:bg-white/10 hover:text-white px-8 py-3.5 text-base sm:text-lg rounded-xl transform hover:scale-[1.02]"
+							className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white border-0 hover:from-cyan-500 hover:to-blue-600 px-8 py-3.5 text-base sm:text-lg rounded-xl transform hover:scale-[1.02] shadow-lg"
 						>
 							<Upload className="mr-2 h-5 w-5" />
 							Upload Resume
